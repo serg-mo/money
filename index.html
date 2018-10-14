@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jmespath/0.15.0/jmespath.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+
+    <script src="/js/lib.js"></script>
+    <script src="/js/index.js"></script>
+
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <section id="dnd">
+      <input type="file" name="file" id="file" style="width: 100%; height: 100%" />
+      <div>
+        Drag and Drop<br/>
+        transactions.json
+      </div>
+    </section>
+
+    <section id="section_one">
+      <header>
+        <select id="time_resolution">
+            <option value="date">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+        </select>
+
+        <input type="text" id="time_after" placeholder="after" />
+        <input type="text" id="time_before" placeholder="before" />
+      </header>
+      <div id="pie_one" class="chart pie"></div>
+      <div id="pie_two" class="chart pie"></div>
+      <div id="stack" class="chart stack"></div>
+    </section>
+
+    <section>
+      <div id="bar_one" class="chart bar">
+          <canvas></canvas>
+      </div>
+      <div id="bar_two" class="chart bar">
+          <canvas></canvas>
+      </div>
+    </section>
+
+    <section>
+      <table id="table"></table>
+    </section>
+  </body>
+</html>

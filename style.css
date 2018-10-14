@@ -1,0 +1,95 @@
+/* TODO: Practice grid layout https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout */
+
+html, body {
+  font-family: Monaco, monospace;
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
+}
+
+section {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  display: flex;
+  align-items: center;
+}
+
+section { display: none; }
+section:first-child { display: bock; }
+
+
+section, header, footer {
+  width: 85%;
+  margin: auto;
+  text-align: center;
+}
+
+div.chart {
+  width: 100%;
+  height: 300px;
+}
+
+div.pie {
+  width: 40%;
+}
+
+div.line {
+  width: 80%;
+}
+
+div.bar {
+  width: auto;
+}
+
+
+table {
+  color: #333;
+  margin: 10px auto;
+}
+
+th {
+  background-color: #f0f0f0;
+  padding: 2px 5px;
+  text-transform: capitalize;
+  font-size: 12px;
+}
+
+td {
+  padding: 2px 5px;
+  text-align: center;
+  font-size: 11px;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+
+
+#dnd {
+  font-size: 40px;
+  text-align: center;
+  display: table;
+
+  width: 100%;
+  height: 100%;
+}
+
+#dnd div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#dnd input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
