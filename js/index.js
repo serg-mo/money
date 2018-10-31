@@ -5,6 +5,7 @@ const colors = [
   "#806815", "#6C939F", "#313841", "#104050", "#5B5494", '#0D083B', '#AA9139', "#022835", 
 ];
 
+
 /*
 const colors = [
   "#A7CECB", "#8BA6A9", "#75704E", "#CACC90", "#F4EBBE",
@@ -118,6 +119,7 @@ function set_events(update) {
 
 function section_one_setup(selector) {
   // TODO: refactor all of this as plugins, https://www.chartjs.org/docs/latest/developers/plugins.html
+  // TODO: add two sets of percentages to the pie legend, total and currently visible
 
   let pie_one_canvas   = document.createElement("canvas");
   let pie_two_canvas   = document.createElement("canvas");
@@ -143,6 +145,8 @@ function section_one_setup(selector) {
   };
 
 
+  // pie_two can do dataset toggle AND whitespace reset, I love it
+  // this is because clicking nothing syncs hidden datasets and shows them all
   pie_two.config.options.onClick = function (event, items) {
     if (items.length) {
       pick_subcategory(items[0]._chart.data.labels[items[0]._index]);
@@ -165,40 +169,73 @@ function section_one_setup(selector) {
   stack.config.options.tooltips.itemSort = function(a, b) { return b.yLabel - a.yLabel; };
   stack.config.options.tooltips.filter = function(v) { return v.yLabel > 0; };
 
-  // TODO: jquery is better than native code
+  // jquery is better than native code, http://youmightnotneedjquery.com
   $("#time_resolution").val();
   $("#time_after").val(time_after);
 }
 
 function section_one_update(query = "[]") {
-  let current  = `${query}.{${category_resolution}: ${category_resolution}, ${time_resolution}: ${time_resolution}, amount: amount}`;
-  let data     = filter_transactions(current);
-  let [x_summary, y_summary, xy_summary, subset] = three_summaries(data, category_resolution, time_resolution);
-  //console.log(x_summary);
+  let select = {};
 
+  select[category_resolution] = category_resolution; // must go first
+  select[time_resolution]     = time_resolution; // variable key
+  select["amount"]            = "amount"; // must go last
+
+  let data = filter_transactions(query + "." + JSON.stringify(select));
+  let x, y, xy;
 
   // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
   // TODO: on month click, redo the weekday summary
   // TODO: preserve labels if they are set
 
   if (query == "[]") {
-    let original = `${query}.{category: category, ${time_resolution}: ${time_resolution}, amount: amount}`;
-    let summary  = filter_transactions(original).reduce(single_reducer("category"), {});
+    [x, y, xy] = three_summaries(data, "category", time_resolution);
 
-    summary = sort_summary(summary);
+    pie_one.config.options.title.text = category_resolution;
+    pie_one.config.data = x;
 
-    pie_one.config.data = make_data(summary, original);
-    pie_two.config.data = make_data(summary, original);
+    pie_two.config.options.title.text = category_resolution;
+    pie_two.config.data = x;
+
+    stack.config.options.title.text = category_resolution;
+    stack.config.data   = xy;
+  } else {
+    [x, y, xy] = three_summaries(data, category_resolution, time_resolution);
+
+    pie_two.config.options.title.text = category_resolution;
+    pie_two.config.data = x;
+
+    stack.config.options.title.text = category_resolution;
+    stack.config.data   = xy;
   }
 
-
-  pie_two.config.data = make_data(x_summary, query);
-  stack.config.data   = make_data(xy_summary, Object.keys(y_summary));
 
   pie_one.update();
   pie_two.update();
   stack.update();
 }
+
+// TODO: given xy_summary, I can produce x_summary and y_summary (sorting belongs elsewhere)
+// TODO: I am getting three columns, assume x and y are the first two and aggregate the third one
+function three_summaries(data, x, y) {
+  // I can do this in a single loop, but it's not necessary
+
+  // first column values become datasets, graphed across the values from the second column
+  let x_summary  = data.reduce(single_reducer(x), {});
+  let y_summary  = data.reduce(single_reducer(y), {});
+
+  x_summary = sort_summary(x_summary);
+  init      = sort_summary(x_summary, 0); // preserve the order of the sorted summary (desc)
+
+  let xy_summary = data.reduce(double_reducer(x, y), init);
+
+  let x_data  = make_data(x_summary, "default");
+  let y_data  = make_data(y_summary, "default");
+  let xy_data = make_data(xy_summary, Object.keys(y_summary));
+
+  return [x_data, y_data, xy_data, data];
+}
+
 
 function key_handler(event) {
   const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];

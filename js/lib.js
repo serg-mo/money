@@ -109,7 +109,15 @@ function draw(canvas, type, data, options) {
     bodyFontFamily: "Monaco",
     footerFontFamily: "Monaco",
     footerFontStyle: "normal",
-    footerFontStyle: "normal"
+    footerFontStyle: "normal",
+    layout: {
+      padding: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0
+      }
+    }
   };
 
   let context = canvas.getContext("2d");
@@ -271,23 +279,6 @@ function make_data(summary, labels) {
       datasets
     };    
   }
-}
-
-// TODO: I can do this in a single loop
-// TODO: refactor reductions to produce a dataset 3 column outputs every time
-// TODO: given xy_summary, I can produce x_summary and y_summary (sorting belongs elsewhere)
-// TODO: I am getting three columns, assume x and y are the first two and aggregate the third one
-function three_summaries(data, x, y) {
-  // first column values become datasets, graphed across the values from the second column
-  let x_summary  = data.reduce(single_reducer(x), {});
-  let y_summary  = data.reduce(single_reducer(y), {});
-
-  x_summary = sort_summary(x_summary);
-  init      = sort_summary(x_summary, 0); // preserve the order of the sorted summary (desc)
-
-  let xy_summary = data.reduce(double_reducer(x, y), init);
-
-  return [x_summary, y_summary, xy_summary, data];
 }
 
 function sort_summary(summary, init = null) {
