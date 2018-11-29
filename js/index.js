@@ -19,26 +19,50 @@ var pie_two;
 var stack;
 var bar;
 
+/*
 const CATEGORY_RESOLUTIONS = ["category", "subcategory", "merchant"];
 const TIME_RESOLUTIONS     = ["date", "week", "month"];
 
 var category_resolution    = "category";
 var time_resolution        = "month";
 
-var time_after             = pick_cutoff(time_resolution);
-var time_before            = format_date(new Date);
+//var time_after             = pick_cutoff(time_resolution);
+//var time_before            = format_date(new Date);
+*/
 
 window.onload = function() {
-  document.querySelector("#file").addEventListener("change", file_handler);
-  document.addEventListener('keydown', key_handler); // TODO: is this the best place for it?
+  $(".ui.modal")
+    .modal('setting', 'closable', false)
+    .modal("show");
 
-  document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
-  document.querySelector("#time_after").value              = time_after;
-  document.querySelector("#time_before").value             = time_before;
+  $(".ui.dropdown")
+    .dropdown();
+
+  var app = new Vue({
+    el: "#app",
+    data: {
+      CATEGORY_RESOLUTIONS: ["category", "subcategory", "merchant"],
+      TIME_RESOLUTIONS:     ["date", "week", "month"],
+
+      category_resolution:  "category",
+      time_resolution:      "month",
+
+      time_after:           pick_cutoff("month"),
+      time_before:          format_date(new Date),
+    }
+  })
+
+  document.querySelector("#file").addEventListener("change", file_handler);
+  document.addEventListener("keydown", key_handler); // TODO: is this the best place for it?
+
+  // TODO: these should just be maps to view placeholders
+  //document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
+  //$("#time_after").value(time_after);
+  //$("#time_before").value(time_before);
 }
 
 function file_handler() {
-  event.target.parentNode.style.display = "none";
+  $(".ui.modal").modal("hide");
 
   let reader = new FileReader();
   reader.onload = function (e) {
@@ -49,8 +73,6 @@ function file_handler() {
     transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); });
     // chronological order, console.table(transactions, ["date"]);
 
-
-    document.querySelector("#section_one").style.display = "flex";
 
     section_one_setup("#section_one");
     set_events(section_one_update);
@@ -94,6 +116,7 @@ function parse_transaction(t)
 }
 
 function set_events(update) {
+  /*
   $("#time_resolution").change(function() {
     time_resolution = $(this).val();
     time_after      = pick_cutoff(time_resolution);
@@ -115,9 +138,10 @@ function set_events(update) {
 
     update();
   });
+  */
 }
 
-function section_one_setup(selector) {
+function section_one_setup() {
   // TODO: refactor all of this as plugins, https://www.chartjs.org/docs/latest/developers/plugins.html
   // TODO: add two sets of percentages to the pie legend, total and currently visible
 
@@ -125,9 +149,9 @@ function section_one_setup(selector) {
   let pie_two_canvas   = document.createElement("canvas");
   let pie_three_canvas = document.createElement("canvas");
 
-  document.querySelector(selector + " #pie_one").appendChild(pie_one_canvas);
-  document.querySelector(selector + " #pie_two").appendChild(pie_two_canvas);
-  document.querySelector(selector + " #stack").appendChild(pie_three_canvas);
+  document.querySelector("#pie_one").appendChild(pie_one_canvas);
+  document.querySelector("#pie_two").appendChild(pie_two_canvas);
+  document.querySelector("#stack").appendChild(pie_three_canvas);
 
   // globally visible vars
   pie_one = make_pie(pie_one_canvas);
@@ -170,8 +194,8 @@ function section_one_setup(selector) {
   stack.config.options.tooltips.filter = function(v) { return v.yLabel > 0; };
 
   // jquery is better than native code, http://youmightnotneedjquery.com
-  $("#time_resolution").val();
-  $("#time_after").val(time_after);
+  //$("#time_resolution").val();
+  //$("#time_after").val(time_after);
 }
 
 function section_one_update(query = "[]") {
@@ -245,7 +269,7 @@ function key_handler(event) {
     event.preventDefault();
     //console.log(key);
 
-    // 
+    // TODO: up inside date input should change that date and nothing else
     if (key == "ArrowUp" || key == "ArrowDown") {
       let delta       = (key == "ArrowUp") ? 1 : -1;
       let current     = TIME_RESOLUTIONS.indexOf(time_resolution);
@@ -270,13 +294,15 @@ function key_handler(event) {
         before.setDate(before.getDate() + delta);
       }
 
-      time_after  = format_date(after);
-      time_before = format_date(before);
+      app.time_after  = format_date(after);
+      app.time_before = format_date(before);
     }
 
+    /*
     document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
     document.querySelector("#time_before").value             = time_before;
+    */
 
     section_one_update();
   }
@@ -356,6 +382,7 @@ function pick_time_slice(index) {
 }
 
 function pick_cutoff(type) {
+  //TODO: add shortcuts for YTD and 1yr
   let date = new Date();
   if (type == "month") {
     date.setMonth(date.getMonth() - 12); // same month last year
@@ -392,10 +419,13 @@ function parse_date(date) {
 
 function filter_transactions(query = "", field = "date") {
   let data;
-  let filter = `${field} >= '${time_after}'`;
+  let filter = '[]';
+  /*
+  `${field} >= '${app.time_after}'`;
   if (time_before) {
-    filter+= ` && ${field} <= '${time_before}'`;
+    filter+= ` && ${field} <= '${app.time_before}'`;
   }
+  */
 
   // TODO: consider setting default columns here
   query = query ? `[?${filter}] | ${query}` : `${filter}`; // query sets the columns, not filter
