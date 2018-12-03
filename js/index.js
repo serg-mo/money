@@ -13,12 +13,13 @@ const colors = [
 ];
 */
 
-var transactions;
+//var transactions;
 var pie_one;
 var pie_two;
 var stack;
 var bar;
 
+var app;
 /*
 const CATEGORY_RESOLUTIONS = ["category", "subcategory", "merchant"];
 const TIME_RESOLUTIONS     = ["date", "week", "month"];
@@ -38,7 +39,7 @@ window.onload = function() {
   $(".ui.dropdown")
     .dropdown();
 
-  var app = new Vue({
+  app = new Vue({
     el: "#app",
     data: {
       CATEGORY_RESOLUTIONS: ["category", "subcategory", "merchant"],
@@ -49,6 +50,8 @@ window.onload = function() {
 
       time_after:           pick_cutoff("month"),
       time_before:          format_date(new Date),
+
+      transactions:         [],
     }
   })
 
@@ -67,11 +70,14 @@ function file_handler() {
   let reader = new FileReader();
   reader.onload = function (e) {
     let json = JSON.parse(e.target.result); // FileReader
-    transactions = json.transactions.map(parse_transaction);
+    let transactions = json.transactions.map(parse_transaction);
+
     transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
 
-    transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); });
-    // chronological order, console.table(transactions, ["date"]);
+    transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
+
+    app.transactions = transactions;
+    console.table(app.transactions);
 
 
     section_one_setup("#section_one");
@@ -198,38 +204,39 @@ function section_one_setup() {
   //$("#time_after").val(time_after);
 }
 
-function section_one_update(query = "[]") {
-  let select = {};
+function section_one_update(query = "") {
+  let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
+  let select = fields.map(v => `${v}: ${v}`);
 
-  select[category_resolution] = category_resolution; // must go first
-  select[time_resolution]     = time_resolution; // variable key
-  select["amount"]            = "amount"; // must go last
-
-  let data = filter_transactions(query + "." + JSON.stringify(select));
+  let data = filter_transactions('{' + select.join(', ') + '}');
   let x, y, xy;
 
+  //console.log(query + "." + JSON.stringify(select));
+  //console.log(data);
   // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
   // TODO: on month click, redo the weekday summary
   // TODO: preserve labels if they are set
 
-  if (query == "[]") {
-    [x, y, xy] = three_summaries(data, "category", time_resolution);
+  // TODO: query will no longer apply because we have Vue global context
+  if (app.category_resolution == "category") {
+    [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
-    pie_one.config.options.title.text = category_resolution;
+    pie_one.config.options.title.text = app.category_resolution;
     pie_one.config.data = x;
 
-    pie_two.config.options.title.text = category_resolution;
+    pie_two.config.options.title.text = app.category_resolution;
     pie_two.config.data = x;
 
-    stack.config.options.title.text = category_resolution;
+    stack.config.options.title.text = app.category_resolution;
     stack.config.data   = xy;
   } else {
-    [x, y, xy] = three_summaries(data, category_resolution, time_resolution);
+    // do not update the left pie for anything else
+    [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
-    pie_two.config.options.title.text = category_resolution;
+    pie_two.config.options.title.text = app.category_resolution;
     pie_two.config.data = x;
 
-    stack.config.options.title.text = category_resolution;
+    stack.config.options.title.text = app.category_resolution;
     stack.config.data   = xy;
   }
 
@@ -269,27 +276,28 @@ function key_handler(event) {
     event.preventDefault();
     //console.log(key);
 
+    /*
     // TODO: up inside date input should change that date and nothing else
     if (key == "ArrowUp" || key == "ArrowDown") {
       let delta       = (key == "ArrowUp") ? 1 : -1;
-      let current     = TIME_RESOLUTIONS.indexOf(time_resolution);
+      let current     = TIME_RESOLUTIONS.indexOf(app.time_resolution);
       let next        = Math.max(Math.min(current + delta, TIME_RESOLUTIONS.length - 1), 0);
       
-      time_resolution = TIME_RESOLUTIONS[next];
-      time_after      = pick_cutoff(time_resolution);
+      app.time_resolution = TIME_RESOLUTIONS[next];
+      time_after      = pick_cutoff(app.time_resolution);
       time_before     = format_date(new Date());
     } else if (key == "ArrowLeft" || key == "ArrowRight") {
       let delta  = (key == "ArrowLeft") ? -1 : 1;
       let after  = parse_date(time_after);
       let before = parse_date(time_before);
 
-      if (time_resolution == "month") {
+      if (app.time_resolution == "month") {
         after.setMonth(after.getMonth() + delta, after.getDate()); // month [date]
         before.setMonth(before.getMonth() + delta + 1, 0); // last day of the month
-      } else if (time_resolution == "week") {
+      } else if (app.time_resolution == "week") {
         after.setDate(after.getDate() + (7 * delta));
         before.setDate(before.getDate() + (7 * delta));
-      } else if (time_resolution == "date") {
+      } else if (app.time_resolution == "date") {
         after.setDate(after.getDate() + delta);
         before.setDate(before.getDate() + delta);
       }
@@ -297,7 +305,7 @@ function key_handler(event) {
       app.time_after  = format_date(after);
       app.time_before = format_date(before);
     }
-
+*/
     /*
     document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
@@ -312,10 +320,10 @@ function pick_category(category = "") {
   let query;
 
   if (category) {
-    category_resolution = "subcategory";
+    app.category_resolution = "subcategory";
     query              = `[?category == '${category}']`
   } else {
-    category_resolution = "category";
+    app.category_resolution = "category";
     query              = "[]";
   }
 
@@ -330,17 +338,16 @@ function pick_subcategory(subcategory = "") {
   // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
   // TODO: synchronyze the two datasets in pie_two and stack
 
-  let category_resolution;
   let query;
 
   if (subcategory) {
-    category_resolution = "subcategory";
+    app.category_resolution = "subcategory";
     query              = `[?subcategory == '${subcategory}']`
   } else {
-    category_resolution = "category";
+    app.category_resolution = "category";
     query              = "[]";
   }
-  query += `.{${time_resolution}: ${time_resolution}, amount: amount}`;
+  query += `.{${app.time_resolution}: ${app.time_resolution}, amount: amount}`;
 
   stack.options.title.text = pie_two.config.options.title.text + (subcategory ? `: ${subcategory}` : "");
 
@@ -419,17 +426,14 @@ function parse_date(date) {
 
 function filter_transactions(query = "", field = "date") {
   let data;
-  let filter = '[]';
-  /*
-  `${field} >= '${app.time_after}'`;
-  if (time_before) {
+  let filter = `${field} >= '${app.time_after}'`;
+  if (app.time_before) {
     filter+= ` && ${field} <= '${app.time_before}'`;
   }
-  */
 
   // TODO: consider setting default columns here
-  query = query ? `[?${filter}] | ${query}` : `${filter}`; // query sets the columns, not filter
-  data  = jmespath.search(transactions, query);
+  query = query ? `[?${filter}].${query}` : `${filter}`; // query sets the columns, not filter
+  data  = jmespath.search(app.transactions, query);
 
   //console.log(query);
   //console.table(data);
@@ -438,7 +442,7 @@ function filter_transactions(query = "", field = "date") {
 }
 
 function make_comparisons(datetime) {
-  //let query = `[?${time_resolution} == '${label}'].{${time_resolution}: ${time_resolution}, category: category, subcategory: subcategory, amount: amount}`;
+  //let query = `[?${app.time_resolution} == '${label}'].{${app.time_resolution}: ${app.time_resolution}, category: category, subcategory: subcategory, amount: amount}`;
   //make_table($("#table"), filter_transactions(query));
 
   // TODO  sync_hidden_datasets(pie_two, stack);
@@ -498,7 +502,7 @@ function make_comparisons(datetime) {
   // TODO: this is essentially a custom stack, except not as a line but as datasets - categories
   // TODO: do a separate chart comparing this month/week/day to the same month/week/day last year/month/week
 
-  if (time_resolution == "day") {
+  if (app.time_resolution == "day") {
     let same_day_last_week  = new Date(datetime);
     same_day_last_week.setDate(same_day_last_week.getDate() - 7);
     same_day_last_week = format_date(same_day_last_week);
@@ -523,7 +527,7 @@ function make_comparisons(datetime) {
       same_day_last_year:   "[?date == '" + same_day_last_year + "']",
       same_date_last_year:  "[?date == '" + same_date_last_year + "']",
     };
-  } else if (time_resolution == "month") {
+  } else if (app.time_resolution == "month") {
     let same_month_last_year = new Date(datetime);
     same_month_last_year.setYear(same_month_last_year.getFullYear() - 1);
 

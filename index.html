@@ -26,13 +26,13 @@
         <div id="app" class="ui top attached segment">
             <header>
                 <div class="ui action input">
+                  <input type="text" v-model="time_after" placeholder="after" />
+                  <input type="text" v-model="time_before" placeholder="before" />
                   <select v-model="time_resolution" class="ui dropdown">
                     <option value="day">day</option>
                     <option value="week">week</option>
                     <option value="month">month</option>
                   </select>
-                  <input type="text" v-model="time_after" placeholder="after" />
-                  <input type="text" v-model="time_before" placeholder="before" />
                 </div>
             </header>
 
