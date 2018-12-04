@@ -36,9 +36,6 @@ window.onload = function() {
     .modal('setting', 'closable', false)
     .modal("show");
 
-  $(".ui.dropdown")
-    .dropdown();
-
   app = new Vue({
     el: "#app",
     data: {
@@ -54,6 +51,20 @@ window.onload = function() {
       transactions:         [],
     }
   })
+
+  let values = app.TIME_RESOLUTIONS.map(v => {
+    return {
+      name: v,
+      value: v,
+      selected: (v == app.time_resolution)
+    }; 
+  });
+
+  $(".ui.dropdown")
+    .dropdown({
+      values: values,
+  });
+
 
   document.querySelector("#file").addEventListener("change", file_handler);
   document.addEventListener("keydown", key_handler); // TODO: is this the best place for it?
@@ -77,8 +88,6 @@ function file_handler() {
     transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
 
     app.transactions = transactions;
-    console.table(app.transactions);
-
 
     section_one_setup("#section_one");
     set_events(section_one_update);
