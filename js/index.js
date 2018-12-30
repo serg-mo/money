@@ -5,6 +5,7 @@ const colors = [
   "#806815", "#6C939F", "#313841", "#104050", "#5B5494", '#0D083B', '#AA9139', "#022835", 
 ];
 
+//TODO: consider hosting this on codepen.io or better yet, a cloudfront
 
 /*
 const colors = [
@@ -13,24 +14,14 @@ const colors = [
 ];
 */
 
-//var transactions;
 var pie_one;
 var pie_two;
 var stack;
 var bar;
 
 var app;
-/*
-const CATEGORY_RESOLUTIONS = ["category", "subcategory", "merchant"];
-const TIME_RESOLUTIONS     = ["date", "week", "month"];
 
-var category_resolution    = "category";
-var time_resolution        = "month";
-
-//var time_after             = pick_cutoff(time_resolution);
-//var time_before            = format_date(new Date);
-*/
-
+// TODO: jquery.ready does not work
 window.onload = function() {
   $(".ui.modal")
     .modal('setting', 'closable', false)
@@ -43,6 +34,7 @@ window.onload = function() {
       TIME_RESOLUTIONS:     ["date", "week", "month"],
 
       category_resolution:  "category",
+      category:             null, // default
       time_resolution:      "month",
 
       time_after:           pick_cutoff("month"),
@@ -52,25 +44,15 @@ window.onload = function() {
     }
   })
 
-  let values = app.TIME_RESOLUTIONS.map(v => {
-    return {
-      name: v,
-      value: v,
-      selected: (v == app.time_resolution)
-    }; 
-  });
+  $(".ui.dropdown").dropdown();
 
-  $(".ui.dropdown")
-    .dropdown({
-      values: values,
-  });
-
-
-  document.querySelector("#file").addEventListener("change", file_handler);
-  document.addEventListener("keydown", key_handler); // TODO: is this the best place for it?
+  $("#file").on("change", file_handler);
+  // TODO: is this the best place for it?
+  //$("#time_after").on("keydown", key_handler);
+  //$("#time_before").on("keydown", key_handler);
 
   // TODO: these should just be maps to view placeholders
-  //document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
+  //$("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
   //$("#time_after").value(time_after);
   //$("#time_before").value(time_before);
 }
@@ -164,9 +146,9 @@ function section_one_setup() {
   let pie_two_canvas   = document.createElement("canvas");
   let pie_three_canvas = document.createElement("canvas");
 
-  document.querySelector("#pie_one").appendChild(pie_one_canvas);
-  document.querySelector("#pie_two").appendChild(pie_two_canvas);
-  document.querySelector("#stack").appendChild(pie_three_canvas);
+  $("#pie_one").append(pie_one_canvas);
+  $("#pie_two").append(pie_two_canvas);
+  $("#stack").append(pie_three_canvas);
 
   // globally visible vars
   pie_one = make_pie(pie_one_canvas);
@@ -177,7 +159,10 @@ function section_one_setup() {
   pie_one.config.options.events = ["click", "hover"];
   pie_one.config.options.onClick = function (event, items) {
     if (items.length) {
-      pick_category(items[0]._chart.data.labels[items[0]._index]);
+      app.category_resolution = "subcategory";
+      app.category            = items[0]._chart.data.labels[items[0]._index];
+
+      section_one_update()
     } else {
       setTimeout(() => sync_hidden_datasets(stack, pie_one)); // async sync
     }
@@ -186,9 +171,25 @@ function section_one_setup() {
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
+  
   pie_two.config.options.onClick = function (event, items) {
     if (items.length) {
-      pick_subcategory(items[0]._chart.data.labels[items[0]._index]);
+      app.category_resolution = "merchant";
+      app.category            = items[0]._chart.data.labels[items[0]._index];
+
+      // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
+      // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
+      // TODO: synchronyze the two datasets in pie_two and stack
+
+      stack.options.title.text = pie_two.config.options.title.text + (app.category ? `: ${app.category}` : "");
+
+      // hide things other than the active one
+      stack.data.datasets.forEach(function(v){
+        v.hidden = (v.label != app.category)
+      });
+      stack.update();
+
+      // TODO: sync_hidden_datasets(stack, pie_two);
     } else {
       setTimeout(() => sync_hidden_datasets(stack, pie_two)); // async sync
     }
@@ -206,22 +207,29 @@ function section_one_setup() {
   // TODO: onHover is more picky than tooltips.callbacks.title
 
   stack.config.options.tooltips.itemSort = function(a, b) { return b.yLabel - a.yLabel; };
-  stack.config.options.tooltips.filter = function(v) { return v.yLabel > 0; };
+  stack.config.options.tooltips.filter   = function(v) { return v.yLabel > 0; };
 
   // jquery is better than native code, http://youmightnotneedjquery.com
   //$("#time_resolution").val();
   //$("#time_after").val(time_after);
 }
 
-function section_one_update(query = "") {
+function section_one_update() {
+  // TODO: consider setting default columns here
   let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
-  let select = fields.map(v => `${v}: ${v}`);
+  let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
 
-  let data = filter_transactions('{' + select.join(', ') + '}');
+  let filter = `date >= '${app.time_after}' && date <= '${app.time_before}'`;
+  if (app.category) {
+    filter += ` && category == '${app.category}'`
+  }
+
+  let query = `[?${filter}].` + JSON.stringify(select);
+  console.log(query);
+
+  let data = jmespath.search(app.transactions, query);
   let x, y, xy;
 
-  //console.log(query + "." + JSON.stringify(select));
-  //console.log(data);
   // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
   // TODO: on month click, redo the weekday summary
   // TODO: preserve labels if they are set
@@ -248,7 +256,6 @@ function section_one_update(query = "") {
     stack.config.options.title.text = app.category_resolution;
     stack.config.data   = xy;
   }
-
 
   pie_one.update();
   pie_two.update();
@@ -325,49 +332,6 @@ function key_handler(event) {
   }
 }
 
-function pick_category(category = "") {
-  let query;
-
-  if (category) {
-    app.category_resolution = "subcategory";
-    query              = `[?category == '${category}']`
-  } else {
-    app.category_resolution = "category";
-    query              = "[]";
-  }
-
-  pie_two.config.options.title.text = category;
-  stack.config.options.title.text   = category;
-
-  section_one_update(query)
-}
-
-function pick_subcategory(subcategory = "") {
-  // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
-  // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
-  // TODO: synchronyze the two datasets in pie_two and stack
-
-  let query;
-
-  if (subcategory) {
-    app.category_resolution = "subcategory";
-    query              = `[?subcategory == '${subcategory}']`
-  } else {
-    app.category_resolution = "category";
-    query              = "[]";
-  }
-  query += `.{${app.time_resolution}: ${app.time_resolution}, amount: amount}`;
-
-  stack.options.title.text = pie_two.config.options.title.text + (subcategory ? `: ${subcategory}` : "");
-
-  // hide things other than the active subcategory
-  stack.data.datasets.forEach(function(v){
-    v.hidden = (v.label != subcategory)
-  });
-  stack.update();
-  // TODO: sync_hidden_datasets(stack, pie_two);
-}
-
 function pick_time_slice(index) {
   let label           = stack.data.labels[index]; // slice name
   let labels          = []; // stack datasets become pie labels
@@ -431,23 +395,6 @@ function parse_date(date) {
    let [year, month, day] = date.split("-");
    
    return new Date(year, parseInt(month) - 1, day); // zero-based month
-}
-
-function filter_transactions(query = "", field = "date") {
-  let data;
-  let filter = `${field} >= '${app.time_after}'`;
-  if (app.time_before) {
-    filter+= ` && ${field} <= '${app.time_before}'`;
-  }
-
-  // TODO: consider setting default columns here
-  query = query ? `[?${filter}].${query}` : `${filter}`; // query sets the columns, not filter
-  data  = jmespath.search(app.transactions, query);
-
-  //console.log(query);
-  //console.table(data);
-
-  return data;
 }
 
 function make_comparisons(datetime) {

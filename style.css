@@ -3,13 +3,12 @@ html, body {
 }
 
 body {
-  width: 960px;
+  width: 1000px;
   display: flex;
   justify-content: space-around;
   margin: auto;
   text-align: center;
 }
-
 
 div.chart {
   min-height: 200px;
@@ -19,13 +18,17 @@ div.chart {
 }
 
 div.pie {
+  /*
   height: 240px;
   width: 480px;
+  */
 }
 
 div.stack {
+  /*
   height: 480px;
-  width: 960px;
+  width: 1000px;
+  */
 }
 
 div.line {
