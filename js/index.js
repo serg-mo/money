@@ -5,7 +5,10 @@ const colors = [
   "#806815", "#6C939F", "#313841", "#104050", "#5B5494", '#0D083B', '#AA9139', "#022835", 
 ];
 
+// jQuery for the win, http://youmightnotneedjquery.com
 //TODO: consider hosting this on codepen.io or better yet, a cloudfront
+//TODO: make the file input take up the full screen
+
 
 /*
 const colors = [
@@ -21,11 +24,15 @@ var bar;
 
 var app;
 
-// TODO: jquery.ready does not work
+// this does not work in jquery onload below
 window.onload = function() {
   $(".ui.modal")
     .modal('setting', 'closable', false)
     .modal("show");
+}
+
+$(function() {
+  $("#file").on("change", file_handler);
 
   app = new Vue({
     el: "#app",
@@ -41,21 +48,26 @@ window.onload = function() {
       time_before:          format_date(new Date),
 
       transactions:         [],
+    },
+    watch: {
+      time_after: function (val) {
+        section_one_update();
+      },
+      time_before: function (val) {
+        section_one_update();
+      },
+      time_resolution: function (val) {
+        this.time_after  = pick_cutoff(this.time_resolution);
+        this.time_before = "";
+
+        section_one_update();
+      }
     }
   })
 
-  $(".ui.dropdown").dropdown();
-
-  $("#file").on("change", file_handler);
-  // TODO: is this the best place for it?
-  //$("#time_after").on("keydown", key_handler);
-  //$("#time_before").on("keydown", key_handler);
-
-  // TODO: these should just be maps to view placeholders
-  //$("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
-  //$("#time_after").value(time_after);
-  //$("#time_before").value(time_before);
-}
+//  $("#time_after").on("keydown", key_handler);
+//  $("#time_before").on("keydown", key_handler);
+});
 
 function file_handler() {
   $(".ui.modal").modal("hide");
@@ -72,7 +84,6 @@ function file_handler() {
     app.transactions = transactions;
 
     section_one_setup("#section_one");
-    set_events(section_one_update);
     section_one_update();
   }
   reader.readAsText(event.target.files[0]);
@@ -112,32 +123,6 @@ function parse_transaction(t)
   return result;
 }
 
-function set_events(update) {
-  /*
-  $("#time_resolution").change(function() {
-    time_resolution = $(this).val();
-    time_after      = pick_cutoff(time_resolution);
-    time_before     = "";
-
-    $("#time_after").val(time_after);
-
-    update();
-  });
-
-  $("#time_after").change(function() {
-    time_after = $(this).val();
-
-    update();
-  });
-
-  $("#time_before").change(function() {
-    time_before = $(this).val();
-
-    update();
-  });
-  */
-}
-
 function section_one_setup() {
   // TODO: refactor all of this as plugins, https://www.chartjs.org/docs/latest/developers/plugins.html
   // TODO: add two sets of percentages to the pie legend, total and currently visible
@@ -164,7 +149,7 @@ function section_one_setup() {
 
       section_one_update()
     } else {
-      setTimeout(() => sync_hidden_datasets(stack, pie_one)); // async sync
+      //setTimeout(() => sync_hidden_datasets(stack, pie_one)); // async sync
     }
   };
 
@@ -191,7 +176,7 @@ function section_one_setup() {
 
       // TODO: sync_hidden_datasets(stack, pie_two);
     } else {
-      setTimeout(() => sync_hidden_datasets(stack, pie_two)); // async sync
+      //setTimeout(() => sync_hidden_datasets(stack, pie_two)); // async sync
     }
   }
   pie_two.config.options.tooltips.callbacks.footer = footer_callback_avg;
@@ -208,10 +193,6 @@ function section_one_setup() {
 
   stack.config.options.tooltips.itemSort = function(a, b) { return b.yLabel - a.yLabel; };
   stack.config.options.tooltips.filter   = function(v) { return v.yLabel > 0; };
-
-  // jquery is better than native code, http://youmightnotneedjquery.com
-  //$("#time_resolution").val();
-  //$("#time_after").val(time_after);
 }
 
 function section_one_update() {
@@ -219,7 +200,10 @@ function section_one_update() {
   let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
   let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
 
-  let filter = `date >= '${app.time_after}' && date <= '${app.time_before}'`;
+  let filter = `date >= '${app.time_after}'`
+  if (app.time_before) {
+    filter += ` && date <= '${app.time_before}'`;
+  }
   if (app.category) {
     filter += ` && category == '${app.category}'`
   }
@@ -290,7 +274,6 @@ function key_handler(event) {
 
   if (keys.includes(key)) {
     event.preventDefault();
-    //console.log(key);
 
     /*
     // TODO: up inside date input should change that date and nothing else
@@ -321,7 +304,8 @@ function key_handler(event) {
       app.time_after  = format_date(after);
       app.time_before = format_date(before);
     }
-*/
+    */
+
     /*
     document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
