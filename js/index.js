@@ -71,6 +71,7 @@ $(function() {
 
 function file_handler() {
   $(".ui.modal").modal("hide");
+  $(".ui.modal").modal("hide");
 
   let reader = new FileReader();
   reader.onload = function (e) {
@@ -246,6 +247,9 @@ function section_one_update() {
   stack.update();
 }
 
+// TODO: instead of the hover note for average, add an extra dataset with avg as the only value
+// TODO: pies should also do a total and average per slice
+
 // TODO: given xy_summary, I can produce x_summary and y_summary (sorting belongs elsewhere)
 // TODO: I am getting three columns, assume x and y are the first two and aggregate the third one
 function three_summaries(data, x, y) {
@@ -275,8 +279,10 @@ function key_handler(event) {
   if (keys.includes(key)) {
     event.preventDefault();
 
-    /*
+    // TODO: up/down scale/shrink the interval, left/right move it
     // TODO: up inside date input should change that date and nothing else
+
+    /*
     if (key == "ArrowUp" || key == "ArrowDown") {
       let delta       = (key == "ArrowUp") ? 1 : -1;
       let current     = TIME_RESOLUTIONS.indexOf(app.time_resolution);

@@ -81,7 +81,7 @@ td:first-child {
   opacity: 0;
 }
 
-#section_one {
+#app {
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -89,12 +89,12 @@ td:first-child {
   flex-wrap: wrap;
 }
 
-#section_one div.stack {
-  height: 480px;
+#app div.stack {
+  height: 470px;
   width: 960px;
 }
 
-#section_one div.pie {
+#app div.pie {
   height: 240px;
   width: 480px;
 }
