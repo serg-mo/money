@@ -1,9 +1,9 @@
 html, body {
-  
+  text-overflow: hidden;
 }
 
 body {
-  width: 1000px;
+  min-width: 1000px;
   display: flex;
   justify-content: space-around;
   margin: auto;
