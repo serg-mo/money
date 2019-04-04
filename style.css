@@ -15,6 +15,7 @@ div.chart {
   min-width: 200px;
   border-radius: 5px;
   position: relative;
+  margin: auto;
 }
 
 div.pie {
