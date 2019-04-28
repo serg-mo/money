@@ -1,3 +1,44 @@
+// http://paletton.com
+const colors = {
+  "Home":                      "#103C54",
+    "Rent":                    "#1B7997",
+    "Funrnishings":            "#EAC750",
+    "Home Supplies":           "#EF6C2E",
+    "Repairs & Improvements":  "#A2B770",
+  "Financial":                 "#1B7997",
+    "Credit Card Payment":     "#103C54",
+    "Money Transfers":         "#1B7997",
+  "Food & Drink":              "#EF6C2E",
+    "Groceries":               "#A2B770",
+    "Restaurants":             "#1B7997",
+    "Alcohol & Bars":          "#155C77",
+    "Coffee & Tea":            "#EAC750",
+    "Fast Food":               "#EAA944",
+  "Transportation":            "#A2B770",
+    "Gas":                     "#103C54",
+    "Parking & Tolls":         "#1B7997",
+    "Taxis":                   "#EF6C2E",
+    "Public Transit":          "#A2B770",
+    "Auto Services":           "#BE2F24",
+  "Uncategorized":             "#BE2F24",
+    "Cash":                    "#103C54",
+    "Other Shopping":          "#1B7997",
+  "Health & Medical":          "#EAC750",
+  "Personal":                  "#2095B8",
+  "Culture":                   "#EAA944",
+  "Gifts & Donations":         "#5FA693",
+  "Sports & Fitness":          "#155C77",
+  "Education":                 "#022835",
+  "Fees":                      "#ED8B39",
+
+  "default":                   "#D74F29"
+};
+
+Chart.defaults.global.elements.arc.borderWidth = 0.5;
+Chart.defaults.global.elements.arc.borderColor = "#666";
+Chart.defaults.global.defaultFontFamily = "Monaco";
+Chart.defaults.global.defaultFontSize   = 10;
+
 function make_bar(destination, summary, label) {
   let options = {
     scales: {
@@ -16,7 +57,7 @@ function make_bar(destination, summary, label) {
   //console.log("make_bar()", summary, datasets, labels)
 
   let data = make_data(summary, label); // TODO: pass same color for every bar here
-  data.datasets.map((v) => { v.backgroundColor = colors[0]; });
+  // data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: colors[0] 
   add_average(data.datasets);
 
   return draw(destination, "bar", data, options);
@@ -24,9 +65,10 @@ function make_bar(destination, summary, label) {
 
 function make_pie(destination, summary, label) {
   let options = {
-    cutoutPercentage: 50,
+    cutoutPercentage: 45,
+    rotation: 10,
     animation: {
-      duration: 0,
+      duration: 0, // miliseconds
       animateRotate: false,
       animateScale: true
     },
@@ -79,7 +121,7 @@ function make_stack(destination, summary, labels) {
       }],
     },
     animation: {
-      duration: 0
+      duration: 0 // milliseconds
     },
     title: {
       text: "",
@@ -252,12 +294,18 @@ function footer_callback_avg(items, data) {
 // TODO: pass colors here
 function make_data(summary, labels) {
   if (typeof labels == "string") {
+    let length  = Object.values(summary).length;
+    let keys    = Object.keys(summary);
+    let data    = Object.values(summary);
+
+    let palette = keys.map((key) => { return colors[key] || colors['default'] });
+
     return {
-      labels: Object.keys(summary),
+      labels: keys,
       datasets: [{
         label: labels, // name of the dataset
-        data: Object.values(summary),
-        backgroundColor: colors.slice(0, Object.values(summary).length)
+        data: data,
+        backgroundColor: palette
       }]
     };
   } else {
@@ -269,15 +317,14 @@ function make_data(summary, labels) {
       datasets.push({
         "label": dimension,
         "data": labels.map((label) => summary[dimension][label] || 0 ), // fixed cardinality
-        "backgroundColor": colors[i++]
+        "backgroundColor": colors[dimension] || colors['default']
       });
     }
-    //console.log(datasets);  
 
     return {
       labels,
       datasets
-    };    
+    };
   }
 }
 

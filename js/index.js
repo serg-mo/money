@@ -1,21 +1,7 @@
-// http://paletton.com
-const colors = [
-  "#C6DCA3", "#AA7339", "#D4BD6A", "#837EB1",
-  "#457585", "#26596A", "#DB684E", "#393276",
-  "#806815", "#6C939F", "#313841", "#104050", "#5B5494", '#0D083B', '#AA9139', "#022835", 
-];
-
 // jQuery for the win, http://youmightnotneedjquery.com
 //TODO: consider hosting this on codepen.io or better yet, a cloudfront
 //TODO: make the file input take up the full screen
 
-
-/*
-const colors = [
-  "#A7CECB", "#8BA6A9", "#75704E", "#CACC90", "#F4EBBE",
-  "#1B2021", "#51513D", "#A6A867", "#E3DC95", "#E3DCC2",
-];
-*/
 
 var pie_one;
 var pie_two;
@@ -65,8 +51,7 @@ $(function() {
     }
   })
 
-//  $("#time_after").on("keydown", key_handler);
-//  $("#time_before").on("keydown", key_handler);
+  $("body").on("keydown", key_handler);
 });
 
 function file_handler() {
@@ -150,6 +135,7 @@ function section_one_setup() {
 
       section_one_update()
     } else {
+      console.log("THIS NEVER FIRES")
       //setTimeout(() => sync_hidden_datasets(stack, pie_one)); // async sync
     }
   };
@@ -223,22 +209,22 @@ function section_one_update() {
   if (app.category_resolution == "category") {
     [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
-    pie_one.config.options.title.text = app.category_resolution;
+    pie_one.config.options.title.text = app.category || app.category_resolution;
     pie_one.config.data = x;
 
-    pie_two.config.options.title.text = app.category_resolution;
+    pie_two.config.options.title.text = app.category || app.category_resolution;
     pie_two.config.data = x;
 
-    stack.config.options.title.text = app.category_resolution;
+    stack.config.options.title.text = app.category || app.category_resolution;
     stack.config.data   = xy;
   } else {
     // do not update the left pie for anything else
     [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
-    pie_two.config.options.title.text = app.category_resolution;
+    pie_two.config.options.title.text = app.category || app.category_resolution;
     pie_two.config.data = x;
 
-    stack.config.options.title.text = app.category_resolution;
+    stack.config.options.title.text = app.category || app.category_resolution;
     stack.config.data   = xy;
   }
 
@@ -291,10 +277,12 @@ function key_handler(event) {
       app.time_resolution = TIME_RESOLUTIONS[next];
       time_after      = pick_cutoff(app.time_resolution);
       time_before     = format_date(new Date());
-    } else if (key == "ArrowLeft" || key == "ArrowRight") {
+    } else 
+    */
+    if (key == "ArrowLeft" || key == "ArrowRight") {
       let delta  = (key == "ArrowLeft") ? -1 : 1;
-      let after  = parse_date(time_after);
-      let before = parse_date(time_before);
+      let after  = parse_date(app.time_after);
+      let before = parse_date(app.time_before);
 
       if (app.time_resolution == "month") {
         after.setMonth(after.getMonth() + delta, after.getDate()); // month [date]
@@ -310,8 +298,7 @@ function key_handler(event) {
       app.time_after  = format_date(after);
       app.time_before = format_date(before);
     }
-    */
-
+    
     /*
     document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
