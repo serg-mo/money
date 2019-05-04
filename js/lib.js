@@ -8,11 +8,11 @@ const colors = {
   "Financial":                 "#1B7997",
     "Credit Card Payment":     "#103C54",
     "Money Transfers":         "#1B7997",
-  "Food & Drink":              "#EF6C2E",
+  "Food & Drink":              "#E5CF5E",
     "Groceries":               "#A2B770",
     "Restaurants":             "#1B7997",
     "Alcohol & Bars":          "#155C77",
-    "Coffee & Tea":            "#EAC750",
+    "Coffee & Tea":            "#8D6655",
     "Fast Food":               "#EAA944",
   "Transportation":            "#A2B770",
     "Gas":                     "#103C54",
@@ -36,8 +36,8 @@ const colors = {
 
 Chart.defaults.global.elements.arc.borderWidth = 0.5;
 Chart.defaults.global.elements.arc.borderColor = "#666";
-Chart.defaults.global.defaultFontFamily = "Monaco";
-Chart.defaults.global.defaultFontSize   = 10;
+Chart.defaults.global.defaultFontFamily = "Helvetica";
+Chart.defaults.global.defaultFontSize   = 12;
 
 function make_bar(destination, summary, label) {
   let options = {
