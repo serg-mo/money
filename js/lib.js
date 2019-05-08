@@ -2,8 +2,8 @@
 const colors = {
   "Home":                      "#103C54",
     "Rent":                    "#1B7997",
-    "Funrnishings":            "#EAC750",
-    "Home Supplies":           "#EF6C2E",
+    "Furnishings":             "#E5CF5E",
+    "Home Supplies":           "#103C54",
     "Repairs & Improvements":  "#A2B770",
   "Financial":                 "#1B7997",
     "Credit Card Payment":     "#103C54",
@@ -68,9 +68,9 @@ function make_pie(destination, summary, label) {
     cutoutPercentage: 45,
     rotation: 10,
     animation: {
-      duration: 0, // miliseconds
+      duration: 1000, // miliseconds
       animateRotate: false,
-      animateScale: true
+      animateScale: false
     },
     title: {
       text: "",
@@ -133,7 +133,10 @@ function make_stack(destination, summary, labels) {
   };
   //console.log("make_stack()", summary, datasets, labels)
 
-  return draw(destination, "line", make_data(summary, labels), options);
+  let data = make_data(summary, labels); // TODO: pass same color for every bar here
+  // TODO: consider adding average datasets here
+
+  return draw(destination, "line", data, options);
 }
 
 function draw(canvas, type, data, options) {
@@ -202,13 +205,17 @@ function make_table(table, data) {
 }
 
 
-function add_average(datasets) {
+function add_average(datasets, index = 0) {
   let avg = {label: "Average", backgroundColor: "#000000", type: 'line', fill: false, data: []};  
-  let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+  let sum = datasets[index].data.reduce((a, b) => a + b, 0);
   
-  datasets[0].data.forEach(() => { avg.data.push(sum / datasets[0].data.length) });
+  datasets[index].data.forEach(() => { avg.data.push(sum / datasets[index].data.length) });
   
   datasets.push(avg);
+}
+
+function add_averages(datasets, index = 0) {
+  // TODO: for every stream in the stack, draw a straight line in a separate scale (non stacked)?
 }
 
 

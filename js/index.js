@@ -11,13 +11,13 @@ var bar;
 var app;
 
 // this does not work in jquery onload below
-window.onload = function() {
+window.onload = () => {
   $(".ui.modal")
     .modal('setting', 'closable', false)
     .modal("show");
 }
 
-$(function() {
+$(() => {
   $("#file").on("change", file_handler);
 
   app = new Vue({
@@ -27,7 +27,8 @@ $(function() {
       TIME_RESOLUTIONS:     ["date", "week", "month"],
 
       category_resolution:  "category",
-      category:             null, // default
+      category:             null,
+      subcategory:          null,
       time_resolution:      "month",
 
       time_after:           pick_cutoff("month"),
@@ -36,13 +37,9 @@ $(function() {
       transactions:         [],
     },
     watch: {
-      time_after: function (val) {
-        section_one_update();
-      },
-      time_before: function (val) {
-        section_one_update();
-      },
-      time_resolution: function (val) {
+      time_after: (val)      => { section_one_update(); },
+      time_before: (val)     => { section_one_update(); },
+      time_resolution: (val) => {
         this.time_after  = pick_cutoff(this.time_resolution);
         this.time_before = "";
 
@@ -56,7 +53,6 @@ $(function() {
 
 function file_handler() {
   $(".ui.modal").modal("hide");
-  $(".ui.modal").modal("hide");
 
   let reader = new FileReader();
   reader.onload = function (e) {
@@ -64,7 +60,6 @@ function file_handler() {
     let transactions = json.transactions.map(parse_transaction);
 
     transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
-
     transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
 
     app.transactions = transactions;
@@ -131,6 +126,7 @@ function section_one_setup() {
   pie_one.config.options.onClick = function (event, items) {
     if (items.length) {
       app.category_resolution = "subcategory";
+      app.subcategory         = null;
       app.category            = items[0]._chart.data.labels[items[0]._index];
 
       section_one_update()
@@ -146,8 +142,8 @@ function section_one_setup() {
   
   pie_two.config.options.onClick = function (event, items) {
     if (items.length) {
-      app.category_resolution = "merchant";
-      app.category            = items[0]._chart.data.labels[items[0]._index];
+      app.category_resolution = "subcategory";
+      app.subcategory         = items[0]._chart.data.labels[items[0]._index];
 
       // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
       // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
@@ -156,9 +152,7 @@ function section_one_setup() {
       stack.options.title.text = pie_two.config.options.title.text + (app.category ? `: ${app.category}` : "");
 
       // hide things other than the active one
-      stack.data.datasets.forEach(function(v){
-        v.hidden = (v.label != app.category)
-      });
+      stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.category) });
       stack.update();
 
       // TODO: sync_hidden_datasets(stack, pie_two);
@@ -191,9 +185,15 @@ function section_one_update() {
   if (app.time_before) {
     filter += ` && date <= '${app.time_before}'`;
   }
-  if (app.category) {
+
+  // prefer subcategory over category
+  if (app.category_resolution == "subcategory" && app.category) {
     filter += ` && category == '${app.category}'`
+    if (app.subcategory) {
+      filter += ` && subcategory == '${app.subcategory}'`
+    }
   }
+
 
   let query = `[?${filter}].` + JSON.stringify(select);
   console.log(query);
@@ -298,7 +298,7 @@ function key_handler(event) {
       app.time_after  = format_date(after);
       app.time_before = format_date(before);
     }
-    
+
     /*
     document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
@@ -317,7 +317,7 @@ function pick_time_slice(index) {
 
   // clicking a stack, loads that slice into the comparison
   // for each dataset, extract the indexed slice
-  stack.data.datasets.forEach(function(dataset) {
+  stack.data.datasets.forEach((dataset) => {
     labels.push(dataset.label);
     backgroundColor.push(dataset.backgroundColor); // same colors on both graphs
     data.push(dataset.data[index]);
@@ -331,10 +331,13 @@ function pick_time_slice(index) {
   if (true) {
     pie_two.config.data.labels = labels;
 
-    //pie_two.config.data.datasets.push();
-    pie_two.config.data.datasets = [{label, data, backgroundColor}];
+    // add to the top of the stack and chop it down
+    pie_two.config.data.datasets.unshift({label, data, backgroundColor});
+    pie_two.config.data.datasets = pie_two.config.data.datasets.slice(0, 2); // [start, stop index)
 
-    pie_two.update();
+    pie_two.update({
+      "duration": 8000
+    });
   }
 }
 
