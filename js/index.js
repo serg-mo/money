@@ -40,8 +40,8 @@ $(() => {
       time_after: (val)      => { section_one_update(); },
       time_before: (val)     => { section_one_update(); },
       time_resolution: (val) => {
-        this.time_after  = pick_cutoff(this.time_resolution);
-        this.time_before = "";
+        app.time_after  = pick_cutoff(val);
+        app.time_before = format_date(new Date());
 
         section_one_update();
       }
@@ -262,24 +262,17 @@ function key_handler(event) {
   const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
   const key  = event.key;
 
+  // TODO: up/down scale/shrink the interval, left/right move it (infer time resolution)
   if (keys.includes(key)) {
     event.preventDefault();
 
-    // TODO: up/down scale/shrink the interval, left/right move it
-    // TODO: up inside date input should change that date and nothing else
-
-    /*
     if (key == "ArrowUp" || key == "ArrowDown") {
       let delta       = (key == "ArrowUp") ? 1 : -1;
-      let current     = TIME_RESOLUTIONS.indexOf(app.time_resolution);
-      let next        = Math.max(Math.min(current + delta, TIME_RESOLUTIONS.length - 1), 0);
+      let current     = app.TIME_RESOLUTIONS.indexOf(app.time_resolution);
+      let next        = Math.max(Math.min(current + delta, app.TIME_RESOLUTIONS.length - 1), 0);
       
-      app.time_resolution = TIME_RESOLUTIONS[next];
-      time_after      = pick_cutoff(app.time_resolution);
-      time_before     = format_date(new Date());
-    } else 
-    */
-    if (key == "ArrowLeft" || key == "ArrowRight") {
+      app.time_resolution = app.TIME_RESOLUTIONS[next];
+    } else if (key == "ArrowLeft" || key == "ArrowRight") {
       let delta  = (key == "ArrowLeft") ? -1 : 1;
       let after  = parse_date(app.time_after);
       let before = parse_date(app.time_before);
@@ -300,12 +293,10 @@ function key_handler(event) {
     }
 
     /*
-    document.querySelector("#time_resolution").selectedIndex = TIME_RESOLUTIONS.indexOf(time_resolution);
+    document.querySelector("#time_resolution").selectedIndex = app.TIME_RESOLUTIONS.indexOf(time_resolution);
     document.querySelector("#time_after").value              = time_after;
     document.querySelector("#time_before").value             = time_before;
     */
-
-    section_one_update();
   }
 }
 
@@ -352,7 +343,6 @@ function pick_cutoff(type) {
   } else {
     date.setMonth(date.getMonth() - 1); // same date last month
   }
-  //console.log(format_date(date));
 
   return format_date(date);
 }
