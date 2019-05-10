@@ -353,7 +353,7 @@ function single_reducer(group, aggregate = "amount") {
   return (sum, v) => {
     sum[v[group]] = (sum[v[group]] || 0) + v[aggregate];
     return sum;
-  }  
+  }
 }
 
 function double_reducer(group_a, group_b, aggregate = "amount") {
@@ -362,24 +362,22 @@ function double_reducer(group_a, group_b, aggregate = "amount") {
     sum[val[group_a]][val[group_b]] = (sum[val[group_a]][val[group_b]] || 0) + val[aggregate];
 
     return sum;
-  }  
+  }
 }
 
-function sync_hidden_datasets(destination, source) {
+function sync_dataset_property(destination, source, property = "hidden") {
   // stack has datasets per category, e.g., rent, food, gym
   // pie has one dataset with categories as labels
-  if (destination.data.datasets.length == source.data.datasets.length) {
-    destination.data.datasets.forEach(function(v, k){
-      v.hidden = source.datasets[k].hidden;
+  if (destination.datasets.length == source.datasets.length) {
+    destination.datasets.forEach(function(v, k){
+      v[property] = source.datasets[k][property];
     });
-  } else if(source.data.datasets[0].data.length == destination.data.datasets.length) {
+  } else if(source.datasets[0].data.length == destination.datasets.length) {
     source.getDatasetMeta(0).data.forEach(function(v, k){
-      console.log(`${k} dataset should be ${v.hidden}`)
-      destination.data.datasets[k].hidden = v.hidden;
+      console.log(`${k} dataset should be ${v[property]}`)
+      //destination.datasets[k][property] = v[property];
     });
   } else {
     console.log("Source and destination datasets can not be synced");
   }
-
-  destination.update()
 }

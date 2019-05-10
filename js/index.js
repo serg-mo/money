@@ -37,8 +37,8 @@ $(() => {
       transactions:         [],
     },
     watch: {
-      time_after: (val)      => { section_one_update(); },
-      time_before: (val)     => { section_one_update(); },
+      time_after: (val)      => { section_one_update(true); },
+      time_before: (val)     => { section_one_update(true); },
       time_resolution: (val) => {
         app.time_after  = pick_cutoff(val);
         app.time_before = format_date(new Date());
@@ -132,7 +132,7 @@ function section_one_setup() {
       section_one_update()
     } else {
       console.log("THIS NEVER FIRES")
-      //setTimeout(() => sync_hidden_datasets(stack, pie_one)); // async sync
+      //setTimeout(() => sync_dataset_property(stack.config.data, pie_one.config.data, 'hidden')); // async sync
     }
   };
 
@@ -155,9 +155,9 @@ function section_one_setup() {
       stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.category) });
       stack.update();
 
-      // TODO: sync_hidden_datasets(stack, pie_two);
+      // TODO: sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden');
     } else {
-      //setTimeout(() => sync_hidden_datasets(stack, pie_two)); // async sync
+      //setTimeout(() => sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden')); // async sync
     }
   }
   pie_two.config.options.tooltips.callbacks.footer = footer_callback_avg;
@@ -168,7 +168,7 @@ function section_one_setup() {
       pick_time_slice(items[0]._index);
     }
     // TODO: this does not work for some reason
-    setTimeout(() => sync_hidden_datasets(pie_two, stack)); // async sync
+    //setTimeout(() => sync_dataset_property(pie_two.config.data, stack.config.data, 'hidden')); // async sync
   }
   // TODO: onHover is more picky than tooltips.callbacks.title
 
@@ -176,7 +176,7 @@ function section_one_setup() {
   stack.config.options.tooltips.filter   = function(v) { return v.yLabel > 0; };
 }
 
-function section_one_update() {
+function section_one_update(keep_visibility = false) {
   // TODO: consider setting default columns here
   let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
   let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
@@ -210,22 +210,42 @@ function section_one_update() {
     [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
     pie_one.config.options.title.text = app.category || app.category_resolution;
-    pie_one.config.data = x;
+    if (keep_visibility) {
+      pie_one.config.data.datasets[0].data = x.datasets[0].data;
+    } else {
+      pie_one.config.data = x;
+    }
 
     pie_two.config.options.title.text = app.category || app.category_resolution;
-    pie_two.config.data = x;
+    if (keep_visibility) {
+      pie_two.config.data.datasets[0].data = x.datasets[0].data;
+    } else {
+      pie_two.config.data = x;
+    }
 
     stack.config.options.title.text = app.category || app.category_resolution;
-    stack.config.data   = xy;
+    if (keep_visibility) {
+      sync_dataset_property(stack.config.data, xy, "data");
+    } else {
+      stack.config.data = xy;
+    }
   } else {
     // do not update the left pie for anything else
     [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
     pie_two.config.options.title.text = app.category || app.category_resolution;
-    pie_two.config.data = x;
+    if (keep_visibility) {
+      pie_two.config.data.datasets.data = x.datasets.data;
+    } else {
+      pie_two.config.data = x;
+    }
 
     stack.config.options.title.text = app.category || app.category_resolution;
-    stack.config.data   = xy;
+    if (keep_visibility) {
+      sync_dataset_property(stack.config.data, xy, "data");
+    } else {
+      stack.config.data = xy;
+    }
   }
 
   pie_one.update();
@@ -371,7 +391,7 @@ function make_comparisons(datetime) {
   //let query = `[?${app.time_resolution} == '${label}'].{${app.time_resolution}: ${app.time_resolution}, category: category, subcategory: subcategory, amount: amount}`;
   //make_table($("#table"), filter_transactions(query));
 
-  // TODO  sync_hidden_datasets(pie_two, stack);
+  // TODO  sync_dataset_property(pie_two.config.data, stack.config.data, 'hidden');
   // TODO: highlight_row_in_legend(dataset_index);
 
   // TODO: I have the time_resolution and the date range, compare that date range to others like it
@@ -478,7 +498,7 @@ function make_comparisons(datetime) {
 
 
   // TODO: bring back time_after update changing the stack width
-  // pie_one.onClick = () => { sync_hidden_datasets(stack, pie_one); };
+  // pie_one.onClick = () => { sync_dataset_property(stack.config.data, pie_one.config.data, 'hidden'); };
 
   // bar.config.options.title.text = category;
   // bar.config.data = make_data(y_summary, category);
