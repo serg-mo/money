@@ -1,35 +1,38 @@
 // http://paletton.com
+// https://colorhexa.com
+
+// TODO: make the shade proportional to the value, darker - bigger
 const colors = {
-  "Home": "#5A8B7E",
-  "Rent": "#1B7997",
-  "Furnishings": "#E5CF5E",
-  "Home Supplies": "#103C54",
-  "Repairs & Improvements": "#A2B770",
-  "Financial": "#F0B37A",
-  "Credit Card Payment": "#103C54",
-  "Money Transfers": "#1B7997",
-  "Food & Drink": "#914949",
-  "Groceries": "#A2B770",
-  "Restaurants": "#1B7997",
-  "Alcohol & Bars": "#155C77",
-  "Coffee & Tea": "#8D6655",
-  "Fast Food": "#EAA944",
-  "Transportation": "#FAE07A",
-  "Gas": "#103C54",
-  "Parking & Tolls": "#1B7997",
-  "Taxis": "#EF6C2E",
-  "Public Transit": "#A2B770",
-  "Auto Services": "#BE2F24",
-  "Uncategorized": "#FFC58A",
-  "Cash": "#103C54",
-  "Other Shopping": "#1B7997",
-  "Health & Medical": "#44D9BD",
-  "Personal": "#C4B1FF",
-  "Culture": "#9678F2",
-  "Gifts & Donations": "#7150DE",
-  "Sports & Fitness": "#7160DE",
-  "Education": "#7170DE",
-  "Fees": "#7180DE",
+  "Home": "rgba(16,130,174)",
+    "Rent": "rgba(10,78,104)",
+    "Furnishings": "rgba(14,113,151)",
+    "Home Supplies": "rgba(18,147,197)",
+    "Repairs & Improvement": "rgba(32,178,234)",
+  "Financial": "rgb(231,192,40)",
+    "Credit Card Payment": "rgb(198,162,22)",
+    "Money Transfers": "rgb(234,199,63)",
+  "Food & Drink": "rgba(145,174,85)",
+    "Groceries": "rgba(103,124,59)",
+    "Restaurants": "rgba(117,141,67)",
+    "Alcohol & Bars": "rgba(131,158,75)",
+    "Coffee & Tea": "rgba(145,174,85)",
+    "Fast Food": "rgba(156,182,102)",
+  "Transportation": "EAD06A",
+    "Gas": "#103C54",
+    "Parking & Tolls": "#1B7997",
+    "Taxis": "#EF6C2E",
+    "Public Transit": "#A2B770",
+    "Auto Services": "#BE2F24",
+  "Uncategorized": "",
+    "Cash": "#103C54",
+    "Other Shopping": "#1B7997",
+  "Health & Medical": "",
+  "Personal": "",
+  "Culture": "",
+  "Gifts & Donations": "",
+  "Sports & Fitness": "",
+  "Education": "",
+  "Fees": "",
 
   "default": "#CCCCCC"
 };
@@ -131,7 +134,7 @@ function make_stack(destination, summary, labels) {
       }],
     },
     animation: {
-      duration: 1000 // milliseconds
+      duration: 0 // milliseconds
     },
     title: {
       text: "",
@@ -142,7 +145,7 @@ function make_stack(destination, summary, labels) {
     },
     elements: {
       line: {
-        tension: 0 // disables bezier curves
+        tension: .4 // bezier curve
       }
     },
   };
@@ -311,7 +314,6 @@ function footer_callback_avg(items, data) {
     });
   }
 
-  sum = 0; // TODO: figure this function out
   // TODO: average month line in a bar chart makes sense (extra line dataset)
   // TODO: average category spending in a pie chart does not make sense (sum is ok)
 

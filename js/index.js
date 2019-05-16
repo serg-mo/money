@@ -42,20 +42,25 @@ $(() => {
       xy:                   null,
     },
     watch: {
-      time_after: (val)      => { update_query(); },
-      time_before: (val)     => { update_query(); },
-      time_resolution: (val) => {
+      category_resolution: (val) => { update_query(); },
+      category: (val)            => { update_query(); },
+      subcategory: (val)         => { update_query(); },
+
+      time_after: (val)          => { update_query(); },
+      time_before: (val)         => { update_query(); },
+      time_resolution: (val)     => {
         app.time_after  = pick_cutoff(val);
         app.time_before = format_date(new Date());
 
         update_query();
       },
+
       query: (val) => {
         app.data = jmespath.search(app.transactions, app.query);
         [app.x, app.y, app.xy] = three_summaries(app.data, app.category_resolution, app.time_resolution);
-        console.log([app.x, app.y, app.xy]);
+        //console.log([app.x, app.y, app.xy]);
 
-        section_one_update();
+        section_one_update(0);
       }
     }
   })
@@ -82,7 +87,7 @@ function reader_onload(e) {
 
   section_one_setup("#section_one");
   update_query();
-  section_one_update(); // initial call
+  section_one_update(800); // initial call
 }
 
 function parse_transaction(t)
@@ -144,13 +149,14 @@ function section_one_setup() {
   pie_one.config.options.onClick = function (event, items) {
     if (items.length) {
       app.category_resolution = "subcategory";
-      app.subcategory         = null;
       app.category            = items[0]._chart.data.labels[items[0]._index];
+      app.subcategory         = null;
 
       // TODO: clicking a slice should add a dataset to the stack
     } else {
-      console.log("THIS NEVER FIRES")
-      //setTimeout(() => sync_dataset_property(stack.config.data, pie_one.config.data, 'hidden')); // async sync
+      app.category_resolution = "category";
+      app.category            = null;
+      app.subcategory         = null;
     }
   };
 
@@ -175,6 +181,7 @@ function section_one_setup() {
 
       // TODO: sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden');
     } else {
+      console.log("pie_two click outside of legend");
       //setTimeout(() => sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden')); // async sync
     }
   }
@@ -216,7 +223,7 @@ function update_query() {
   console.log(app.query);
 }
 
-function section_one_update() {
+function section_one_update(duration = 0) {
   if (app.data == null)
     return;
 
@@ -228,6 +235,9 @@ function section_one_update() {
   let x_data  = make_data(app.x, "default");
   let y_data  = make_data(app.y, "default");
   let xy_data = make_data(app.xy, Object.keys(app.y)); // labels
+
+  // TODO: consider making data as a set of points
+  // add_average(xy_data.datasets); // this is useful for label
 
   if (app.category_resolution == "category") {
     pie_one.config.options.title.text = app.category || app.category_resolution;
@@ -256,7 +266,7 @@ function section_one_update() {
   pie_one.update();
   pie_two.update();
   line.update();
-  stack.update();
+  stack.update(duration);
 }
 
 function sync_dataset_property(destination, source)
