@@ -35,13 +35,25 @@ $(() => {
       time_before:          format_date(new Date),
 
       transactions:         [],
+      query:                "",
+      data:                 null,
+      x:                    null,
+      y:                    null,
+      xy:                   null,
     },
     watch: {
-      time_after: (val)      => { section_one_update(true); },
-      time_before: (val)     => { section_one_update(true); },
+      time_after: (val)      => { update_query(); },
+      time_before: (val)     => { update_query(); },
       time_resolution: (val) => {
         app.time_after  = pick_cutoff(val);
         app.time_before = format_date(new Date());
+
+        update_query();
+      },
+      query: (val) => {
+        app.data = jmespath.search(app.transactions, app.query);
+        [app.x, app.y, app.xy] = three_summaries(app.data, app.category_resolution, app.time_resolution);
+        console.log([app.x, app.y, app.xy]);
 
         section_one_update();
       }
@@ -55,19 +67,22 @@ function file_handler() {
   $(".ui.modal").modal("hide");
 
   let reader = new FileReader();
-  reader.onload = function (e) {
-    let json = JSON.parse(e.target.result); // FileReader
-    let transactions = json.transactions.map(parse_transaction);
-
-    transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
-    transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
-
-    app.transactions = transactions;
-
-    section_one_setup("#section_one");
-    section_one_update();
-  }
+  reader.onload = reader_onload;
   reader.readAsText(event.target.files[0]);
+}
+
+function reader_onload(e) {
+  let json = JSON.parse(e.target.result); // FileReader
+  let transactions = json.transactions.map(parse_transaction);
+
+  transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
+  transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
+
+  app.transactions = transactions;
+
+  section_one_setup("#section_one");
+  update_query();
+  section_one_update(); // initial call
 }
 
 function parse_transaction(t)
@@ -108,18 +123,21 @@ function section_one_setup() {
   // TODO: refactor all of this as plugins, https://www.chartjs.org/docs/latest/developers/plugins.html
   // TODO: add two sets of percentages to the pie legend, total and currently visible
 
-  let pie_one_canvas   = document.createElement("canvas");
-  let pie_two_canvas   = document.createElement("canvas");
-  let pie_three_canvas = document.createElement("canvas");
+  let pie_one_canvas = document.createElement("canvas");
+  let pie_two_canvas = document.createElement("canvas");
+  let line_canvas    = document.createElement("canvas");
+  let stack_canvas   = document.createElement("canvas");
 
   $("#pie_one").append(pie_one_canvas);
   $("#pie_two").append(pie_two_canvas);
-  $("#stack").append(pie_three_canvas);
+  $("#line").append(line_canvas);
+  $("#stack").append(stack_canvas);
 
   // globally visible vars
   pie_one = make_pie(pie_one_canvas);
   pie_two = make_pie(pie_two_canvas);
-  stack   = make_stack(pie_three_canvas);
+  line    = make_line(line_canvas);
+  stack   = make_stack(stack_canvas);
 
 
   pie_one.config.options.events = ["click", "hover"];
@@ -129,7 +147,7 @@ function section_one_setup() {
       app.subcategory         = null;
       app.category            = items[0]._chart.data.labels[items[0]._index];
 
-      section_one_update()
+      // TODO: clicking a slice should add a dataset to the stack
     } else {
       console.log("THIS NEVER FIRES")
       //setTimeout(() => sync_dataset_property(stack.config.data, pie_one.config.data, 'hidden')); // async sync
@@ -176,7 +194,7 @@ function section_one_setup() {
   stack.config.options.tooltips.filter   = function(v) { return v.yLabel > 0; };
 }
 
-function section_one_update(keep_visibility = false) {
+function update_query() {
   // TODO: consider setting default columns here
   let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
   let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
@@ -194,63 +212,56 @@ function section_one_update(keep_visibility = false) {
     }
   }
 
+  app.query = `[?${filter}].` + JSON.stringify(select);
+  console.log(app.query);
+}
 
-  let query = `[?${filter}].` + JSON.stringify(select);
-  console.log(query);
-
-  let data = jmespath.search(app.transactions, query);
-  let x, y, xy;
+function section_one_update() {
+  if (app.data == null)
+    return;
 
   // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
   // TODO: on month click, redo the weekday summary
   // TODO: preserve labels if they are set
 
-  // TODO: query will no longer apply because we have Vue global context
-  if (app.category_resolution == "category") {
-    [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
+  // TODO: I can slice this function by chart
+  let x_data  = make_data(app.x, "default");
+  let y_data  = make_data(app.y, "default");
+  let xy_data = make_data(app.xy, Object.keys(app.y)); // labels
 
+  if (app.category_resolution == "category") {
     pie_one.config.options.title.text = app.category || app.category_resolution;
-    if (keep_visibility) {
-      pie_one.config.data.datasets[0].data = x.datasets[0].data;
-    } else {
-      pie_one.config.data = x;
-    }
+    pie_one.config.data = x_data;
 
     pie_two.config.options.title.text = app.category || app.category_resolution;
-    if (keep_visibility) {
-      pie_two.config.data.datasets[0].data = x.datasets[0].data;
-    } else {
-      pie_two.config.data = x;
-    }
+    pie_two.config.data = x_data;
 
     stack.config.options.title.text = app.category || app.category_resolution;
-    if (keep_visibility) {
-      sync_dataset_property(stack.config.data, xy, "data");
-    } else {
-      stack.config.data = xy;
-    }
+    //sync_dataset_property(stack.config.data, xy_data, "data");
+    stack.config.data = xy_data;
+
+    line.config.options.title.text = app.category || app.category_resolution;
+    line.config.data = y_data;
   } else {
     // do not update the left pie for anything else
-    [x, y, xy] = three_summaries(data, app.category_resolution, app.time_resolution);
 
     pie_two.config.options.title.text = app.category || app.category_resolution;
-    if (keep_visibility) {
-      pie_two.config.data.datasets.data = x.datasets.data;
-    } else {
-      pie_two.config.data = x;
-    }
+    pie_two.config.data = x_data;
 
     stack.config.options.title.text = app.category || app.category_resolution;
-    if (keep_visibility) {
-      sync_dataset_property(stack.config.data, xy, "data");
-    } else {
-      stack.config.data = xy;
-    }
+    sync_dataset_property(stack.config.data, xy_data, "data");
+    stack.config.data = xy_data;
   }
 
   pie_one.update();
   pie_two.update();
+  line.update();
   stack.update();
+}
+
+function sync_dataset_property(destination, source)
+{
+  destination = source; // TODO: this is just a placeholder
 }
 
 // TODO: instead of the hover note for average, add an extra dataset with avg as the only value
@@ -270,11 +281,7 @@ function three_summaries(data, x, y) {
 
   let xy_summary = data.reduce(double_reducer(x, y), init);
 
-  let x_data  = make_data(x_summary, "default");
-  let y_data  = make_data(y_summary, "default");
-  let xy_data = make_data(xy_summary, Object.keys(y_summary));
-
-  return [x_data, y_data, xy_data, data];
+  return [x_summary, y_summary, xy_summary];
 }
 
 

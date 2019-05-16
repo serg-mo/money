@@ -1,50 +1,59 @@
 // http://paletton.com
 const colors = {
-  "Home":                      "#103C54",
-    "Rent":                    "#1B7997",
-    "Furnishings":             "#E5CF5E",
-    "Home Supplies":           "#103C54",
-    "Repairs & Improvements":  "#A2B770",
-  "Financial":                 "#1B7997",
-    "Credit Card Payment":     "#103C54",
-    "Money Transfers":         "#1B7997",
-  "Food & Drink":              "#E5CF5E",
-    "Groceries":               "#A2B770",
-    "Restaurants":             "#1B7997",
-    "Alcohol & Bars":          "#155C77",
-    "Coffee & Tea":            "#8D6655",
-    "Fast Food":               "#EAA944",
-  "Transportation":            "#A2B770",
-    "Gas":                     "#103C54",
-    "Parking & Tolls":         "#1B7997",
-    "Taxis":                   "#EF6C2E",
-    "Public Transit":          "#A2B770",
-    "Auto Services":           "#BE2F24",
-  "Uncategorized":             "#BE2F24",
-    "Cash":                    "#103C54",
-    "Other Shopping":          "#1B7997",
-  "Health & Medical":          "#EAC750",
-  "Personal":                  "#2095B8",
-  "Culture":                   "#EAA944",
-  "Gifts & Donations":         "#5FA693",
-  "Sports & Fitness":          "#155C77",
-  "Education":                 "#022835",
-  "Fees":                      "#ED8B39",
+  "Home": "#5A8B7E",
+  "Rent": "#1B7997",
+  "Furnishings": "#E5CF5E",
+  "Home Supplies": "#103C54",
+  "Repairs & Improvements": "#A2B770",
+  "Financial": "#F0B37A",
+  "Credit Card Payment": "#103C54",
+  "Money Transfers": "#1B7997",
+  "Food & Drink": "#914949",
+  "Groceries": "#A2B770",
+  "Restaurants": "#1B7997",
+  "Alcohol & Bars": "#155C77",
+  "Coffee & Tea": "#8D6655",
+  "Fast Food": "#EAA944",
+  "Transportation": "#FAE07A",
+  "Gas": "#103C54",
+  "Parking & Tolls": "#1B7997",
+  "Taxis": "#EF6C2E",
+  "Public Transit": "#A2B770",
+  "Auto Services": "#BE2F24",
+  "Uncategorized": "#FFC58A",
+  "Cash": "#103C54",
+  "Other Shopping": "#1B7997",
+  "Health & Medical": "#44D9BD",
+  "Personal": "#C4B1FF",
+  "Culture": "#9678F2",
+  "Gifts & Donations": "#7150DE",
+  "Sports & Fitness": "#7160DE",
+  "Education": "#7170DE",
+  "Fees": "#7180DE",
 
-  "default":                   "#D74F29"
+  "default": "#CCCCCC"
 };
 
-Chart.defaults.global.elements.arc.borderWidth = 0.5;
-Chart.defaults.global.elements.arc.borderColor = "#666";
-Chart.defaults.global.defaultFontFamily = "Helvetica";
-Chart.defaults.global.defaultFontSize   = 12;
+Chart.defaults.global.elements.arc.borderWidth = 0;
+Chart.defaults.global.elements.arc.borderColor = "rgba(0, 0, 0, 0)";
+//Chart.defaults.global.elements.line.borderWidth = 0;
+//Chart.defaults.global.elements.line.borderColor = "rgba(0, 0, 0, 0)";
+Chart.defaults.global.elements.point.borderWidth = 0;
+Chart.defaults.global.elements.point.backgroundColor = "rgba(0, 0, 0, 0)";
+Chart.defaults.global.tooltips.titleFontFamily = "Monaco"; // fixed space for columns
+Chart.defaults.global.tooltips.bodyFontFamily = "Monaco";
+Chart.defaults.global.tooltips.footerFontFamily = "Monaco";
+Chart.defaults.global.tooltips.footerFontStyle = "normal";
+// footerFontStyle: "normal",
+Chart.defaults.global.defaultFontFamily = "Raleway"; // sans-serif;
+Chart.defaults.global.defaultFontSize = 12;
 
 function make_bar(destination, summary, label) {
   let options = {
     scales: {
       yAxes: [{
         stacked: false,
-        ticks: { 
+        ticks: {
           callback: ticks_callback
         }
       }],
@@ -95,7 +104,8 @@ function make_line(destination, summary, label) {
   let options = {
     scales: {
       yAxes: [{
-        ticks: { 
+        stacked: false,
+        ticks: {
           callback: ticks_callback
         }
       }],
@@ -115,13 +125,13 @@ function make_stack(destination, summary, labels) {
     scales: {
       yAxes: [{
         stacked: true,
-        ticks: { 
+        ticks: {
           callback: ticks_callback
         }
       }],
     },
     animation: {
-      duration: 0 // milliseconds
+      duration: 1000 // milliseconds
     },
     title: {
       text: "",
@@ -129,6 +139,11 @@ function make_stack(destination, summary, labels) {
     },
     legend: {
       position: "bottom",
+    },
+    elements: {
+      line: {
+        tension: 0 // disables bezier curves
+      }
     },
   };
   //console.log("make_stack()", summary, datasets, labels)
@@ -150,11 +165,6 @@ function draw(canvas, type, data, options) {
       label: label_callback,
       footer: footer_callback_sum,
     },
-    titleFontFamily: "Monaco", // fixed space for columns
-    bodyFontFamily: "Monaco",
-    footerFontFamily: "Monaco",
-    footerFontStyle: "normal",
-    footerFontStyle: "normal",
     layout: {
       padding: {
         left: 0,
@@ -166,8 +176,12 @@ function draw(canvas, type, data, options) {
   };
 
   let context = canvas.getContext("2d");
-  let config  = { type, data, options };
-  let chart   = new Chart(context, config);
+  let config = {
+    type,
+    data,
+    options
+  };
+  let chart = new Chart(context, config);
 
   return chart;
 }
@@ -177,12 +191,12 @@ function make_table(table, data) {
   table.html(""); // fresh copy
 
   let columns = Object.keys(data[0]);
-  let sum     = 0;
-  let avg     = 0;
+  let sum = 0;
+  let avg = 0;
 
   table.append("<tr><th>" + columns.join("</th><th>") + "</th></tr>")
 
-  data.forEach(function(row){
+  data.forEach(function(row) {
     let cells = columns.map((c) => row[c]); // values for known columns
     sum += row[columns[columns.length - 1]]; // last column is the amount
 
@@ -193,7 +207,7 @@ function make_table(table, data) {
   // empty rows of the same length
   let sum_row = columns.map(() => "");
   let avg_row = columns.map(() => "");
-  
+
   sum_row[0] = "SUM";
   sum_row[sum_row.length - 1] = Math.round(sum).toLocaleString();
 
@@ -206,11 +220,19 @@ function make_table(table, data) {
 
 
 function add_average(datasets, index = 0) {
-  let avg = {label: "Average", backgroundColor: "#000000", type: 'line', fill: false, data: []};  
+  let avg = {
+    label: "Average",
+    backgroundColor: "#000000",
+    type: 'line',
+    fill: false,
+    data: []
+  };
   let sum = datasets[index].data.reduce((a, b) => a + b, 0);
-  
-  datasets[index].data.forEach(() => { avg.data.push(sum / datasets[index].data.length) });
-  
+
+  datasets[index].data.forEach(() => {
+    avg.data.push(sum / datasets[index].data.length)
+  });
+
   datasets.push(avg);
 }
 
@@ -234,18 +256,18 @@ function title_callback(items, data) {
 
 function label_callback(item, data) {
   let category = data.labels[item.index] || "";
-  let dataset  = data.datasets[item.datasetIndex].label;
-  let value    = data.datasets[item.datasetIndex].data[item.index];
+  let dataset = data.datasets[item.datasetIndex].label;
+  let value = data.datasets[item.datasetIndex].data[item.index];
   //console.log("label_callback()", item, data);
   //console.log(category, dataset, value)
 
-  let parts    = [];
-  let sum      = 0;
+  let parts = [];
+  let sum = 0;
 
 
   // TODO: percent does not make sense for two datasets in a pie, the way it does for stacks
-  if (data.datasets.length > 1 ) {
-    parts[0] = dataset; 
+  if (data.datasets.length > 1) {
+    parts[0] = dataset;
     sum = data.datasets.reduce((carry, v) => carry + (v.hidden ? 0 : v.data[item.index]), 0); // visible datasets only
   } else {
     parts[0] = category;
@@ -301,18 +323,19 @@ function footer_callback_avg(items, data) {
 // TODO: pass colors here
 function make_data(summary, labels) {
   if (typeof labels == "string") {
-    let length  = Object.values(summary).length;
-    let keys    = Object.keys(summary);
-    let data    = Object.values(summary);
+    let length = Object.values(summary).length;
+    let keys = Object.keys(summary);
+    let data = Object.values(summary);
 
-    let palette = keys.map((key) => { return colors[key] || colors['default'] });
+    let palette = keys.map((key) => colors[key] || colors['default']);
 
     return {
       labels: keys,
       datasets: [{
         label: labels, // name of the dataset
         data: data,
-        backgroundColor: palette
+        backgroundColor: palette,
+        fill: false
       }]
     };
   } else {
@@ -323,7 +346,7 @@ function make_data(summary, labels) {
     for (dimension in summary) {
       datasets.push({
         "label": dimension,
-        "data": labels.map((label) => summary[dimension][label] || 0 ), // fixed cardinality
+        "data": labels.map((label) => summary[dimension][label] || 0), // fixed cardinality
         "backgroundColor": colors[dimension] || colors['default']
       });
     }
@@ -341,9 +364,15 @@ function sort_summary(summary, init = null) {
 
   let func;
   if (init != null) {
-    func = (sum, v) => { sum[v[0]] = init; return sum; };
+    func = (sum, v) => {
+      sum[v[0]] = init;
+      return sum;
+    };
   } else {
-    func = (sum, v) => { sum[v[0]] = v[1]; return sum; };
+    func = (sum, v) => {
+      sum[v[0]] = v[1];
+      return sum;
+    };
   }
 
   return arr.reduce(func, {});
@@ -368,16 +397,15 @@ function double_reducer(group_a, group_b, aggregate = "amount") {
 function sync_dataset_property(destination, source, property = "hidden") {
   // stack has datasets per category, e.g., rent, food, gym
   // pie has one dataset with categories as labels
-  if (destination.datasets.length == source.datasets.length) {
-    destination.datasets.forEach(function(v, k){
-      v[property] = source.datasets[k][property];
-    });
-  } else if(source.datasets[0].data.length == destination.datasets.length) {
-    source.getDatasetMeta(0).data.forEach(function(v, k){
-      console.log(`${k} dataset should be ${v[property]}`)
-      //destination.datasets[k][property] = v[property];
-    });
+
+  // if the destination has no datasets or source / destination datasets are of equal length
+  if (!destination.datasets.length || destination.datasets.length == source.datasets.length) {
+    for (let i = 0; i < source.datasets.length; i++) {
+      // destination.datasets[i][property] = source.datasets[i][property]; // THIS DOES NOT WOEK
+    }
   } else {
+    console.log(destination.datasets.length);
+    console.log(source.datasets.length);
     console.log("Source and destination datasets can not be synced");
   }
 }
