@@ -17,7 +17,7 @@ const colors = {
     "Alcohol & Bars": "rgba(131,158,75)",
     "Coffee & Tea": "rgba(145,174,85)",
     "Fast Food": "rgba(156,182,102)",
-  "Transportation": "EAD06A",
+  "Transportation": "",
     "Gas": "#103C54",
     "Parking & Tolls": "#1B7997",
     "Taxis": "#EF6C2E",
@@ -37,19 +37,19 @@ const colors = {
   "default": "#CCCCCC"
 };
 
-Chart.defaults.global.elements.arc.borderWidth = 0;
-Chart.defaults.global.elements.arc.borderColor = "rgba(0, 0, 0, 0)";
-//Chart.defaults.global.elements.line.borderWidth = 0;
-//Chart.defaults.global.elements.line.borderColor = "rgba(0, 0, 0, 0)";
-Chart.defaults.global.elements.point.borderWidth = 0;
+Chart.defaults.global.elements.arc.borderWidth       = 0;
+Chart.defaults.global.elements.arc.borderColor       = "rgba(0, 0, 0, 0)";
+//Chart.defaults.global.elements.line.borderWidth    = 0;
+//Chart.defaults.global.elements.line.borderColor    = "rgba(0, 0, 0, 0)";
+Chart.defaults.global.elements.point.borderWidth     = 0;
 Chart.defaults.global.elements.point.backgroundColor = "rgba(0, 0, 0, 0)";
-Chart.defaults.global.tooltips.titleFontFamily = "Monaco"; // fixed space for columns
-Chart.defaults.global.tooltips.bodyFontFamily = "Monaco";
-Chart.defaults.global.tooltips.footerFontFamily = "Monaco";
-Chart.defaults.global.tooltips.footerFontStyle = "normal";
+Chart.defaults.global.tooltips.titleFontFamily       = "Monaco"; // fixed space for columns
+Chart.defaults.global.tooltips.bodyFontFamily        = "Monaco";
+Chart.defaults.global.tooltips.footerFontFamily      = "Monaco";
+Chart.defaults.global.tooltips.footerFontStyle       = "normal";
 // footerFontStyle: "normal",
-Chart.defaults.global.defaultFontFamily = "Raleway"; // sans-serif;
-Chart.defaults.global.defaultFontSize = 12;
+Chart.defaults.global.defaultFontFamily              = "Raleway"; // sans-serif;
+Chart.defaults.global.defaultFontSize                = 12;
 
 function make_bar(destination, summary, label) {
   let options = {
@@ -145,7 +145,7 @@ function make_stack(destination, summary, labels) {
     },
     elements: {
       line: {
-        tension: .4 // bezier curve
+        tension: .2 // bezier curve
       }
     },
   };
@@ -267,7 +267,6 @@ function label_callback(item, data) {
   let parts = [];
   let sum = 0;
 
-
   // TODO: percent does not make sense for two datasets in a pie, the way it does for stacks
   if (data.datasets.length > 1) {
     parts[0] = dataset;
@@ -304,7 +303,6 @@ function footer_callback_sum(items, data) {
 function footer_callback_avg(items, data) {
   let sum = 0;
 
-
   // TODO: loop through the other dimension
   if (data.datasets.length == 1) {
     sum += data.datasets[0].data.reduce((a, b) => a + b, 0); // add values in a single dataser
@@ -325,10 +323,9 @@ function footer_callback_avg(items, data) {
 // TODO: pass colors here
 function make_data(summary, labels) {
   if (typeof labels == "string") {
-    let length = Object.values(summary).length;
-    let keys = Object.keys(summary);
-    let data = Object.values(summary);
-
+    let length  = Object.values(summary).length;
+    let keys    = Object.keys(summary);
+    let data    = Object.values(summary);
     let palette = keys.map((key) => colors[key] || colors['default']);
 
     return {

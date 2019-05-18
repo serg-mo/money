@@ -166,22 +166,29 @@ function section_one_setup() {
   
   pie_two.config.options.onClick = function (event, items) {
     if (items.length) {
-      app.category_resolution = "subcategory";
-      app.subcategory         = items[0]._chart.data.labels[items[0]._index];
+      let subcategory = items[0]._chart.data.labels[items[0]._index];
+      //app.category_resolution = "subcategory";
+      //app.subcategory         = subcategory;
 
       // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
       // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
       // TODO: synchronyze the two datasets in pie_two and stack
 
-      stack.options.title.text = pie_two.config.options.title.text + (app.category ? `: ${app.category}` : "");
+      stack.options.title.text = pie_two.config.options.title.text + (app.category ? `: ${subcategory}` : "");
 
       // hide things other than the active one
-      stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.category) });
+      stack.data.datasets.forEach((v) => { v.hidden = (v.label != subcategory) });
       stack.update();
 
       // TODO: sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden');
     } else {
-      console.log("pie_two click outside of legend");
+      pie_two.data.datasets.forEach((v) => { v.hidden = false; });
+      stack.data.datasets.forEach((v) => { v.hidden = false; });
+
+      pie_two.update();
+      stack.update();
+
+      //app.subcategory = null;
       //setTimeout(() => sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden')); // async sync
     }
   }
