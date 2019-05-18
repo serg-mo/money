@@ -6,6 +6,7 @@
 var pie_one;
 var pie_two;
 var stack;
+var line;
 var bar;
 
 var app;
@@ -144,15 +145,13 @@ function section_one_setup() {
   line    = make_line(line_canvas);
   stack   = make_stack(stack_canvas);
 
-
+  // TODO: clicking a slice should add a dataset to the stack
   pie_one.config.options.events = ["click", "hover"];
-  pie_one.config.options.onClick = function (event, items) {
+  pie_one.config.options.onClick = (event, items) => {
     if (items.length) {
       app.category_resolution = "subcategory";
       app.category            = items[0]._chart.data.labels[items[0]._index];
       app.subcategory         = null;
-
-      // TODO: clicking a slice should add a dataset to the stack
     } else {
       app.category_resolution = "category";
       app.category            = null;
@@ -163,8 +162,7 @@ function section_one_setup() {
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
-  
-  pie_two.config.options.onClick = function (event, items) {
+  pie_two.config.options.onClick = (event, items) => {
     if (items.length) {
       let subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
@@ -182,20 +180,23 @@ function section_one_setup() {
 
       // TODO: sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden');
     } else {
-      pie_two.data.datasets.forEach((v) => { v.hidden = false; });
-      stack.data.datasets.forEach((v) => { v.hidden = false; });
-
-      pie_two.update();
-      stack.update();
-
-      //app.subcategory = null;
-      //setTimeout(() => sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden')); // async sync
+      // TODO: unhide all datasets here
     }
   }
+  // TODO: sync datasets[].hidden, pie_two.config.options.legend.onClick
+
+  /*
+  (event, items) => {
+    Chart.defaults.global.legend.onClick(event, items);
+
+    //stack.data.datasets.forEach((v, i) => { v.hidden = pie_two.data.datasets[i].hidden; });
+    //stack.update();
+  }
+  */
   pie_two.config.options.tooltips.callbacks.footer = footer_callback_avg;
 
 
-  stack.config.options.onClick = function (event, items) {
+  stack.config.options.onClick = (event, items) => {
     if (items.length) {
       pick_time_slice(items[0]._index);
     }
@@ -204,8 +205,8 @@ function section_one_setup() {
   }
   // TODO: onHover is more picky than tooltips.callbacks.title
 
-  stack.config.options.tooltips.itemSort = function(a, b) { return b.yLabel - a.yLabel; };
-  stack.config.options.tooltips.filter   = function(v) { return v.yLabel > 0; };
+  stack.config.options.tooltips.itemSort = (a, b) => { return b.yLabel - a.yLabel; };
+  stack.config.options.tooltips.filter   = (v) => { return v.yLabel > 0; };
 }
 
 function update_query() {
@@ -247,33 +248,34 @@ function section_one_update(duration = 0) {
   // add_average(xy_data.datasets); // this is useful for label
 
   if (app.category_resolution == "category") {
-    pie_one.config.options.title.text = app.category || app.category_resolution;
+    pie_one.config.options.title.text = "";
     pie_one.config.data = x_data;
 
     pie_two.config.options.title.text = app.category || app.category_resolution;
     pie_two.config.data = x_data;
 
     stack.config.options.title.text = app.category || app.category_resolution;
-    //sync_dataset_property(stack.config.data, xy_data, "data");
     stack.config.data = xy_data;
+    //sync_dataset_property(stack.config.data, xy_data, "data"); // keep hidden datasets hidden
 
-    line.config.options.title.text = app.category || app.category_resolution;
-    line.config.data = y_data;
+    //line.config.options.title.text = app.category || app.category_resolution;
+    //line.config.data = y_data;
+
+    pie_one.update();
+    pie_two.update();
+    stack.update();
   } else {
     // do not update the left pie for anything else
-
     pie_two.config.options.title.text = app.category || app.category_resolution;
     pie_two.config.data = x_data;
 
     stack.config.options.title.text = app.category || app.category_resolution;
     sync_dataset_property(stack.config.data, xy_data, "data");
     stack.config.data = xy_data;
-  }
 
-  pie_one.update();
-  pie_two.update();
-  line.update();
-  stack.update(duration);
+    pie_two.update();
+    stack.update();
+  }
 }
 
 function sync_dataset_property(destination, source)

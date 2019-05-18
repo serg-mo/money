@@ -39,8 +39,6 @@ const colors = {
 
 Chart.defaults.global.elements.arc.borderWidth       = 0;
 Chart.defaults.global.elements.arc.borderColor       = "rgba(0, 0, 0, 0)";
-//Chart.defaults.global.elements.line.borderWidth    = 0;
-//Chart.defaults.global.elements.line.borderColor    = "rgba(0, 0, 0, 0)";
 Chart.defaults.global.elements.point.borderWidth     = 0;
 Chart.defaults.global.elements.point.backgroundColor = "rgba(0, 0, 0, 0)";
 Chart.defaults.global.tooltips.titleFontFamily       = "Monaco"; // fixed space for columns
@@ -116,6 +114,13 @@ function make_line(destination, summary, label) {
     legend: {
       display: false,
     },
+    elements: {
+      line: {
+        tension: .2, // bezier curve
+        borderWidth: 0,
+        borderColor: "rgba(0, 0, 0, 0)",
+      }
+    },
   };
   //console.log("make_line()", summary, datasets, labels)
 
@@ -145,7 +150,9 @@ function make_stack(destination, summary, labels) {
     },
     elements: {
       line: {
-        tension: .2 // bezier curve
+        tension: .2, // bezier curve
+        borderWidth: 0,
+        borderColor: "rgba(0, 0, 0, 0)",
       }
     },
   };
@@ -245,7 +252,7 @@ function add_averages(datasets, index = 0) {
 
 
 function ticks_callback(v) {
-  return Math.round(v).toLocaleString();
+  return Math.round(v).toLocaleString(); // prepending "$" here changes font
 }
 
 function title_callback(items, data) {
