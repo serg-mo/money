@@ -19,14 +19,6 @@ window.onload = () => {
 }
 
 $(() => {
-  $("#file").on("change", file_handler);
-  // skip file upload if one is available
-  $.getJSON('transactions.json', (json) => {
-    console.log("here");
-    console.log(json);
-    //app.transactions = json.transactions.map(parse_transaction);
-  });
-
   app = new Vue({
     el: "#app",
     data: {
@@ -41,58 +33,50 @@ $(() => {
       time_after:           pick_cutoff("month"),
       time_before:          format_date(new Date),
 
-      transactions:         [],
       query:                "",
+      transactions:         [],
+      filtered:             [],
       data:                 [],
-      x:                    null,
-      y:                    null,
-      xy:                   null,
+      x:                    {},
+      y:                    {},
+      xy:                   {},
 
       charts:               [],
     },
     watch: {
-      category_resolution: (val) => { update_query(); },
-      category: (val)            => { update_query(); },
-      subcategory: (val)         => { update_query(); },
+      category_resolution: (val) => { section_one_wrapper(); },
+      category: (val)            => { section_one_wrapper(); },
+      subcategory: (val)         => { section_one_wrapper(); },
 
-      time_after: (val)          => { update_query(); },
-      time_before: (val)         => { update_query(); },
+      time_after: (val)          => { section_one_wrapper(); },
+      time_before: (val)         => { section_one_wrapper(); },
       time_resolution: (val)     => {
         app.time_after  = pick_cutoff(val);
         app.time_before = format_date(new Date());
 
-        update_query();
+        section_one_wrapper();
       },
-
-      query: (val) => {
-        app.data = jmespath.search(app.transactions, app.query);
-        [app.x, app.y, app.xy] = three_summaries(app.data, app.category_resolution, app.time_resolution);
-
-        console.log(app.transactions);
-        console.log(app.data);
-        console.log([app.x, app.y, app.xy]);
-
-        section_one_update(0);
-      },
-      transactions: (val) => {
-        transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
-        transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
-
-        app.transactions = transactions;
-
-        section_one_setup("#section_one");
-        update_query();
-        section_one_update(800); // initial call
+    },
+    /*
+    computed: {
+      getter () {
+        return 3
       }
     }
+    */
   })
+
+  $("#file").on("change", file_handler);
+
+  // skip file upload, if one is available
+  $.getJSON('transactions.json', (json) => {
+    set_transactions(json.transactions);
+  });
 
   $("body").on("keydown", key_handler);
 });
 
 function file_handler() {
-  $(".ui.modal").modal("hide");
-
   let reader = new FileReader();
   reader.onload = reader_onload;
   reader.readAsText(event.target.files[0]);
@@ -100,7 +84,19 @@ function file_handler() {
 
 function reader_onload(e) {
   let json = JSON.parse(e.target.result); // FileReader
-  app.transactions = json.transactions.map(parse_transaction);
+  set_transactions(json.transactions)
+}
+
+function set_transactions(transactions)
+{
+  app.transactions = transactions.map(parse_transaction);
+  app.transactions = jmespath.search(app.transactions, "[?category != 'Income']"); // spending only
+  app.transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
+
+  section_one_setup("#section_one");
+  section_one_wrapper();
+  section_one_update(800); // initial call
+  $(".ui.modal").modal("hide");
 }
 
 function parse_transaction(t)
@@ -124,14 +120,13 @@ function parse_transaction(t)
   monday.setDate(datetime.getDate() - datetime.getDay() + 1);
 
   let result = {
-    amount:       t["amounts"]["amount"] / 10000,
-    type:         t["bookkeeping_type"],
-    category:     t["categories"][0]["folder"],
-    subcategory:  t["categories"][0]["name"],
-    description:  t["description"], // raw description
     date:         format_date(datetime, "date"),
     week:         format_date(monday, "week"),
     month:        format_date(datetime, "month"),
+    amount:       t["amounts"]["amount"] / 10000,
+    category:     t["categories"][0]["folder"],
+    subcategory:  t["categories"][0]["name"],
+    description:  t["description"], // raw description
   };
 
   return result;
@@ -173,6 +168,7 @@ function section_one_setup() {
     }
   };
 
+  // TODO: hovering, i.e., scrolling, through the stack should animate pie_two as a cross-section of the stack
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
@@ -182,9 +178,7 @@ function section_one_setup() {
       app.subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
 
-      // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
       // TODO: synchronyze the two datasets in pie_two and stack
-
       // hide things other than the active one
       stack.options.title.text = `${app.category}: ${app.subcategory}`;
       stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.subcategory) });
@@ -221,36 +215,23 @@ function section_one_setup() {
   stack.options.tooltips.filter   = (v) => { return v.yLabel > 0; };
 }
 
-function update_query() {
-  // TODO: consider setting default columns here
-  let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
-  let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
+function section_one_wrapper() {
+  app.query = get_query();
+  app.data = jmespath.search(app.transactions, app.query); // this can't be a local variable
+  [app.x, app.y, app.xy] = three_summaries(app.data, app.category_resolution, app.time_resolution);
 
-  let filter = `date >= '${app.time_after}'`
-  if (app.time_before) {
-    filter += ` && date <= '${app.time_before}'`;
-  }
+  [filter, select] = get_query(true).split('.');
+  app.filtered = jmespath.search(app.transactions, filter);
 
-  // prefer subcategory over category
-  if (app.category_resolution == "subcategory" && app.category) {
-    filter += ` && category == '${app.category}'`
-
-    // subcategory just keeps track of which datasets to show
-    //if (app.subcategory) {
-    //  filter += ` && subcategory == '${app.subcategory}'`
-    //}
-  }
-
-  app.query = `[?${filter}].` + JSON.stringify(select);
+  section_one_update(0);
 }
 
 function section_one_update(duration = 0) {
   if (!app.data.length)
     return;
 
-  // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
-  // TODO: on month click, redo the weekday summary
-  // TODO: preserve labels if they are set
+  // TODO: same as below, except with subcategory filter, make this configurable
+
 
   // TODO: I can slice this function by chart
   let x_data  = make_data(app.x, "default");
@@ -273,11 +254,35 @@ function section_one_update(duration = 0) {
   pie_two.options.title.text = app.category || app.category_resolution;
   pie_two.data = x_data;
 
+  // TODO: just set the query here and have the chart figure out the rest
   //sync_dataset_property(stack.data, xy_data, "data"); // keep hidden datasets hidden
   stack.options.title.text = app.category + (app.subcategory ? `: ${app.subcategory}` : "");
   stack.data = xy_data;
 
   app.charts.forEach((c) => { c.update() });
+}
+
+function get_query(include_subcategory = false) {
+  // TODO: consider setting default columns here
+  let fields = [app.category_resolution, app.time_resolution, "amount"]; // category first, amount last
+  let select = fields.reduce((carry, value) => { carry[value] = value; return carry; }, {}); // array -> object
+
+  let filter = `date >= '${app.time_after}'`
+  if (app.time_before) {
+    filter += ` && date <= '${app.time_before}'`;
+  }
+
+  // prefer subcategory over category
+  if (app.category_resolution == "subcategory" && app.category) {
+    filter += ` && category == '${app.category}'`
+
+    // subcategory just keeps track of which datasets to show
+    if (include_subcategory && app.subcategory) {
+      filter += ` && subcategory == '${app.subcategory}'`
+    }
+  }
+
+  return `[?${filter}].` + JSON.stringify(select);
 }
 
 function sync_dataset_property(destination, source)

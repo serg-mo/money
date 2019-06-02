@@ -40,17 +40,17 @@
                     <div id="line" class="chart line"></div>
                 </div>
             </div>
-            <div class="row" v-if="data.length > 0">
+            <div class="row" v-if="filtered.length > 0">
                 <div class="column">
-                    <div>{{ data.length }}</div>
-                    <table id="data" class="ui collapsing striped small single line celled table">
+                    <div>{{ filtered.length }}</div>
+                    <table id="transactions" class="ui collapsing striped small single line celled table">
                       <thead>
-                        <th v-for="(value, name) in data[0]" v-if="data.length > 0" title="{{ name }}">
+                        <th v-for="(value, name) in filtered[0]" title="{{ name }}">
                           {{ name }}
                         </th>
                       </thead>
                       <tbody>
-                        <tr v-for="row in data" v-if="data.length > 0">
+                        <tr v-for="row in filtered">
                           <td v-for="value in row" title="{{ value }}">
                             {{ value }}
                           </td>

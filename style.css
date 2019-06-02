@@ -43,24 +43,18 @@ div.bar {
 }
 
 
-#data {
+#transactions {
   color: #333333;
   margin: 10px auto;
 }
 
-#data th {
+#transactions th {
   text-transform: capitalize;
   font-size: 12px;
 }
 
-#data td {
-  padding: 2px 5px;
-  text-align: center;
+#transactions td {
   font-size: 11px;
-}
-
-#data td:first-child {
-  text-align: left;
 }
 
 
