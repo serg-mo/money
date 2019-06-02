@@ -164,22 +164,22 @@ function section_one_setup() {
   // this is because clicking nothing syncs hidden datasets and shows them all
   pie_two.options.onClick = (event, items) => {
     if (items.length) {
-      let subcategory = items[0]._chart.data.labels[items[0]._index];
+      app.subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
-      //app.subcategory         = subcategory;
 
       // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
       // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
       // TODO: synchronyze the two datasets in pie_two and stack
 
-      stack.options.title.text = pie_two.options.title.text + (app.category ? `: ${subcategory}` : "");
-
       // hide things other than the active one
-      stack.data.datasets.forEach((v) => { v.hidden = (v.label != subcategory) });
+      stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.subcategory) });
       stack.update();
 
       // TODO: sync_dataset_property(stack.data, pie_two.data, 'hidden');
     } else {
+      stack.data.datasets.forEach((v) => { v.hidden = false; });
+      stack.update();
+
       // TODO: clicking a dataset label gets me here, but updating anything break it
       // TODO: sync datasets[].hidden, pie_two.options.legend.onClick
 
@@ -227,9 +227,11 @@ function update_query() {
   // prefer subcategory over category
   if (app.category_resolution == "subcategory" && app.category) {
     filter += ` && category == '${app.category}'`
-    if (app.subcategory) {
-      filter += ` && subcategory == '${app.subcategory}'`
-    }
+
+    // subcategory just keeps track of which datasets to show
+    //if (app.subcategory) {
+    //  filter += ` && subcategory == '${app.subcategory}'`
+    //}
   }
 
   app.query = `[?${filter}].` + JSON.stringify(select);
@@ -275,7 +277,7 @@ function section_one_update(duration = 0) {
     pie_two.data = x_data;
 
     stack.options.title.text = app.category || app.category_resolution;
-    sync_dataset_property(stack.data, xy_data, "data");
+    //sync_dataset_property(stack.data, xy_data, "data"); // breaks labels
     stack.data = xy_data;
 
     pie_two.update();

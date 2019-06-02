@@ -43,25 +43,23 @@ div.bar {
 }
 
 
-table {
-  color: #333;
+#data {
+  color: #333333;
   margin: 10px auto;
 }
 
-th {
-  background-color: #f0f0f0;
-  padding: 2px 5px;
+#data th {
   text-transform: capitalize;
   font-size: 12px;
 }
 
-td {
+#data td {
   padding: 2px 5px;
   text-align: center;
   font-size: 11px;
 }
 
-td:first-child {
+#data td:first-child {
   text-align: left;
 }
 

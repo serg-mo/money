@@ -43,7 +43,7 @@
             <div class="row" v-if="data.length > 0">
                 <div class="column">
                     <div>{{ data.length }}</div>
-                    <table class="ui striped fixed single line celled table">
+                    <table id="data" class="ui collapsing striped small single line celled table">
                       <thead>
                         <th v-for="(value, name) in data[0]" v-if="data.length > 0" title="{{ name }}">
                           {{ name }}
