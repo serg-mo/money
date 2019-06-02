@@ -37,7 +37,7 @@ $(() => {
 
       transactions:         [],
       query:                "",
-      data:                 null,
+      data:                 [],
       x:                    null,
       y:                    null,
       xy:                   null,
@@ -142,12 +142,12 @@ function section_one_setup() {
   // globally visible vars
   pie_one = make_pie(pie_one_canvas);
   pie_two = make_pie(pie_two_canvas);
-  line    = make_line(line_canvas);
+  //line    = make_line(line_canvas);
   stack   = make_stack(stack_canvas);
 
   // TODO: clicking a slice should add a dataset to the stack
-  pie_one.config.options.events = ["click", "hover"];
-  pie_one.config.options.onClick = (event, items) => {
+  pie_one.options.events = ["click", "hover"];
+  pie_one.options.onClick = (event, items) => {
     if (items.length) {
       app.category_resolution = "subcategory";
       app.category            = items[0]._chart.data.labels[items[0]._index];
@@ -162,7 +162,7 @@ function section_one_setup() {
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
-  pie_two.config.options.onClick = (event, items) => {
+  pie_two.options.onClick = (event, items) => {
     if (items.length) {
       let subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
@@ -172,18 +172,23 @@ function section_one_setup() {
       // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
       // TODO: synchronyze the two datasets in pie_two and stack
 
-      stack.options.title.text = pie_two.config.options.title.text + (app.category ? `: ${subcategory}` : "");
+      stack.options.title.text = pie_two.options.title.text + (app.category ? `: ${subcategory}` : "");
 
       // hide things other than the active one
       stack.data.datasets.forEach((v) => { v.hidden = (v.label != subcategory) });
       stack.update();
 
-      // TODO: sync_dataset_property(stack.config.data, pie_two.config.data, 'hidden');
+      // TODO: sync_dataset_property(stack.data, pie_two.data, 'hidden');
     } else {
-      // TODO: unhide all datasets here
+      // TODO: clicking a dataset label gets me here, but updating anything break it
+      // TODO: sync datasets[].hidden, pie_two.options.legend.onClick
+
+      //pie_two.data.datasets.forEach((v) => { v.hidden = false; });
+      //stack.data.datasets.forEach((v) => { v.hidden = false; });
+
+      //stack.update();
     }
   }
-  // TODO: sync datasets[].hidden, pie_two.config.options.legend.onClick
 
   /*
   (event, items) => {
@@ -193,20 +198,20 @@ function section_one_setup() {
     //stack.update();
   }
   */
-  pie_two.config.options.tooltips.callbacks.footer = footer_callback_avg;
+  pie_two.options.tooltips.callbacks.footer = footer_callback_avg;
 
 
-  stack.config.options.onClick = (event, items) => {
+  stack.options.onClick = (event, items) => {
     if (items.length) {
       pick_time_slice(items[0]._index);
     }
     // TODO: this does not work for some reason
-    //setTimeout(() => sync_dataset_property(pie_two.config.data, stack.config.data, 'hidden')); // async sync
+    //setTimeout(() => sync_dataset_property(pie_two.data, stack.data, 'hidden')); // async sync
   }
   // TODO: onHover is more picky than tooltips.callbacks.title
 
-  stack.config.options.tooltips.itemSort = (a, b) => { return b.yLabel - a.yLabel; };
-  stack.config.options.tooltips.filter   = (v) => { return v.yLabel > 0; };
+  stack.options.tooltips.itemSort = (a, b) => { return b.yLabel - a.yLabel; };
+  stack.options.tooltips.filter   = (v) => { return v.yLabel > 0; };
 }
 
 function update_query() {
@@ -232,7 +237,7 @@ function update_query() {
 }
 
 function section_one_update(duration = 0) {
-  if (app.data == null)
+  if (!app.data.length)
     return;
 
   // TODO: stack tells you where in time you are, which is a cross section of pie_two pipeline
@@ -248,30 +253,30 @@ function section_one_update(duration = 0) {
   // add_average(xy_data.datasets); // this is useful for label
 
   if (app.category_resolution == "category") {
-    pie_one.config.options.title.text = "";
-    pie_one.config.data = x_data;
+    pie_one.options.title.text = "";
+    pie_one.data = x_data;
 
-    pie_two.config.options.title.text = app.category || app.category_resolution;
-    pie_two.config.data = x_data;
+    pie_two.options.title.text = app.category || app.category_resolution;
+    pie_two.data = x_data;
 
-    stack.config.options.title.text = app.category || app.category_resolution;
-    stack.config.data = xy_data;
-    //sync_dataset_property(stack.config.data, xy_data, "data"); // keep hidden datasets hidden
+    stack.options.title.text = app.category || app.category_resolution;
+    stack.data = xy_data;
+    //sync_dataset_property(stack.data, xy_data, "data"); // keep hidden datasets hidden
 
-    //line.config.options.title.text = app.category || app.category_resolution;
-    //line.config.data = y_data;
+    //line.options.title.text = app.category || app.category_resolution;
+    //line.data = y_data;
 
     pie_one.update();
     pie_two.update();
     stack.update();
   } else {
     // do not update the left pie for anything else
-    pie_two.config.options.title.text = app.category || app.category_resolution;
-    pie_two.config.data = x_data;
+    pie_two.options.title.text = app.category || app.category_resolution;
+    pie_two.data = x_data;
 
-    stack.config.options.title.text = app.category || app.category_resolution;
-    sync_dataset_property(stack.config.data, xy_data, "data");
-    stack.config.data = xy_data;
+    stack.options.title.text = app.category || app.category_resolution;
+    sync_dataset_property(stack.data, xy_data, "data");
+    stack.data = xy_data;
 
     pie_two.update();
     stack.update();
@@ -363,14 +368,14 @@ function pick_time_slice(index) {
 
 
   // reset datasets if the only existing dataset has a label that is a category
-  //if (pie_one.config.data.labels.includes(pie_two.config.data.datasets[0].label)) {
-  //if (!stack.config.data.labels.includes(pie_two.config.data.datasets[0].label) || pie_two.config.data.datasets.length > 1) {
+  //if (pie_one.data.labels.includes(pie_two.data.datasets[0].label)) {
+  //if (!stack.data.labels.includes(pie_two.data.datasets[0].label) || pie_two.data.datasets.length > 1) {
   if (true) {
-    pie_two.config.data.labels = labels;
+    pie_two.data.labels = labels;
 
     // add to the top of the stack and chop it down
-    pie_two.config.data.datasets.unshift({label, data, backgroundColor});
-    pie_two.config.data.datasets = pie_two.config.data.datasets.slice(0, 2); // [start, stop index)
+    pie_two.data.datasets.unshift({label, data, backgroundColor});
+    pie_two.data.datasets = pie_two.data.datasets.slice(0, 2); // [start, stop index)
 
     pie_two.update({
       "duration": 8000
@@ -417,7 +422,7 @@ function make_comparisons(datetime) {
   //let query = `[?${app.time_resolution} == '${label}'].{${app.time_resolution}: ${app.time_resolution}, category: category, subcategory: subcategory, amount: amount}`;
   //make_table($("#table"), filter_transactions(query));
 
-  // TODO  sync_dataset_property(pie_two.config.data, stack.config.data, 'hidden');
+  // TODO  sync_dataset_property(pie_two.data, stack.data, 'hidden');
   // TODO: highlight_row_in_legend(dataset_index);
 
   // TODO: I have the time_resolution and the date range, compare that date range to others like it
@@ -524,12 +529,12 @@ function make_comparisons(datetime) {
 
 
   // TODO: bring back time_after update changing the stack width
-  // pie_one.onClick = () => { sync_dataset_property(stack.config.data, pie_one.config.data, 'hidden'); };
+  // pie_one.onClick = () => { sync_dataset_property(stack.data, pie_one.data, 'hidden'); };
 
-  // bar.config.options.title.text = category;
-  // bar.config.data = make_data(y_summary, category);
-  // bar.config.data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: this is redundant
-  // add_average(bar.config.data.datasets);
+  // bar.options.title.text = category;
+  // bar.data = make_data(y_summary, category);
+  // bar.data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: this is redundant
+  // add_average(bar.data.datasets);
   // bar.update();
 
   console.table(comparisons);

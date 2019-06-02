@@ -1,40 +1,36 @@
 // http://paletton.com
 // https://colorhexa.com
 
-// TODO: make the shade proportional to the value, darker - bigger
+// TODO: make alpha proportional to the value, darker - bigger
 const colors = {
-  "Home": "rgba(16,130,174)",
-    "Rent": "rgba(10,78,104)",
-    "Furnishings": "rgba(14,113,151)",
-    "Home Supplies": "rgba(18,147,197)",
-    "Repairs & Improvement": "rgba(32,178,234)",
-  "Financial": "rgb(231,192,40)",
-    "Credit Card Payment": "rgb(198,162,22)",
-    "Money Transfers": "rgb(234,199,63)",
-  "Food & Drink": "rgba(145,174,85)",
-    "Groceries": "rgba(103,124,59)",
-    "Restaurants": "rgba(117,141,67)",
-    "Alcohol & Bars": "rgba(131,158,75)",
-    "Coffee & Tea": "rgba(145,174,85)",
-    "Fast Food": "rgba(156,182,102)",
-  "Transportation": "",
-    "Gas": "#103C54",
-    "Parking & Tolls": "#1B7997",
-    "Taxis": "#EF6C2E",
-    "Public Transit": "#A2B770",
-    "Auto Services": "#BE2F24",
-  "Uncategorized": "",
-    "Cash": "#103C54",
-    "Other Shopping": "#1B7997",
-  "Health & Medical": "",
-  "Personal": "",
-  "Culture": "",
-  "Gifts & Donations": "",
-  "Sports & Fitness": "",
-  "Education": "",
-  "Fees": "",
-
-  "default": "#CCCCCC"
+  "Home": "rgba(14,130,174,1)",
+    "Rent": "rgba(14,130,174,.9)",
+    "Furnishings": "rgba(14,130,174,.8)",
+    "Home Supplies": "rgba(14,130,174,.6)",
+    "Repairs & Improvement": "rgba(14,130,174,.4)",
+  "Financial": "rgba(145,174,85,1)",
+    "Credit Card Payment": "rgba(145,174,85,.8)",
+    "Money Transfers": "rgba(145,174,85,.6)",
+  "Food & Drink": "rgba(11,45,68,1)",
+    "Groceries": "rgba(11,45,68,.8)",
+    "Restaurants": "rgba(11,45,68,.6)",
+    "Alcohol & Bars": "rgba(11,45,68,.4)",
+    "Coffee & Tea": "rgba(11,45,68,.2)",
+    "Fast Food": "rgba(11,45,68,.1)",
+  "Transportation": "rgba(232,156,30,1)",
+    "Gas": "rgba(232,156,30,.8)",
+    "Auto Services": "rgba(232,156,30,.6)",
+    "Parking & Tolls": "rgba(232,156,30,.4)",
+    "Taxis": "rgba(232,156,30,.2)",
+    "Public Transit": "rgba(232,156,30,.1)",
+  "Personal": "rgba(74,153,128,1)",
+    "Clothing": "rgba(74,153,128,.8)",
+    "Laundry": "rgba(74,153,128,.6)",
+  "Health & Medical": "rgba(13,100,137,1)",
+  "Sports & Fitness": "rgba(231,192,40,1)",
+  "Fees": "rgba(179,26,16,1)",
+ 
+  "default": "rgba(211,211,211,1)"
 };
 
 Chart.defaults.global.elements.arc.borderWidth       = 0;
@@ -66,7 +62,7 @@ function make_bar(destination, summary, label) {
   };
   //console.log("make_bar()", summary, datasets, labels)
 
-  let data = make_data(summary, label); // TODO: pass same color for every bar here
+  let data = make_data_single(summary, label); // TODO: pass same color for every bar here
   // data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: colors[0] 
   add_average(data.datasets);
 
@@ -94,7 +90,7 @@ function make_pie(destination, summary, label) {
 
   let data = null;
   if (summary && label) {
-    data = make_data(summary, label);
+    data = make_data_single(summary, label);
   }
 
   return draw(destination, "pie", data, options);
@@ -124,7 +120,7 @@ function make_line(destination, summary, label) {
   };
   //console.log("make_line()", summary, datasets, labels)
 
-  return draw(destination, "line", make_data(summary, label), options);
+  return draw(destination, "line", make_data_single(summary, label), options);
 }
 
 function make_stack(destination, summary, labels) {
@@ -158,7 +154,7 @@ function make_stack(destination, summary, labels) {
   };
   //console.log("make_stack()", summary, datasets, labels)
 
-  let data = make_data(summary, labels); // TODO: pass same color for every bar here
+  let data = make_data_multiple(summary, labels); // TODO: pass primary color
   // TODO: consider adding average datasets here
 
   return draw(destination, "line", data, options);
@@ -330,39 +326,48 @@ function footer_callback_avg(items, data) {
 // TODO: pass colors here
 function make_data(summary, labels) {
   if (typeof labels == "string") {
-    let length  = Object.values(summary).length;
-    let keys    = Object.keys(summary);
-    let data    = Object.values(summary);
-    let palette = keys.map((key) => colors[key] || colors['default']);
-
-    return {
-      labels: keys,
-      datasets: [{
-        label: labels, // name of the dataset
-        data: data,
-        backgroundColor: palette,
-        fill: false
-      }]
-    };
+    return make_data_single(summary, labels);
   } else {
-    let datasets = [];
-    let i = 0;
-
-    // TODO: list datasets by size or alphabetically
-    for (dimension in summary) {
-      datasets.push({
-        "label": dimension,
-        "data": labels.map((label) => summary[dimension][label] || 0), // fixed cardinality
-        "backgroundColor": colors[dimension] || colors['default']
-      });
-    }
-
-    return {
-      labels,
-      datasets
-    };
+    return make_data_multiple(summary, labels);
   }
 }
+
+function make_data_single(summary, labels) {
+  let length  = Object.values(summary).length;
+  let keys    = Object.keys(summary);
+  let data    = Object.values(summary);
+  let palette = keys.map((key) => colors[key] || colors['default']);
+
+  return {
+    labels: keys,
+    datasets: [{
+      label: labels, // name of the dataset
+      data: data,
+      backgroundColor: palette,
+      fill: false
+    }]
+  };
+}
+
+function make_data_multiple(summary, labels) {
+  let datasets = [];
+  let i = 0;
+
+  // TODO: list datasets by size or alphabetically
+  for (dimension in summary) {
+    datasets.push({
+      "label": dimension,
+      "data": labels.map((label) => summary[dimension][label] || 0), // fixed cardinality
+      "backgroundColor": colors[dimension] || colors['default']
+    });
+  }
+
+  return {
+    labels,
+    datasets
+  };
+}
+
 
 function sort_summary(summary, init = null) {
   arr = Object.entries(summary);
