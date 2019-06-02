@@ -30,7 +30,7 @@ const colors = {
   "Sports & Fitness": "rgba(231,192,40,1)",
   "Fees": "rgba(179,26,16,1)",
  
-  "default": "rgba(211,211,211,1)"
+  "default": "rgba(11,45,68,1)"
 };
 
 Chart.defaults.global.elements.arc.borderWidth       = 0;

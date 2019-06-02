@@ -20,6 +20,12 @@ window.onload = () => {
 
 $(() => {
   $("#file").on("change", file_handler);
+  // skip file upload if one is available
+  $.getJSON('transactions.json', (json) => {
+    console.log("here");
+    console.log(json);
+    //app.transactions = json.transactions.map(parse_transaction);
+  });
 
   app = new Vue({
     el: "#app",
@@ -41,6 +47,8 @@ $(() => {
       x:                    null,
       y:                    null,
       xy:                   null,
+
+      charts:               [],
     },
     watch: {
       category_resolution: (val) => { update_query(); },
@@ -59,9 +67,22 @@ $(() => {
       query: (val) => {
         app.data = jmespath.search(app.transactions, app.query);
         [app.x, app.y, app.xy] = three_summaries(app.data, app.category_resolution, app.time_resolution);
-        //console.log([app.x, app.y, app.xy]);
+
+        console.log(app.transactions);
+        console.log(app.data);
+        console.log([app.x, app.y, app.xy]);
 
         section_one_update(0);
+      },
+      transactions: (val) => {
+        transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
+        transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
+
+        app.transactions = transactions;
+
+        section_one_setup("#section_one");
+        update_query();
+        section_one_update(800); // initial call
       }
     }
   })
@@ -79,16 +100,7 @@ function file_handler() {
 
 function reader_onload(e) {
   let json = JSON.parse(e.target.result); // FileReader
-  let transactions = json.transactions.map(parse_transaction);
-
-  transactions = jmespath.search(transactions, "[?category != 'Income']"); // spending only
-  transactions.sort((a, b) => { return (parse_date(a["date"]) - parse_date(b["date"])); }); // chronological order
-
-  app.transactions = transactions;
-
-  section_one_setup("#section_one");
-  update_query();
-  section_one_update(800); // initial call
+  app.transactions = json.transactions.map(parse_transaction);
 }
 
 function parse_transaction(t)
@@ -105,8 +117,8 @@ function parse_transaction(t)
   // weekday, // datetime->format("D")
 
   // source: "UTC", destination: "America/Los_Angeles"
-  let str      = t["times"]["when_recorded_local"].slice(0, 19).replace(" ", "T"); // yyyy-mm-ddThh:mm:ss
-  let datetime = new Date(str); 
+  let str      = t["times"]["when_recorded_local"].slice(0, 10).replace(" ", "T"); // yyyy-mm-dd
+  let datetime = new Date(t["times"]["when_recorded_local"]);
 
   let monday   = new Date(datetime);
   monday.setDate(datetime.getDate() - datetime.getDay() + 1);
@@ -145,6 +157,8 @@ function section_one_setup() {
   //line    = make_line(line_canvas);
   stack   = make_stack(stack_canvas);
 
+  app.charts = [pie_one, pie_two, stack];
+
   // TODO: clicking a slice should add a dataset to the stack
   pie_one.options.events = ["click", "hover"];
   pie_one.options.onClick = (event, items) => {
@@ -162,16 +176,17 @@ function section_one_setup() {
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
+  pie_two.options.events = ["click", "hover"];
   pie_two.options.onClick = (event, items) => {
     if (items.length) {
       app.subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
 
-      // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
       // TODO: hovering, i.e., scrolling, through the stack will animate pie_two as a cross-section of the stack
       // TODO: synchronyze the two datasets in pie_two and stack
 
       // hide things other than the active one
+      stack.options.title.text = `${app.category}: ${app.subcategory}`;
       stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.subcategory) });
       stack.update();
 
@@ -189,18 +204,10 @@ function section_one_setup() {
       //stack.update();
     }
   }
-
-  /*
-  (event, items) => {
-    Chart.defaults.global.legend.onClick(event, items);
-
-    //stack.data.datasets.forEach((v, i) => { v.hidden = pie_two.data.datasets[i].hidden; });
-    //stack.update();
-  }
-  */
   pie_two.options.tooltips.callbacks.footer = footer_callback_avg;
 
-
+  // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
+  stack.options.events = ["click", "hover"];
   stack.options.onClick = (event, items) => {
     if (items.length) {
       pick_time_slice(items[0]._index);
@@ -235,7 +242,6 @@ function update_query() {
   }
 
   app.query = `[?${filter}].` + JSON.stringify(select);
-  console.log(app.query);
 }
 
 function section_one_update(duration = 0) {
@@ -253,36 +259,25 @@ function section_one_update(duration = 0) {
 
   // TODO: consider making data as a set of points
   // add_average(xy_data.datasets); // this is useful for label
+  //console.log(xy_data);
+
 
   if (app.category_resolution == "category") {
     pie_one.options.title.text = "";
     pie_one.data = x_data;
 
-    pie_two.options.title.text = app.category || app.category_resolution;
-    pie_two.data = x_data;
-
-    stack.options.title.text = app.category || app.category_resolution;
-    stack.data = xy_data;
-    //sync_dataset_property(stack.data, xy_data, "data"); // keep hidden datasets hidden
-
     //line.options.title.text = app.category || app.category_resolution;
     //line.data = y_data;
-
-    pie_one.update();
-    pie_two.update();
-    stack.update();
-  } else {
-    // do not update the left pie for anything else
-    pie_two.options.title.text = app.category || app.category_resolution;
-    pie_two.data = x_data;
-
-    stack.options.title.text = app.category || app.category_resolution;
-    //sync_dataset_property(stack.data, xy_data, "data"); // breaks labels
-    stack.data = xy_data;
-
-    pie_two.update();
-    stack.update();
   }
+
+  pie_two.options.title.text = app.category || app.category_resolution;
+  pie_two.data = x_data;
+
+  //sync_dataset_property(stack.data, xy_data, "data"); // keep hidden datasets hidden
+  stack.options.title.text = app.category + (app.subcategory ? `: ${app.subcategory}` : "");
+  stack.data = xy_data;
+
+  app.charts.forEach((c) => { c.update() });
 }
 
 function sync_dataset_property(destination, source)
