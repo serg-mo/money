@@ -188,9 +188,12 @@ function section_one_setup() {
       app.subcategory = null;
     }
   }
-  // TODO: sync datasets[].hidden, pie_two.options.legend.onClick
-  pie_two.options.legend.onClick = (event, items) => {
-    console.log("here");
+
+  let original = pie_two.options.legend.onClick;
+  pie_two.options.legend.onClick = (event, item) => {
+    original.apply(pie_two, [event, item]);
+    stack.data.datasets[item.index].hidden = !item.hidden;
+    stack.update();
   }
 
   pie_two.options.tooltips.callbacks.footer = footer_callback_avg;
@@ -375,7 +378,7 @@ function pick_time_slice(index) {
     pie_two.data.datasets = pie_two.data.datasets.slice(0, 2); // [start, stop index)
 
     pie_two.update({
-      "duration": 8000
+      "duration": 1000
     });
   }
 }
