@@ -230,7 +230,6 @@ function section_one_update(duration = 0) {
 
   // TODO: same as below, except with subcategory filter, make this configurable
 
-
   // TODO: I can slice this function by chart
   let x_data  = make_data(app.x, "default");
   let y_data  = make_data(app.y, "default");
@@ -239,7 +238,6 @@ function section_one_update(duration = 0) {
   // TODO: consider making data as a set of points
   // add_average(xy_data.datasets); // this is useful for label
   //console.log(xy_data);
-
 
   if (app.category_resolution == "category") {
     pie_one.options.title.text = "";
@@ -257,7 +255,30 @@ function section_one_update(duration = 0) {
   stack.options.title.text = app.category + (app.subcategory ? `: ${app.subcategory}` : "");
   stack.data = xy_data;
 
+  if (app.category_resolution == "subcategory" && app.category) {
+    let base_color = colors[app.category] || colors['default'];
+    let rgba       = base_color.match(/\d+/g);
+    let palette    = get_palette(base_color, stack.data.datasets.length)
+
+    pie_two.data.datasets[0].backgroundColor = palette;
+
+    stack.data.datasets.forEach((dataset, index) => {
+      dataset.backgroundColor = palette[index];
+    });
+  }
+
   app.charts.forEach((c) => { c.update() });
+}
+
+function get_palette(base_color, length) {
+  let rgba    = base_color.match(/\d+/g);
+  let palette = [];
+
+  for (let i = 0; i < length; i++) {
+    rgba[rgba.length - 1] = Math.round(100 * (length - i) / length) / 100; // alpha 1 .. 0
+    palette.push(`rgba(${rgba.join(',')})`);
+  }
+  return palette;
 }
 
 function get_query(include_subcategory = false) {

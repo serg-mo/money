@@ -1,37 +1,24 @@
 // http://paletton.com
 // https://colorhexa.com
 
-// TODO: make alpha proportional to the value, darker - bigger
 const colors = {
-  "Home": "rgba(14,130,174,1)",
-    "Rent": "rgba(14,130,174,.9)",
-    "Furnishings": "rgba(14,130,174,.8)",
-    "Home Supplies": "rgba(14,130,174,.6)",
-    "Repairs & Improvement": "rgba(14,130,174,.4)",
-  "Financial": "rgba(145,174,85,1)",
-    "Credit Card Payment": "rgba(145,174,85,.8)",
-    "Money Transfers": "rgba(145,174,85,.6)",
-  "Food & Drink": "rgba(11,45,68,1)",
-    "Groceries": "rgba(11,45,68,.8)",
-    "Restaurants": "rgba(11,45,68,.6)",
-    "Alcohol & Bars": "rgba(11,45,68,.4)",
-    "Coffee & Tea": "rgba(11,45,68,.2)",
-    "Fast Food": "rgba(11,45,68,.1)",
-  "Transportation": "rgba(232,156,30,1)",
-    "Gas": "rgba(232,156,30,.8)",
-    "Auto Services": "rgba(232,156,30,.6)",
-    "Parking & Tolls": "rgba(232,156,30,.4)",
-    "Taxis": "rgba(232,156,30,.2)",
-    "Public Transit": "rgba(232,156,30,.1)",
-  "Personal": "rgba(74,153,128,1)",
-    "Clothing": "rgba(74,153,128,.8)",
-    "Laundry": "rgba(74,153,128,.6)",
-  "Health & Medical": "rgba(13,100,137,1)",
-  "Sports & Fitness": "rgba(231,192,40,1)",
-  "Fees": "rgba(179,26,16,1)",
+  "Financial": "rgba(23,130,171,1)",
+  "Home": "rgba(19,100,134,1)",
+  "Food & Drink": "rgba(15,72,101,1)",
+  "Transportation": "rgba(13,45,67,1)",
+  "Health & Medical": "rgba(176,27,22,1)",
+  "Uncategorized": "rgba(206,56,24,1)",
+  "Personal": "rgba(235,85,25,1)",
+  "Culture": "rgba(233,120,34,1)",
+  "Gifts & Donations": "rgba(230,154,43,1)",
+  "Sports & Fitness": "rgba(229,191,53,1)",
+  "Education": "rgba(145,172,89,1)",
+  "Fees": "rgba(77,152,128,1)",
  
   "default": "rgba(11,45,68,1)"
 };
+
+
 
 Chart.defaults.global.elements.arc.borderWidth       = 0;
 Chart.defaults.global.elements.arc.borderColor       = "rgba(0, 0, 0, 0)";
@@ -332,18 +319,18 @@ function make_data(summary, labels) {
   }
 }
 
-function make_data_single(summary, labels) {
-  let length  = Object.values(summary).length;
-  let keys    = Object.keys(summary);
-  let data    = Object.values(summary);
-  let palette = keys.map((key) => colors[key] || colors['default']);
+function make_data_single(summary, label) {
+  let length          = Object.values(summary).length;
+  let keys            = Object.keys(summary);
+  let data            = Object.values(summary);
+  let backgroundColor = keys.map((key) => colors[key] || colors['default']);
 
   return {
     labels: keys,
     datasets: [{
-      label: labels, // name of the dataset
-      data: data,
-      backgroundColor: palette,
+      label, // name of the dataset
+      data,
+      backgroundColor,
       fill: false
     }]
   };
@@ -357,7 +344,7 @@ function make_data_multiple(summary, labels) {
   for (dimension in summary) {
     datasets.push({
       "label": dimension,
-      "data": labels.map((label) => summary[dimension][label] || 0), // fixed cardinality
+      "data": labels.map((label) => summary[dimension][label] || 0),
       "backgroundColor": colors[dimension] || colors['default']
     });
   }
