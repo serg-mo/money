@@ -46,7 +46,14 @@ $(() => {
     watch: {
       category_resolution: (val) => { section_one_wrapper(); },
       category: (val)            => { section_one_wrapper(); },
-      subcategory: (val)         => { section_one_wrapper(); },
+      subcategory: (val)         => { 
+        stack.options.title.text = `${app.category}: ${app.subcategory}`;
+        stack.data.datasets.forEach((dataset, i) => {
+          // if available, hide things other than the active one, show all by default
+          dataset.hidden = app.subcategory ? (dataset.label != app.subcategory) : false;
+        });
+        stack.update();
+      },
 
       time_after: (val)          => { section_one_wrapper(); },
       time_before: (val)         => { section_one_wrapper(); },
@@ -175,29 +182,17 @@ function section_one_setup() {
   pie_two.options.events = ["click", "hover"];
   pie_two.options.onClick = (event, items) => {
     if (items.length) {
-      app.subcategory = items[0]._chart.data.labels[items[0]._index];
       //app.category_resolution = "subcategory";
-
-      // TODO: synchronyze the two datasets in pie_two and stack
-      // hide things other than the active one
-      stack.options.title.text = `${app.category}: ${app.subcategory}`;
-      stack.data.datasets.forEach((v) => { v.hidden = (v.label != app.subcategory) });
-      stack.update();
-
-      // TODO: sync_dataset_property(stack.data, pie_two.data, 'hidden');
+      app.subcategory = items[0]._chart.data.labels[items[0]._index];
     } else {
-      stack.data.datasets.forEach((v) => { v.hidden = false; });
-      stack.update();
-
-      // TODO: clicking a dataset label gets me here, but updating anything break it
-      // TODO: sync datasets[].hidden, pie_two.options.legend.onClick
-
-      //pie_two.data.datasets.forEach((v) => { v.hidden = false; });
-      //stack.data.datasets.forEach((v) => { v.hidden = false; });
-
-      //stack.update();
+      app.subcategory = null;
     }
   }
+  // TODO: sync datasets[].hidden, pie_two.options.legend.onClick
+  pie_two.options.legend.onClick = (event, items) => {
+    console.log("here");
+  }
+
   pie_two.options.tooltips.callbacks.footer = footer_callback_avg;
 
   // TODO: clicking or hovering over the stack should *slowly* update the charti, i.e., animate the relative change
