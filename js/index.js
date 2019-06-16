@@ -77,7 +77,10 @@ $(() => {
 
   // skip file upload, if one is available
   $.getJSON('transactions.json', (json) => {
+    console.log("Data on the server")
     set_transactions(json.transactions);
+  }, (error) => {
+    console.log("No data on the server, wait for drag and drop")
   });
 
   $("body").on("keydown", key_handler);
@@ -172,10 +175,28 @@ function section_one_setup() {
       app.category_resolution = "category";
       app.category            = null;
       app.subcategory         = null;
+
+      // this fires when I click on the labels in the legend
     }
   };
 
+  let existing_handler = pie_one.options.legend.onClick;
+  pie_one.options.legend.onClick = (event, item) => {
+    if (typeof item == 'object') {
+      let {index, hidden} = item; // text is the label
+      
+      stack.data.datasets[index].hidden = !hidden; // it's about to be flipped
+      stack.update();
+    } else {
+      console.log("Items are empty on pie_one lengend click")
+    }
+
+    existing_handler.call(pie_one, event, item)
+  }
+
+
   // TODO: hovering, i.e., scrolling, through the stack should animate pie_two as a cross-section of the stack
+  // hover fires too frequently when I'm over a slice, consider keeping the previous value
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
@@ -188,6 +209,7 @@ function section_one_setup() {
       app.subcategory = null;
     }
   }
+
 
   let original = pie_two.options.legend.onClick;
   pie_two.options.legend.onClick = (event, item) => {

@@ -1,21 +1,22 @@
 // http://paletton.com
 // https://colorhexa.com
 
+
 const colors = {
-  "Financial": "rgba(23,130,171,1)",
-  "Home": "rgba(19,100,134,1)",
-  "Food & Drink": "rgba(15,72,101,1)",
-  "Transportation": "rgba(13,45,67,1)",
-  "Health & Medical": "rgba(176,27,22,1)",
+  "Financial": "rgba(13,45,67,1)",
+  "Home": "rgba(15,72,101,1)",
+  "Food & Drink": "rgba(19,100,134,1)",
+  "Transportation": "rgba(23,130,171,1)",
+  "Health & Medical": "rgba(235,85,25,1)",
   "Uncategorized": "rgba(206,56,24,1)",
-  "Personal": "rgba(235,85,25,1)",
+  "Personal": "rgba(230,154,43,1)",
   "Culture": "rgba(233,120,34,1)",
-  "Gifts & Donations": "rgba(230,154,43,1)",
-  "Sports & Fitness": "rgba(229,191,53,1)",
+  "Gifts & Donations": "rgba(229,191,53,1)",
+  "Sports & Fitness": "rgba(77,152,128,1)",
   "Education": "rgba(145,172,89,1)",
-  "Fees": "rgba(77,152,128,1)",
+  "Fees": "rgba(176,27,22,1)",
  
-  "default": "rgba(11,45,68,1)"
+  "default": "rgba(206,56,24,1)" // same as uncategorized
 };
 
 
