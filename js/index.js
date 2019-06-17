@@ -180,18 +180,13 @@ function section_one_setup() {
     }
   };
 
-  let existing_handler = pie_one.options.legend.onClick;
+  let pie_one_existing_handler = pie_one.options.legend.onClick;
   pie_one.options.legend.onClick = (event, item) => {
-    if (typeof item == 'object') {
-      let {index, hidden} = item; // text is the label
-      
-      stack.data.datasets[index].hidden = !hidden; // it's about to be flipped
-      stack.update();
-    } else {
-      console.log("Items are empty on pie_one lengend click")
-    }
+    pie_one_existing_handler.call(pie_one, event, item)
 
-    existing_handler.call(pie_one, event, item)
+    // TODO: check if this is safe to do first
+    stack.data.datasets[item.index].hidden = !item.hidden; // it's about to be flipped
+    stack.update();
   }
 
 
@@ -211,9 +206,11 @@ function section_one_setup() {
   }
 
 
-  let original = pie_two.options.legend.onClick;
+  let pie_two_existing_handler = pie_two.options.legend.onClick;
   pie_two.options.legend.onClick = (event, item) => {
-    original.apply(pie_two, [event, item]);
+    pie_two_existing_handler.call(pie_two, event, item);
+
+    // TODO: check if this is safe to do first
     stack.data.datasets[item.index].hidden = !item.hidden;
     stack.update();
   }
@@ -229,6 +226,22 @@ function section_one_setup() {
     // TODO: this does not work for some reason
     //setTimeout(() => sync_dataset_property(pie_two.data, stack.data, 'hidden')); // async sync
   }
+
+  let stack_existing_handler = stack.options.legend.onClick;
+  stack.options.legend.onClick = (event, item) => {
+    if (typeof item == 'object') {
+      let {datasetIndex, hidden} = item; // text is the label
+
+      meta = pie_one.getDatasetMeta(0);
+      meta.data[datasetIndex].hidden = !hidden; // it's about to be flipped
+      pie_one.update();
+    } else {
+      console.log("Items are empty on stack lengend click")
+    }
+
+    stack_existing_handler.call(stack, event, item)
+  }
+
   // TODO: onHover is more picky than tooltips.callbacks.title
 
   stack.options.tooltips.itemSort = (a, b) => { return b.yLabel - a.yLabel; };
