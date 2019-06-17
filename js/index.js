@@ -193,6 +193,8 @@ function section_one_setup() {
   // TODO: hovering, i.e., scrolling, through the stack should animate pie_two as a cross-section of the stack
   // hover fires too frequently when I'm over a slice, consider keeping the previous value
 
+  // TODO: stack should keep track of who's slices it is flipping back.
+
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
   pie_two.options.events = ["click", "hover"];

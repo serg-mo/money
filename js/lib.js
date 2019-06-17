@@ -3,10 +3,10 @@
 
 
 const colors = {
-  "Financial": "rgba(13,45,67,1)",
-  "Home": "rgba(15,72,101,1)",
-  "Food & Drink": "rgba(19,100,134,1)",
-  "Transportation": "rgba(23,130,171,1)",
+  "Financial": "rgba(15,72,101,1)",
+  "Home": "rgba(19,100,134,1)",
+  "Food & Drink": "rgba(23,130,171,1)",
+  "Transportation": "rgba(176,27,22,1)",
   "Health & Medical": "rgba(235,85,25,1)",
   "Uncategorized": "rgba(206,56,24,1)",
   "Personal": "rgba(230,154,43,1)",
@@ -14,7 +14,6 @@ const colors = {
   "Gifts & Donations": "rgba(229,191,53,1)",
   "Sports & Fitness": "rgba(77,152,128,1)",
   "Education": "rgba(145,172,89,1)",
-  "Fees": "rgba(176,27,22,1)",
  
   "default": "rgba(206,56,24,1)" // same as uncategorized
 };
@@ -274,20 +273,34 @@ function label_callback(item, data) {
 }
 
 function footer_callback_sum(items, data) {
+  let total   = 0
+  let visible = 0;
+
   if (data.datasets.length == 1) {
+    //meta = chart.getDatasetMeta(0);
+    //meta.data[datasetIndex].hidden = !hidden; // it's about to be flipped
+
+    data.datasets[0]._meta[0].data.forEach((v, i) => {
+      visible += v.hidden ? 0 : data.datasets[0].data[i];
+    });
+
     // add values in the only dataset
-    // TODO: only add visible datasets
-    sum = data.datasets[0].data.reduce((carry, v) => carry + v, 0);
+    total = data.datasets[0].data.reduce((carry, v) => carry + v, 0);
   } else {
     // add this column across all datasets
-    sum = items.reduce((carry, v) => carry + data.datasets[v.datasetIndex].data[v.index], 0);
+    total = items.reduce((carry, v) => carry + data.datasets[v.datasetIndex].data[v.index], 0);
+    visible = total; // TODO: this should be different
   }
 
   // TODO: average month line in a bar chart makes sense (extra line dataset)
   // TODO: average category spending in a pie chart does not make sense (sum is ok)
 
+  total   = Math.round(total);
+  visible = Math.round(visible);
+
   // there is no legend color box, which takes up two spaces
-  return "TOTAL ".padStart(27, " ") + Math.round(sum).toLocaleString();
+  return " ".repeat(27) + `TOTAL       ${total.toLocaleString()}\n` +
+  " ".repeat(27) + `VISIBLE     ${visible.toLocaleString()}`;
 }
 
 // TODO: refactor these into one generator that can do both or one at a time
