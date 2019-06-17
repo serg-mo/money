@@ -192,8 +192,7 @@ function section_one_setup() {
 
   // TODO: hovering, i.e., scrolling, through the stack should animate pie_two as a cross-section of the stack
   // hover fires too frequently when I'm over a slice, consider keeping the previous value
-
-  // TODO: stack should keep track of who's slices it is flipping back.
+  // this will also help with time scroll keeping the same datasets visible
 
   // pie_two can do dataset toggle AND whitespace reset, I love it
   // this is because clicking nothing syncs hidden datasets and shows them all
@@ -204,6 +203,9 @@ function section_one_setup() {
       app.subcategory = items[0]._chart.data.labels[items[0]._index];
     } else {
       app.subcategory = null;
+
+      stack.data.datasets[item.index].hidden = false;
+      stack.update();
     }
   }
 
@@ -234,9 +236,15 @@ function section_one_setup() {
     if (typeof item == 'object') {
       let {datasetIndex, hidden} = item; // text is the label
 
-      meta = pie_one.getDatasetMeta(0);
-      meta.data[datasetIndex].hidden = !hidden; // it's about to be flipped
-      pie_one.update();
+      if (app.category) {
+        meta = pie_two.getDatasetMeta(0);
+        meta.data[datasetIndex].hidden = !hidden; // it's about to be flipped
+        pie_two.update();
+      } else {
+        meta = pie_one.getDatasetMeta(0);
+        meta.data[datasetIndex].hidden = !hidden; // it's about to be flipped
+        pie_one.update();
+      }
     } else {
       console.log("Items are empty on stack lengend click")
     }

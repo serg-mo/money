@@ -3,10 +3,10 @@
 
 
 const colors = {
-  "Financial": "rgba(15,72,101,1)",
+  "Financial": "rgba(23,130,171,1)",
   "Home": "rgba(19,100,134,1)",
-  "Food & Drink": "rgba(23,130,171,1)",
-  "Transportation": "rgba(176,27,22,1)",
+  "Food & Drink": "rgba(15,72,101,1)",
+  "Transportation": "rgba(13,45,67,1)",
   "Health & Medical": "rgba(235,85,25,1)",
   "Uncategorized": "rgba(206,56,24,1)",
   "Personal": "rgba(230,154,43,1)",
@@ -14,8 +14,9 @@ const colors = {
   "Gifts & Donations": "rgba(229,191,53,1)",
   "Sports & Fitness": "rgba(77,152,128,1)",
   "Education": "rgba(145,172,89,1)",
+  "Fees": "rgba(176,27,22,1)",
  
-  "default": "rgba(206,56,24,1)" // same as uncategorized
+  "default": "rgba(200,200,200,1)"
 };
 
 
