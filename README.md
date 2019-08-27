@@ -1,3 +1,5 @@
+# Demo
+![demo](./simple-charts.gif)
 
 # Simple Charts
 ```
