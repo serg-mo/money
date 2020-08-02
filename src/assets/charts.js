@@ -33,123 +33,8 @@ Chart.defaults.global.tooltips.footerFontStyle       = "normal";
 Chart.defaults.global.defaultFontFamily              = "Raleway"; // sans-serif;
 Chart.defaults.global.defaultFontSize                = 12;
 
-function make_bar(destination, summary, label) {
-  let options = {
-    scales: {
-      yAxes: [{
-        stacked: false,
-        ticks: {
-          callback: ticks_callback
-        }
-      }],
-    },
-
-    legend: {
-      display: false,
-    },
-  };
-  //console.log("make_bar()", summary, datasets, labels)
-
-  let data = make_data_single(summary, label); // TODO: pass same color for every bar here
-  // data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: colors[0] 
-  add_average(data.datasets);
-
-  return draw(destination, "bar", data, options);
-}
-
-function make_pie(destination, summary, label) {
-  let options = {
-    cutoutPercentage: 45,
-    rotation: 10,
-    animation: {
-      duration: 1000, // miliseconds
-      animateRotate: false,
-      animateScale: false
-    },
-    title: {
-      text: "",
-      display: true,
-    },
-    legend: {
-      position: "left",
-    },
-  }
-  //console.log("make_pie()", summary, datasets, labels)
-
-  let data = null;
-  if (summary && label) {
-    data = make_data_single(summary, label);
-  }
-
-  return draw(destination, "pie", data, options);
-}
-
-function make_line(destination, summary, label) {
-  // stacked axes can not be changed later
-  let options = {
-    scales: {
-      yAxes: [{
-        stacked: false,
-        ticks: {
-          callback: ticks_callback
-        }
-      }],
-    },
-    legend: {
-      display: false,
-    },
-    elements: {
-      line: {
-        tension: .2, // bezier curve
-        borderWidth: 0,
-        borderColor: "rgba(0, 0, 0, 0)",
-      }
-    },
-  };
-  //console.log("make_line()", summary, datasets, labels)
-
-  return draw(destination, "line", make_data_single(summary, label), options);
-}
-
-function make_stack(destination, summary, labels) {
-  // stacked axes can not be changed later
-  let options = {
-    scales: {
-      yAxes: [{
-        stacked: true,
-        ticks: {
-          callback: ticks_callback
-        }
-      }],
-    },
-    animation: {
-      duration: 0 // milliseconds
-    },
-    title: {
-      text: "",
-      display: true,
-    },
-    legend: {
-      position: "bottom",
-    },
-    elements: {
-      line: {
-        tension: .2, // bezier curve
-        borderWidth: 0,
-        borderColor: "rgba(0, 0, 0, 0)",
-      }
-    },
-  };
-  //console.log("make_stack()", summary, datasets, labels)
-
-  let data = make_data_multiple(summary, labels); // TODO: pass primary color
-  // TODO: consider adding average datasets here
-
-  return draw(destination, "line", data, options);
-}
 
 function draw(canvas, type, data, options) {
-  // http://www.chartjs.org/docs/latest/developers/api.html
   // object properties are copied by reference, so only touch tooltips here
   options.tooltips = {
     mode: "index",
@@ -168,16 +53,6 @@ function draw(canvas, type, data, options) {
       }
     }
   };
-
-  let context = canvas.getContext("2d");
-  let config = {
-    type,
-    data,
-    options
-  };
-  let chart = new Chart(context, config);
-
-  return chart;
 }
 
 

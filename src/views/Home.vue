@@ -1,6 +1,10 @@
 <template>
     <div>
         <dnd></dnd>
+        <line-chart :chart-data="datacollection"></line-chart>
+        <button @click="fillData()">Randomize</button>
+
+        <!--
         <header>
             <div>{{ query }}</div>
         </header>
@@ -43,15 +47,50 @@
                 </div>
             </div>
         </div>
+      -->
     </div>
 </template>
 <script type="text/javascript">
-  import Dnd from "@/components/Dnd"
-  import {} from "@/assets/index.js"
-  const stipJson = require('strip-json-comments');
-
+  import Dnd from '@/components/Dnd'
+  import LineChart from '@/components/LineChart'
 
   export default {
+    components: {
+      LineChart, Dnd
+    },
+    data () {
+      return {
+        datacollection: {
+          labels: [],
+          datasets: []
+        }
+      }
+    },
+    mounted () {
+      this.fillData()
+    },
+    methods: {
+      fillData () {
+        this.datacollection = {
+          labels: [this.getRandomInt(), this.getRandomInt()],
+          datasets: [
+            {
+              label: 'Data One',
+              backgroundColor: '#f87979',
+              data: [this.getRandomInt(), this.getRandomInt()]
+            }, {
+              label: 'Data One',
+              backgroundColor: '#f87979',
+              data: [this.getRandomInt(), this.getRandomInt()]
+            }
+          ]
+        }
+      },
+      getRandomInt () {
+        return Math.floor(Math.random() * (50 - 5 + 1)) + 5
+      }
+    }
+    /*
     data() {
       return {
         CATEGORY_RESOLUTIONS: ["category", "subcategory", "merchant"],
@@ -97,33 +136,9 @@
         section_one_wrapper();
       },
     },
-    components: {
-        Dnd
-    },
 
-    /*
-    // this does not work in jquery onload below
-    window.onload = () => {
-      $(".ui.modal")
-        .modal('setting', 'closable', false)
-        .modal("show");
-    }
-
-
-     $("#file").on("change", file_handler);
-
-     // skip file upload, if one is available
-     $.getJSON('transactions.json', (json) => {
-       console.log("Data on the server")
-       set_transactions(json.transactions);
-     }, (error) => {
-       console.log("No data on the server, wait for drag and drop")
-     });
-
-     $("body").on("keydown", key_handler);
-
-
-     */
+    $("body").on("keydown", key_handler);
+ */
   }
 </script>
 <style type="text/css" scoped>
