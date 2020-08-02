@@ -4,10 +4,16 @@
 # Production
 https://serg-mo.github.io/simple-charts/
 
-# Dev
+
+## Commands
 ```
-docker build -t simple-charts .
-docker run -it --rm -p 80:80 -v "${PWD}":/var/www/html/ simple-charts
+docker run -it -p 8080:80 -p 8000:8000 -v $(pwd):/usr/src/app node:14 bash
+vue ui --headless --port 8000 --host 0.0.0.0
+
+npm install
+npm run serve
+npm run build
+npm run lint
 
 open http://localhost
 ```
