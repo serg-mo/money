@@ -16,12 +16,12 @@ function App() {
     return lines.map(parseCSV).map((fields) => {
       return headers.reduce((obj, header, index) => {
         let value = "";
-        if (index == 0) {
+        if (index === 0) {
           value = fields[index].slice(0, 3) + " " + fields[index].slice(-4); // e.g., Jan 2022
         } else {
-          value = parseFloat(fields[index].replace(/[\$,]/g, '')); 
+          value = parseFloat(fields[index].replace(/[$,]/g, ""));
         }
-        
+
         return { ...obj, [header]: value };
       }, {});
     });
@@ -38,9 +38,11 @@ function App() {
 
       const header = lines.slice(0, 4); // title, account, date range, headers
       const middle = lines.slice(4, lines.length - 8);
-      const tail = lines.slice(lines.length - 8); // blank, report date, 6 lines of junk
+      // const tail = lines.slice(lines.length - 8); // blank, report date, 6 lines of junk
 
       const headers = parseCSV(header[3]);
+      // console.log(tail[1])
+
       setTransactions(parseTransactions(middle, headers));
     };
     reader.readAsText(file);

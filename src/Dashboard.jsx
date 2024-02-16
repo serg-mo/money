@@ -1,29 +1,32 @@
-// import React, { useState, useEffect } from "react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut } from "react-chartjs-2";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-const data = {
-  labels: ["Red", "Blue", "Yellow"],
-  datasets: [
-    {
-      label: "My First Dataset",
-      data: [300, 50, 100],
-      backgroundColor: [
-        "rgb(255, 99, 132)",
-        "rgb(54, 162, 235)",
-        "rgb(255, 205, 86)",
-      ],
-      hoverOffset: 4,
-    },
-  ],
-};
+import LineChart from "./LineChart";
+import BarChart from "./LineChart";
 
 function Dashboard({ transactions }) {
   // console.log(transactions);
 
-  return <Doughnut data={data} />;
+  if (!transactions.length) {
+    return;
+  }
+
+  const data = {
+    labels: transactions.map((fields) => fields["Month"]),
+    datasets: [
+      {
+        label: "Dataset",
+        data: transactions.map((fields) => fields["Withdrawals"]),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
+
+  //       <LineChart data={data} />
+
+  return (
+    <div>
+      <BarChart data={data} />
+    </div>
+  );
 }
 
 export default Dashboard;
