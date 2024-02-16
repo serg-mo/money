@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   text-overflow: hidden;
 }
 
@@ -42,7 +43,6 @@ div.bar {
   min-width: 800px;
 }
 
-
 #transactions {
   color: #333333;
   margin: 10px auto;
@@ -55,23 +55,6 @@ div.bar {
 
 #transactions td {
   font-size: 11px;
-}
-
-
-#dnd {
-  font-size: 40px;
-  text-align: center;
-  display: table;
-}
-
-#dnd input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
 }
 
 #app {
