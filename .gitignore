@@ -1,2 +1,4 @@
 .DS_Store
 transactions.json
+node_modules
+yarn.lock
