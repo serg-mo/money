@@ -5,7 +5,5 @@
 # DEV
 
 ```
-yarn tailwindcss -i ./src/input.css -o ./public/style.css --watch
+yarn start
 ```
-
-Local development, `yarn start`.

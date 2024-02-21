@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,10 +7,8 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend,
-} from 'chart.js';
-
-import { Line } from 'react-chartjs-2';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -20,28 +17,23 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
 );
 
-const options = {
-  responsive: true,
-  plugins: {
-    title: {
-      display: true,
-      text: "Line Chart",
+export default function LineChart({ title, data }) {
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+      },
     },
-  },
-  elements: {
-    line: {
-      tension: 0.2, // bezier curve
+    elements: {
+      line: {
+        tension: 0.2, // bezier curve
+      },
     },
-  },
-};
+  };
 
-export default function LineChart({ data }) {
-  return (
-    <div>
-      <Line options={options} data={data} />
-    </div>
-  );
+  return <Line options={options} data={data} />;
 }

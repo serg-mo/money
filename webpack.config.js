@@ -1,11 +1,11 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
-  entry: './src/index.js',
+  entry: "./src/index.js",
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
   },
   module: {
     rules: [
@@ -13,32 +13,28 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
-          }
+            presets: ["@babel/preset-env", "@babel/preset-react"],
+          },
         },
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'postcss-loader'
-        ],
+        use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html',
+      template: "./public/index.html",
     }),
   ],
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: [".js", ".jsx"],
   },
   devServer: {
-    static: './dist',
+    static: "./dist",
     open: true,
     hot: true,
   },

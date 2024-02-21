@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import LineChart from "./LineChart";
+import BarChart from "./BarChart";
+import ScrollList from "./ScrollList";
 
 const titles = [
   // "Month",
@@ -13,7 +15,7 @@ const titles = [
 
 // TODO: accept files and parse transactions for each
 export default function Dashboard({ transactions }) {
-  const xColumn = "Month"
+  const xColumn = "Month";
   const [yColumn, setYColumn] = useState("Withdrawals");
 
   if (!transactions.length) {
@@ -24,7 +26,7 @@ export default function Dashboard({ transactions }) {
     labels: transactions.map((fields) => fields[xColumn]),
     datasets: [
       {
-        label: "Dataset", // TODO: derive this
+        label: yColumn,
         data: transactions.map((fields) => fields[yColumn]),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
@@ -34,7 +36,9 @@ export default function Dashboard({ transactions }) {
 
   return (
     <div>
-      <LineChart data={data} />
+      <ScrollList options={titles} value={yColumn} onChange={setYColumn} />
+      <LineChart title={yColumn} data={data} />
+      <BarChart title={yColumn} data={data} />
     </div>
   );
 }

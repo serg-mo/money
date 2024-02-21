@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from "react";
 
-// TODO: consider passing the items as a prop
-export default function ScrollList() {
-  const items = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"];
+export default function ScrollList({ options, value, onChange }) {
+  const [selectedOption, setSelectedOption] = useState(value);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleScroll = (e) => {
-    e.preventDefault();
-    if (e.deltaY < 0) {
-      // scrolling up
-      setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-    } else if (e.deltaY > 0) {
-      // scrolling down
-      setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, items.length - 1));
-    }
+  // Handle changing the select dropdown
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    setSelectedOption(newValue);
+    onChange(newValue);
   };
 
   return (
-    <div onWheel={handleScroll} style={{ overflow: 'hidden' }}>
-      <div>{items[currentIndex]}</div>
-    </div>
+    <select
+      value={selectedOption}
+      onChange={handleChange}
+      className="form-select block mt-1"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
   );
-};
+}
