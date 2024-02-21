@@ -20,10 +20,15 @@ ChartJS.register(
   Legend,
 );
 
-function LineChart({ data }) {
+export default function LineChart({ data }) {
   const options = {
     responsive: true,
-    plugins: {},
+    plugins: {
+      title: {
+        display: true,
+        text: "Line Chart",
+      },
+    },
     elements: {
       line: {
         tension: 0.2, // bezier curve
@@ -65,5 +70,3 @@ function LineChart({ data }) {
 
   return <Line options={options} data={data} />;
 }
-
-export default LineChart;

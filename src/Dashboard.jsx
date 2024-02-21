@@ -1,18 +1,18 @@
 import LineChart from "./LineChart";
-import BarChart from "./LineChart";
+import BarChart from "./BarChart";
 
-function Dashboard({ transactions }) {
+export default function Dashboard({ transactions }) {
   // console.log(transactions);
 
   if (!transactions.length) {
     return;
   }
 
-  const data = {
+  const lineData = {
     labels: transactions.map((fields) => fields["Month"]),
     datasets: [
       {
-        label: "Dataset",
+        label: "Dataset", // TODO: derive this
         data: transactions.map((fields) => fields["Withdrawals"]),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
@@ -20,13 +20,22 @@ function Dashboard({ transactions }) {
     ],
   };
 
-  //       <LineChart data={data} />
+  const barData = {
+    labels: transactions.map((fields) => fields["Month"]),
+    datasets: [
+      {
+        label: "Dataset", // TODO: derive this
+        data: transactions.map((fields) => fields["Withdrawals"]),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
 
   return (
     <div>
-      <BarChart data={data} />
+      <LineChart data={lineData} />
+      <BarChart data={barData} />
     </div>
   );
 }
-
-export default Dashboard;

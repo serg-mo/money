@@ -1,10 +1,12 @@
+# Old Simple Bank Visualization
 ![demo](./simple-charts.gif)
 
 # DEV
 
 ```
-yarn tailwindcss -i ./src/input.css -o ./public/output.css --watch
+yarn tailwindcss -i ./src/input.css -o ./public/style.css --watch
 ```
 
-To begin the development, `yarn start`.
-To create a production bundle, `yarn build`.
+Local development, `yarn start`.
+
+Production bundle, `yarn build`.
