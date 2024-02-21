@@ -2,3 +2,4 @@
 transactions.json
 node_modules
 yarn.lock
+*.log

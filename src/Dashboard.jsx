@@ -1,31 +1,31 @@
+import React, { useState, useEffect } from "react";
 import LineChart from "./LineChart";
-import BarChart from "./BarChart";
 
+const titles = [
+  // "Month",
+  "Beginning Balance",
+  "Market Change Minus Fees",
+  "Dividends & Interest",
+  "Deposits",
+  "Withdrawals",
+  "Ending Balance",
+];
+
+// TODO: accept files and parse transactions for each
 export default function Dashboard({ transactions }) {
-  // console.log(transactions);
+  const xColumn = "Month"
+  const [yColumn, setYColumn] = useState("Withdrawals");
 
   if (!transactions.length) {
     return;
   }
 
-  const lineData = {
-    labels: transactions.map((fields) => fields["Month"]),
+  const data = {
+    labels: transactions.map((fields) => fields[xColumn]),
     datasets: [
       {
         label: "Dataset", // TODO: derive this
-        data: transactions.map((fields) => fields["Withdrawals"]),
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(255, 99, 132, 0.5)",
-      },
-    ],
-  };
-
-  const barData = {
-    labels: transactions.map((fields) => fields["Month"]),
-    datasets: [
-      {
-        label: "Dataset", // TODO: derive this
-        data: transactions.map((fields) => fields["Withdrawals"]),
+        data: transactions.map((fields) => fields[yColumn]),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
@@ -34,8 +34,7 @@ export default function Dashboard({ transactions }) {
 
   return (
     <div>
-      <LineChart data={lineData} />
-      <BarChart data={barData} />
+      <LineChart data={data} />
     </div>
   );
 }

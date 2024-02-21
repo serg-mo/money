@@ -30,6 +30,6 @@ const options = {
   },
 };
 
-export default function BarChart({data}) {
+export default function BarChart({ data }) {
   return <Bar options={options} data={data} />;
 }

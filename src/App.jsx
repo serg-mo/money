@@ -5,6 +5,7 @@ const parseCSV = (str) =>
   str.split('","').map((one) => one.replace(/^"|"$/g, ""));
 
 function App() {
+  // TODO: handle multiple file upload, e.g., brokerage + checking
   const [file, setFile] = useState();
   const [transactions, setTransactions] = useState([]);
 
@@ -58,6 +59,7 @@ function App() {
         <input
           type="file"
           onChange={handleChange}
+          accept="text/csv"
           className="absolute inset-0 flex justify-center items-center z-10 w-full opacity-0"
         />
         <div className="w-96 h-96 flex justify-center items-center text-center text-5xl p-10 border-2 rounded-xl">

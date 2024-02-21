@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,8 +9,9 @@ import {
   Title,
   Tooltip,
   Legend,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+} from 'chart.js';
+
+import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -17,56 +20,28 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 );
 
-export default function LineChart({ data }) {
-  const options = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: "Line Chart",
-      },
-    },
-    elements: {
-      line: {
-        tension: 0.2, // bezier curve
-      },
-    },
-  };
-
-  /*
-  let options = {
-    scales: {
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            callback: ticks_callback,
-          },
-        },
-      ],
-    },
-    animation: {
-      duration: 0, // milliseconds
-    },
+const options = {
+  responsive: true,
+  plugins: {
     title: {
-      text: "",
       display: true,
+      text: "Line Chart",
     },
-    legend: {
-      position: "bottom",
+  },
+  elements: {
+    line: {
+      tension: 0.2, // bezier curve
     },
-    elements: {
-      line: {
-        tension: 0.2, // bezier curve
-        borderWidth: 0,
-        borderColor: "rgba(0, 0, 0, 0)",
-      },
-    },
-  };
-  */
+  },
+};
 
-  return <Line options={options} data={data} />;
+export default function LineChart({ data }) {
+  return (
+    <div>
+      <Line options={options} data={data} />
+    </div>
+  );
 }
