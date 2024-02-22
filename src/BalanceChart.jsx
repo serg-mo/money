@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ScrollList from "./ScrollList";
 
 import {
   Chart as ChartJS,
@@ -32,36 +31,28 @@ const titles = [
   "Ending Balance",
 ];
 
-export default function LineChart({ transactions }) {
-  const xColumn = "Month";
-  const [yColumn, setYColumn] = useState("Withdrawals");
-
+export default function BalanceChart({ transactions }) {
   const options = {
     responsive: true,
-    plugins: {},
-    elements: {
-      line: {
-        tension: 0.2, // bezier curve
+    plugins: {
+      title: {
+        display: true,
+        text: "Ending Balance",
       },
     },
   };
 
+  // NOTE: ending balance of one month is the same as the beginning balance of the next one
   const data = {
-    labels: transactions.map((fields) => fields[xColumn]),
+    labels: transactions.map((fields) => fields["Month"]),
     datasets: [
       {
-        label: yColumn,
-        data: transactions.map((fields) => fields[yColumn]),
+        data: transactions.map((fields) => fields["Ending Balance"]),
         borderColor: "rgb(100, 100, 100)",
         backgroundColor: "rgba(100, 100, 100, 1)",
       },
     ],
   };
 
-  return (
-    <div>
-      <ScrollList options={titles} value={yColumn} onChange={setYColumn} />
-      <Line options={options} data={data} />
-    </div>
-  );
+  return <Line options={options} data={data} />;
 }

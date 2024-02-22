@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import LineChart from "./LineChart";
-import StackedBarChart from "./StackedBarChart";
+import BalanceChart from "./BalanceChart";
+import CashFlowChart from "./CashFlowChart";
+import IncomeChart from "./IncomeChart";
 
 const parseCSV = (str) =>
   str.split('","').map((one) => one.replace(/^"|"$/g, ""));
@@ -10,7 +11,7 @@ function parseTransactions(lines, headers) {
     return headers.reduce((obj, header, index) => {
       let value = "";
       if (index === 0) {
-        value = fields[index].slice(0, 3) + " " + fields[index].slice(-4); // e.g., Jan 2022
+        value = fields[index].slice(0, 3) + " " + fields[index].slice(-2); // e.g., Jan 2022
       } else {
         value = parseFloat(fields[index].replace(/[$,]/g, ""));
       }
@@ -37,6 +38,7 @@ function parseFile(file, callBack) {
   reader.readAsText(file);
 }
 
+// TODO: add arrow key handlers to zoom in/out and shift left/right
 export default function Dashboard({ files }) {
   const [transactions, setTransactions] = useState([]);
 
@@ -47,9 +49,10 @@ export default function Dashboard({ files }) {
   }
 
   return (
-    <div>
-      <LineChart transactions={transactions} />
-      <StackedBarChart transactions={transactions} />
+    <div className="w-4xl max-w-4xl m-auto">
+      <BalanceChart transactions={transactions} />
+      <IncomeChart transactions={transactions} />
+      <CashFlowChart transactions={transactions} />
     </div>
   );
 }

@@ -14,13 +14,13 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
 defaults.font.family = "Monaco";
 
-export default function StackedBarChart({ transactions }) {
+export default function IncomeChart({ transactions }) {
   const options = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: "Deposits & Withdrawals",
+        text: "Dividends & Returns",
       },
     },
     scales: {
@@ -33,14 +33,14 @@ export default function StackedBarChart({ transactions }) {
     labels: transactions.map((fields) => fields["Month"]),
     datasets: [
       {
-        label: "Deposits",
-        data: transactions.map((fields) => fields["Deposits"]),
+        label: "Market Change Minus Fees",
+        data: transactions.map((fields) => fields["Market Change Minus Fees"]),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(23,130,171,1)",
       },
       {
-        label: "Withdrawals",
-        data: transactions.map((fields) => -1 * fields["Withdrawals"]),
+        label: "Dividends & Interest",
+        data: transactions.map((fields) => fields["Dividends & Interest"]),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(19,100,134,1)",
       },
