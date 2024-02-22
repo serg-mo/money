@@ -14,7 +14,7 @@ export default function ScrollList({ options, value, onChange }) {
     <select
       value={selectedOption}
       onChange={handleChange}
-      className="form-select block mt-1"
+      className="form-select block outline-none mt-1 m-auto"
     >
       {options.map((option) => (
         <option key={option} value={option}>

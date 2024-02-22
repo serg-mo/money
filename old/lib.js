@@ -26,7 +26,6 @@ Chart.defaults.global.tooltips.titleFontFamily = "Monaco"; // fixed space for co
 Chart.defaults.global.tooltips.bodyFontFamily = "Monaco";
 Chart.defaults.global.tooltips.footerFontFamily = "Monaco";
 Chart.defaults.global.tooltips.footerFontStyle = "normal";
-// footerFontStyle: "normal",
 Chart.defaults.global.defaultFontFamily = "Raleway"; // sans-serif;
 Chart.defaults.global.defaultFontSize = 12;
 
