@@ -49,7 +49,7 @@ export default function DashboardBrokerage({ file }) {
   }
 
   return (
-    <div className="w-4xl max-w-4xl m-auto">
+    <div>
       <BalanceChart transactions={transactions} />
       <IncomeChart transactions={transactions} />
       <CashFlowChart transactions={transactions} />

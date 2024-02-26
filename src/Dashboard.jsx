@@ -6,11 +6,11 @@ export default function Dashboard({ files }) {
   // TODO: parse more than one file
   const file = files[0];
   // TODO: determine schema by looking at it, brokerage vs credit type Dashboard
-  const isCredit = true;
+  const TypedDashboard = true ? DashboardCredit : DashboardBrokerage;
 
-  if (isCredit) {
-    return <DashboardCredit file={file} />;
-  }
-
-  return <DashboardBrokerage file={file} />;
+  return (
+    <div className="w-4xl max-w-4xl m-auto">
+      <TypedDashboard file={file} />
+    </div>
+  );
 }

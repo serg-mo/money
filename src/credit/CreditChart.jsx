@@ -1,29 +1,25 @@
 import React, { useState } from "react";
+import { groupBy, sumBy } from "lodash";
 import { CHART_COLORS } from "../utils";
+
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
+  defaults,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
-import { groupBy, sumBy } from "lodash";
+import { Bar } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-);
+defaults.font.family = "Monaco";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
 const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
 
-export default function LineChart({ transactions }) {
+export default function CreditChart({ transactions }) {
   const options = {
     responsive: true,
     plugins: {
@@ -31,6 +27,10 @@ export default function LineChart({ transactions }) {
         display: true,
         text: "Debits",
       },
+    },
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true },
     },
   };
 
@@ -49,8 +49,7 @@ export default function LineChart({ transactions }) {
       },
     ],
   };
+  // console.log(data);
 
-  console.log(data);
-
-  return <Line options={options} data={data} />;
+  return <Bar options={options} data={data} />;
 }

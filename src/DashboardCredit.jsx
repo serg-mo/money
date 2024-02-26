@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import LineChart from "./credit/LineChart";
-import { groupBy, sumBy } from "lodash";
+import CreditChart from "./credit/CreditChart";
+import RecurringCharges from "./credit/RecurringCharges";
 
 const parseCSV = (str) =>
   str.split('","').map((one) => one.replace(/^"|"$/g, ""));
@@ -37,13 +37,18 @@ export default function DashboardCredit({ file }) {
     reader.readAsText(file);
   }
 
+  if (!transactions.length) {
+    return;
+  }
+
   const filteredTransactions = transactions.filter(
     (row) => row["Transaction"] === "DEBIT",
   );
 
   return (
-    <div className="w-4xl max-w-4xl m-auto">
-      <LineChart transactions={filteredTransactions} />
+    <div>
+      <CreditChart transactions={filteredTransactions} />
+      <RecurringCharges transactions={filteredTransactions} />
     </div>
   );
 }
