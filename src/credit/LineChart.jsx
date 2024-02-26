@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { CHART_COLORS } from "../utils";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { groupBy, sumBy } from "lodash";
 
 ChartJS.register(
   CategoryScale,
@@ -28,22 +29,28 @@ export default function LineChart({ transactions }) {
     plugins: {
       title: {
         display: true,
-        text: "Ending Balance",
+        text: "Debits",
       },
     },
   };
 
-  // NOTE: ending balance of one month is the same as the beginning balance of the next one
+  // "2022-08-30" -> "2022-08"
+  const groups = groupBy(transactions, (row) => row["Date"].substring(0, 7));
+
   const data = {
-    labels: transactions.map((fields) => fields["Date"]),
+    labels: Object.keys(groups), // year-month
     datasets: [
       {
-        data: transactions.map((fields) => fields["Amount"]),
-        borderColor: "rgb(100, 100, 100)",
-        backgroundColor: "rgba(100, 100, 100, 1)",
+        data: Object.values(groups).map(
+          (subset) => -1 * sumBy(subset, "Amount"),
+        ),
+        borderColor: CHART_COLORS["one"],
+        backgroundColor: CHART_COLORS["two"],
       },
     ],
   };
+
+  console.log(data);
 
   return <Line options={options} data={data} />;
 }
