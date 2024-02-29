@@ -52,6 +52,13 @@ export default function RecurringCharges({ transactions }) {
 
   return (
     <table className="w-max mx-auto">
+      <thead>
+        <tr>
+          <th colSpan="2" className="text-center">
+            Recurring
+          </th>
+        </tr>
+      </thead>
       <tbody>
         {Object.entries(filtered).map(([key, last]) => (
           <tr key={key}>

@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
-
-// TODO: generate these, split name on spaces + manual categories
-// https://www.npmjs.com/package/decision-tree
-const CATEGORIES = [
-  { pattern: /AMZN/i, category: "Amazon" },
-  { pattern: /SHELL|OIL|GAS|ARCO|CHEVRON/i, category: "Gas" },
-  { pattern: /ATT/i, category: "Phone" },
-  { pattern: /GEICO|LEMONADE/i, category: "Insurance" },
-  { pattern: /WODIFY/i, category: "Gym" },
-  { pattern: /PET/i, category: "Pet" },
-  { pattern: /SPOTIFY/i, category: "Subscriptions" },
-  { pattern: /AIRBNB/i, category: "AirBnB" },
-  { pattern: /PARKING/i, category: "Car" },
-  { pattern: /ANTHEM/i, category: "Insurance" },
-];
-
-const parseCSV = (str) =>
-  str.split('","').map((one) => one.replace(/^"|"$/g, ""));
+import { getCategory, parseCSV } from "./utils";
 
 function parseTransactions(lines, headers) {
   return lines.map(parseCSV).map((fields) => {
@@ -40,11 +23,6 @@ function parseFile(lines) {
   const tail = lines.slice(1, lines.length - 1);
 
   return parseTransactions(tail, headers);
-}
-
-function getCategory(name) {
-  const match = CATEGORIES.find(({ pattern, category }) => name.match(pattern));
-  return match?.category ?? "Other";
 }
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
@@ -73,12 +51,21 @@ export default function DashboardCredit({ file }) {
       <CreditChart transactions={filteredTransactions} />
       <RecurringCharges transactions={filteredTransactions} />
       <table className="w-max mx-auto">
+        <thead>
+          <tr>
+            <th colSpan="2" className="text-center">
+              Unclassified
+            </th>
+          </tr>
+        </thead>
         <tbody>
           {filteredTransactions
-            .filter((t) => t["Category"] === "Other")
+            .filter((t) => t["Category"] === "OTHER")
             .map((t, key) => (
               <tr key={key}>
-                <td>{t["Name"]}</td>
+                <td>
+                  {t["Name"]} {t["Amount"]}
+                </td>
                 <td>{t["Category"]}</td>
               </tr>
             ))}
