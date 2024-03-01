@@ -23,7 +23,27 @@ export const CHART_COLORS = {
 // maybe there is a default categories that you customize and that's what gets saved in browser storage
 // consider doing clusters with manual categories, then pick the nearest cluster for unknown ones
 
-const CATEGORIES = {
+// subscriptions, phone, utilities, insurance, transport, food
+
+// TODO: generate the keywords manually, only maintain the keys of top categories here
+const CATEGORIES = [
+  "CAR",
+  "ENTERTAINMENT",
+  "FEES",
+  "FOOD",
+  "GIFTS",
+  "GYM",
+  "HEALTH",
+  "INSURANCE",
+  "PET",
+  "SHOPPING",
+  "SUBSCRIPTIONS",
+  "TRAVEL",
+  "UTILITIES",
+];
+
+/*
+const rules = {
   FOOD: [
     "BAR",
     "BEVERAGES",
@@ -53,7 +73,7 @@ const CATEGORIES = {
     "THE PLOUGH & THE STARS",
   ],
   GYM: ["GYM", "WODIFY", "YOGA"],
-  HEALTHCARE: [
+  HEALTH: [
     "CLINIC",
     "CVS",
     "DENTIST",
@@ -67,7 +87,7 @@ const CATEGORIES = {
     "WESTSIDE HEAD NECK",
   ],
   INSURANCE: ["ANTHEM", "ERENTERPLAN", "GEICO", "LEMONADE"],
-  LODGING: ["AIRBNB", "HOTEL", "LODGING", "RESORT", "SHERATON", "ACE HOTEL"],
+  TRAVEL: ["AIRBNB", "HOTEL", "LODGING", "RESORT", "SHERATON", "ACE HOTEL"],
   PET: ["CHEWY", "DOG", "PET", "VETERINARY"],
   SHOPPING: [
     ".COM",
@@ -159,13 +179,15 @@ const CATEGORIES = {
   GIFTS: ["FRANK DARLING", "CHEFKNIVESTOGO", "SALT CAVES"],
   ENTERTAINMENT: ["THEATER", "THEATRES"],
 };
+*/
 
-export function getCategory(name) {
+export function getCategory(name, rules) {
+  // TODO: split on \s+ and only match the description
   // NOTE: name has a structure: description, city, state
   // city is sometimes a phone number or a domain name
   name = name.toUpperCase().replace(/\s+/g, " ");
 
-  const match = Object.entries(CATEGORIES).find(([key, values]) =>
+  const match = Object.entries(rules).find(([key, values]) =>
     values.find((value) => name.includes(value)),
   );
 

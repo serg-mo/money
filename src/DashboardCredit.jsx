@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
+import UnclassifiedCharges from "./credit/UnclassifiedCharges";
 import { getCategory, parseCSV } from "./utils";
 
 function parseTransactions(lines, headers) {
   return lines.map(parseCSV).map((fields) => {
     return headers.reduce((obj, header, index) => {
-      const value =
-        header === "Amount" ? parseFloat(fields[index]) : fields[index]; // Amount as a number
+      let value = fields[index];
 
-      if (header === "Name") {
-        return { ...obj, [header]: value, Category: getCategory(value) };
+      if (header === "Amount") {
+        value = parseFloat(value);
       }
 
-      return { ...obj, [header]: value };
+      return { ...obj, [header]: value, Category: "OTHER" };
     }, {});
   });
 }
@@ -22,7 +22,15 @@ function parseFile(lines) {
   const headers = parseCSV(lines[0]); // "Date","Transaction","Name","Memo","Amount"
   const tail = lines.slice(1, lines.length - 1);
 
-  return parseTransactions(tail, headers);
+  // TODO: load rules here
+  const rules = {};
+
+  const transactions = parseTransactions(tail, headers);
+
+  // TODO: add Category here
+  // return { ...obj, [header]: value, Category: getCategory(value) };
+
+  return transactions;
 }
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
@@ -50,27 +58,7 @@ export default function DashboardCredit({ file }) {
     <div>
       <CreditChart transactions={filteredTransactions} />
       <RecurringCharges transactions={filteredTransactions} />
-      <table className="w-max mx-auto">
-        <thead>
-          <tr>
-            <th colSpan="2" className="text-center">
-              Unclassified
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTransactions
-            .filter((t) => t["Category"] === "OTHER")
-            .map((t, key) => (
-              <tr key={key}>
-                <td>
-                  {t["Name"]} {t["Amount"]}
-                </td>
-                <td>{t["Category"]}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <UnclassifiedCharges transactions={filteredTransactions} />
     </div>
   );
 }

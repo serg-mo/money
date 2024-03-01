@@ -33,7 +33,6 @@ export default function RecurringCharges({ transactions }) {
   }, {});
   // console.log(summary);
 
-  // TODO: given a set of transactions determine if they all fall on consecutive months
   const filtered = Object.entries(summary).reduce(
     (obj, [key, transactions]) => {
       if (isMonthly(transactions)) {
@@ -55,7 +54,7 @@ export default function RecurringCharges({ transactions }) {
       <thead>
         <tr>
           <th colSpan="2" className="text-center">
-            Recurring
+            Recurring ({Object.keys(filtered).length})
           </th>
         </tr>
       </thead>
