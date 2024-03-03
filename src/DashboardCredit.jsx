@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
 import UnclassifiedCharges from "./credit/UnclassifiedCharges";
-import { getCategory, parseCSV } from "./utils";
+import { CATEGORIES, getCategory, parseCSV } from "./utils";
 
 function parseTransactions(lines, headers) {
   return lines.map(parseCSV).map((fields) => {
@@ -13,7 +13,7 @@ function parseTransactions(lines, headers) {
         value = parseFloat(value);
       }
 
-      return { ...obj, [header]: value, Category: "OTHER" };
+      return { ...obj, [header]: value, Category: CATEGORIES.UNCLASSIFIED };
     }, {});
   });
 }
@@ -46,6 +46,12 @@ export default function DashboardCredit({ file }) {
     reader.readAsText(file);
   }
 
+  const onCategorize = (name, category) => {
+    // TODO: prune the name first, then add a rule
+    // TODO: consider what happens when the same name has multiple categories, i.e., overwrite
+    console.log({ name, category });
+  };
+
   if (!transactions.length) {
     return;
   }
@@ -54,11 +60,15 @@ export default function DashboardCredit({ file }) {
     (row) => row["Transaction"] === "DEBIT",
   );
 
+  // TODO: use context to access filteredTransactions
   return (
-    <div>
+    <div className="font-mono text-xs">
       <CreditChart transactions={filteredTransactions} />
       <RecurringCharges transactions={filteredTransactions} />
-      <UnclassifiedCharges transactions={filteredTransactions} />
+      <UnclassifiedCharges
+        transactions={filteredTransactions}
+        onCategorize={onCategorize}
+      />
     </div>
   );
 }

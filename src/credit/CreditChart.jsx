@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { groupBy, sumBy } from "lodash";
-import { CHART_COLORS } from "../utils";
+import { COLORS, CATEGORIES } from "../utils";
 
 import {
   Chart as ChartJS,
@@ -22,12 +22,7 @@ const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
 export default function CreditChart({ transactions }) {
   const options = {
     responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: "Debits",
-      },
-    },
+    plugins: {},
     scales: {
       x: { stacked: true },
       y: { stacked: true },
@@ -44,8 +39,8 @@ export default function CreditChart({ transactions }) {
         data: Object.values(groups).map(
           (subset) => -1 * sumBy(subset, "Amount"),
         ),
-        borderColor: CHART_COLORS["one"],
-        backgroundColor: CHART_COLORS["two"],
+        borderColor: COLORS[CATEGORIES.UNCLASSIFIED],
+        backgroundColor: COLORS[CATEGORIES.UNCLASSIFIED],
       },
     ],
   };
