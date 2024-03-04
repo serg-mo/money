@@ -26,19 +26,20 @@ export const CATEGORIES = {
 
 // TODO: first classify everything, then sort categories by size, then pick the colors
 export const COLORS = {
-  [CATEGORIES.CAR]: "red",
-  [CATEGORIES.FUN]: "orange",
-  [CATEGORIES.OTHER]: "amber",
   [CATEGORIES.FOOD]: "yellow",
-  [CATEGORIES.GIFTS]: "lime",
+  [CATEGORIES.INSURANCE]: "teal",
   [CATEGORIES.GYM]: "green",
   [CATEGORIES.HEALTH]: "emerald",
-  [CATEGORIES.INSURANCE]: "teal",
+  [CATEGORIES.CAR]: "red",
   [CATEGORIES.PET]: "cyan",
   [CATEGORIES.SHOPPING]: "sky",
   [CATEGORIES.SUBSCRIPTIONS]: "blue",
   [CATEGORIES.TRAVEL]: "indigo",
+  [CATEGORIES.FUN]: "orange",
+  [CATEGORIES.GIFTS]: "lime",
   [CATEGORIES.UTILITIES]: "violet",
+
+  [CATEGORIES.OTHER]: "amber",
   [CATEGORIES.UNCLASSIFIED]: "slate",
 };
 

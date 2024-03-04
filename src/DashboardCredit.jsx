@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
-import UnclassifiedCharges from "./credit/UnclassifiedCharges";
+import CreditTransactions from "./credit/CreditTransactions";
 import { CATEGORIES, getCategory, parseCSV } from "./utils";
 
 function parseTransactions(lines, headers) {
@@ -36,38 +36,56 @@ function parseFile(lines) {
 // TODO: add arrow key handlers to zoom in/out and shift left/right
 export default function DashboardCredit({ file }) {
   const [transactions, setTransactions] = useState([]);
+  const [debits, setDebits] = useState([]);
+  const [rules, setRules] = useState({});
 
-  if (!transactions.length) {
-    let reader = new FileReader();
-    reader.onload = (e) => {
-      const lines = e.target.result.split(/\r?\n/); // FileReader
-      setTransactions(parseFile(lines));
-    };
-    reader.readAsText(file);
-  }
+  // TODO: load existing rules
+  useEffect(() => {
+    // when rules state changes, save a copy to local storage
+    localStorage.setItem("rules", JSON.stringify(rules));
+  }, [rules]);
+
+  useEffect(() => {
+    if (!transactions.length) {
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        const lines = e.target.result.split(/\r?\n/); // FileReader
+        setTransactions(parseFile(lines));
+      };
+      reader.readAsText(file);
+    }
+  }, [transactions]);
+
+  useEffect(() => {
+    if (transactions.length) {
+      setDebits(transactions.filter((row) => row["Transaction"] === "DEBIT"));
+    }
+  }, [transactions]);
 
   const onCategorize = (name, category) => {
-    // TODO: prune the name first, then add a rule
-    // TODO: consider what happens when the same name has multiple categories, i.e., overwrite
-    console.log({ name, category });
+    // TODO: prune the name first
+    // write/overwrite the category for that
+    setRules((existing) => {
+      return { ...existing, [name]: category };
+    });
   };
 
-  if (!transactions.length) {
+  if (!debits.length) {
     return;
   }
 
-  const filteredTransactions = transactions.filter(
-    (row) => row["Transaction"] === "DEBIT",
-  );
-
-  // TODO: use context to access filteredTransactions
+  // TODO: use context to access debits
+  // TODO: these should be tabs + a tab for each category
   return (
     <div className="font-mono text-xs">
-      <CreditChart transactions={filteredTransactions} />
-      <RecurringCharges transactions={filteredTransactions} />
-      <UnclassifiedCharges
-        transactions={filteredTransactions}
+      <div>{JSON.stringify(rules)}</div>
+
+      <CreditChart transactions={debits} />
+      <RecurringCharges transactions={debits} />
+      <CreditTransactions
+        transactions={debits}
         onCategorize={onCategorize}
+        category={CATEGORIES.UNCLASSIFIED}
       />
     </div>
   );

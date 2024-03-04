@@ -1,5 +1,6 @@
 import React from "react";
 import moment from "moment";
+import CreditTransaction from "./CreditTransaction";
 
 function isMonthly(transactions) {
   if (transactions.length <= 2) {
@@ -36,8 +37,7 @@ export default function RecurringCharges({ transactions }) {
   const filtered = Object.entries(summary).reduce(
     (obj, [key, transactions]) => {
       if (isMonthly(transactions)) {
-        const last = transactions[transactions.length - 1];
-        obj[key] = last["Amount"];
+        obj[key] = transactions[transactions.length - 1];
       }
       return obj;
     },
@@ -45,30 +45,33 @@ export default function RecurringCharges({ transactions }) {
   );
 
   const total = Object.values(filtered).reduce(
-    (carry, value) => carry + value,
+    (carry, t) => carry + t["Amount"],
     0,
   );
 
+  // TODO: this is the same as CreditTransactions, except with a total
   return (
-    <table className="w-max mx-auto">
+    <table className="w-full mx-auto">
       <thead>
         <tr>
-          <th colSpan="2" className="text-center">
-            Recurring ({Object.keys(filtered).length})
-          </th>
+          <th colSpan={3}>Recurring ({Object.keys(filtered).length})</th>
+        </tr>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+          <th>Category</th>
         </tr>
       </thead>
       <tbody>
         {Object.entries(filtered).map(([key, last]) => (
-          <tr key={key}>
-            <td>{key}</td>
-            <td>{last}</td>
-          </tr>
+          <CreditTransaction key={key} {...last} />
         ))}
       </tbody>
       <tfoot>
         <tr>
-          <td className="text-right">TOTAL</td>
+          <td colSpan={2} className="text-right">
+            TOTAL
+          </td>
           <td>{total}</td>
         </tr>
       </tfoot>
