@@ -30,14 +30,14 @@ export default function CreditChart({ transactions }) {
   };
 
   // "2022-08-30" -> "2022-08"
-  const groups = groupBy(transactions, (row) => row["Date"].substring(0, 7));
+  const groups = groupBy(transactions, (row) => row["date"].substring(0, 7));
 
   const data = {
     labels: Object.keys(groups), // year-month
     datasets: [
       {
         data: Object.values(groups).map(
-          (subset) => -1 * sumBy(subset, "Amount"),
+          (subset) => -1 * sumBy(subset, "amount"),
         ),
         borderColor: COLORS[CATEGORIES.UNCLASSIFIED],
         backgroundColor: COLORS[CATEGORIES.UNCLASSIFIED],

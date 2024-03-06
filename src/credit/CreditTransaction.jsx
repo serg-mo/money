@@ -6,13 +6,11 @@ import { COLORS, parseName, formatAmount } from "../utils";
 
 function CategoryPicker({ current, onClick }) {
   // bg-red-500 bg-orange-500 bg-amber-500 bg-yellow-500 bg-lime-500 bg-green-500 bg-emerald-500 bg-teal-500 bg-cyan-500 bg-sky-500 bg-blue-500 bg-indigo-500 bg-violet-500 bg-slate-500";
-
-  //
   return (
     <div className="flex flex-row overflow-hidden transition-all ease-in-out duration-500">
       {Object.entries(COLORS).map(([category, color]) => (
         <div
-          className={`rounded-full bg-${color}-500 p-1 opacity-50 hover:opacity-100 ${current === category ? "opacity-100" : ""}`}
+          className={`bg-slate-500 cursor-pointer p-1 ${current === category ? "opacity-100" : "opacity-50"} hover:opacity-100`}
           onClick={() => onClick(category)}
           key={category}
         >
@@ -24,20 +22,20 @@ function CategoryPicker({ current, onClick }) {
 }
 
 export default function Transaction({ onClick, ...t }) {
-  const handleCategory = (category) => onClick(parseName(t["Name"]), category);
+  const handleCategory = (category) => onClick(parseName(t["name"]), category);
 
   return (
     <tr className="group hover:border-2 border-black">
       <td>
-        <div>{t["Name"]}</div>
+        <div>{t["name"]}</div>
         <div className="hidden group-hover:block">
           {onClick && (
-            <CategoryPicker current={t["Category"]} onClick={handleCategory} />
+            <CategoryPicker current={t["category"]} onClick={handleCategory} />
           )}
         </div>
       </td>
-      <td>${formatAmount(t["Amount"])}</td>
-      <td>{t["Category"]}</td>
+      <td>${formatAmount(t["amount"])}</td>
+      <td>{t["category"]}</td>
     </tr>
   );
 }

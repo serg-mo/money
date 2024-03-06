@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Dashboard from "./Dashboard";
 
 export default function App() {
-  // multiple files, e.g., brokerage + checking
+  // multiple files, e.g., brokerage, checking, credit
   const [files, setFiles] = useState([]);
 
   function handleChange(event) {

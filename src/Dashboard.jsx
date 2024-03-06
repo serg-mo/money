@@ -4,8 +4,8 @@ import DashboardBrokerage from "./DashboardBrokerage";
 
 export default function Dashboard({ files }) {
   // TODO: parse more than one file
-  const file = files[0];
   // TODO: determine schema by looking at it, brokerage vs credit type Dashboard
+  const file = files[0];
   const TypedDashboard = true ? DashboardCredit : DashboardBrokerage;
 
   return (

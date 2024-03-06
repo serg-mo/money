@@ -8,7 +8,7 @@ function isMonthly(transactions) {
   }
 
   const months = transactions.map((row) =>
-    moment(row["Date"]).format("YYYY-MM"),
+    moment(row["date"]).format("YYYY-MM"),
   );
   const [first, last] = [months[0], months[months.length - 1]];
 
@@ -28,7 +28,7 @@ function isMonthly(transactions) {
 export default function RecurringCharges({ transactions }) {
   // name => transactions
   const summary = transactions.reduce((obj, transaction) => {
-    const group = transaction["Name"];
+    const group = transaction["name"];
     obj[group] = [...(obj[group] || []), transaction];
     return obj;
   }, {});
@@ -45,7 +45,7 @@ export default function RecurringCharges({ transactions }) {
   );
 
   const total = Object.values(filtered).reduce(
-    (carry, t) => carry + t["Amount"],
+    (carry, t) => carry + t["amount"],
     0,
   );
 
