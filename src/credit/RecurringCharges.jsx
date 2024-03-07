@@ -1,6 +1,6 @@
 import React from "react";
 import moment from "moment";
-import CreditTransaction from "./CreditTransaction";
+import CreditTransactions from "./CreditTransactions";
 
 function isMonthly(transactions) {
   if (transactions.length <= 2) {
@@ -28,53 +28,24 @@ function isMonthly(transactions) {
 export default function RecurringCharges({ transactions }) {
   // name => transactions
   const summary = transactions.reduce((obj, transaction) => {
-    const group = transaction["name"];
+    const group = transaction["name"]; // TODO: parse name here
     obj[group] = [...(obj[group] || []), transaction];
     return obj;
   }, {});
   // console.log(summary);
 
-  const filtered = Object.entries(summary).reduce(
-    (obj, [key, transactions]) => {
-      if (isMonthly(transactions)) {
-        obj[key] = transactions[transactions.length - 1];
-      }
-      return obj;
-    },
-    {},
-  );
+  // last transaction of the recurring transactions grouped by name
+  const filtered = Object.values(summary)
+    .filter(isMonthly)
+    .map((group) => group[group.length - 1]);
 
+  // TODO: bring back the total in the header or the footer
+  /*
   const total = Object.values(filtered).reduce(
     (carry, t) => carry + t["amount"],
     0,
   );
+  */
 
-  // TODO: this is the same as CreditTransactions, except with a total
-  return (
-    <table className="w-full mx-auto">
-      <thead>
-        <tr>
-          <th colSpan={3}>Recurring ({Object.keys(filtered).length})</th>
-        </tr>
-        <tr>
-          <th>Name</th>
-          <th>Amount</th>
-          <th>Category</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Object.entries(filtered).map(([key, last]) => (
-          <CreditTransaction key={key} {...last} />
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colSpan={2} className="text-right">
-            TOTAL
-          </td>
-          <td>{total}</td>
-        </tr>
-      </tfoot>
-    </table>
-  );
+  return <CreditTransactions title="Recurring" transactions={filtered} />;
 }

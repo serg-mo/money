@@ -25,20 +25,21 @@ export const CATEGORIES = {
 // red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose
 
 // TODO: first classify everything, then sort categories by size, then pick the colors
+// category buttons will appear in this order
 export const COLORS = {
   [CATEGORIES.FOOD]: "yellow",
-  [CATEGORIES.INSURANCE]: "teal",
-  [CATEGORIES.GYM]: "green",
-  [CATEGORIES.HEALTH]: "emerald",
+  [CATEGORIES.SHOPPING]: "sky",
   [CATEGORIES.CAR]: "red",
   [CATEGORIES.PET]: "cyan",
-  [CATEGORIES.SHOPPING]: "sky",
   [CATEGORIES.SUBSCRIPTIONS]: "blue",
   [CATEGORIES.TRAVEL]: "indigo",
+
+  [CATEGORIES.HEALTH]: "emerald",
   [CATEGORIES.FUN]: "orange",
   [CATEGORIES.GIFTS]: "lime",
   [CATEGORIES.UTILITIES]: "violet",
-
+  [CATEGORIES.GYM]: "green",
+  [CATEGORIES.INSURANCE]: "teal",
   [CATEGORIES.OTHER]: "amber",
   [CATEGORIES.UNCLASSIFIED]: "slate",
 };
@@ -100,11 +101,57 @@ function parseCreditTransactions(lines, headers) {
 // TODO: add typescript
 // TODO: write unit tests for all of these
 export function normalizeName(name) {
-  name = name.replace(/\*\S+$/, ""); // e.g., AMZN Mktp US*DC1M32GX3
+  // remove processor prefixes, e.q., Square, Toast, WePay
+  const prefixes = [/SQ\ \*?/i, /^SP\ /i, /^TST\*/i, /^WPY\*/i, /^ZSK\*/i];
+  for (const prefix of prefixes) {
+    name = name.replace(prefix, "");
+  }
+
+  name = name.replace(/\*\S+$/, ""); // trailing star + nonspace sequence e.g., AMZN Mktp US*DC1M32GX3
+  name = name.replace(/#\d+.+$/, ""); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
+  name = name.replace(/\s\s\S+$/, ""); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
+  name = name.replace(/\d+$/, ""); // trailing digits, e.g., SHELL OIL 57444585400
+
   name = name.replace(/\*RECUR.+$/, ""); // e.g., GEICO *RECURING PMTS
-  name = name.replace(/\d+$/, ""); // e.g., SHELL OIL 57444585400
-  name = name.replace(/#\d+.+$/, ""); // e.g., ARCO#82184SUPER POWER
+
   name = name.trim();
 
   return name;
 }
+
+// given a list of strings, return the longest common prefix (for rule pruning)
+function getLongestCommonPrefix(names) {
+  if (names.length === 0) {
+    return "";
+  }
+
+  // smallest of the available names
+  let minLength = Math.min(...names.map((name) => name.length));
+
+  let prefix = "";
+  for (let i = 0; i < minLength; i++) {
+    const char = names[0][i]; // i-th character from the first name
+    if (names.every((str) => str[i] === char)) {
+      prefix += char;
+    } else {
+      break; // stop on the first mismatch
+    }
+  }
+
+  return prefix;
+}
+
+/*
+console.log(
+  getLongestCommonPrefix([
+    "LYFT   *1 RIDE 05-",
+    "LYFT   *1 RIDE 06-",
+    "LYFT   *1 RIDE 07-",
+    "LYFT   *1 RIDE 09-",
+    "LYFT   *2 RIDES 04-",
+    "LYFT   *2 RIDES 09-20",
+    "LYFT   *3 RIDES 02-",
+  ]),
+);
+// "LYFT   *"
+*/

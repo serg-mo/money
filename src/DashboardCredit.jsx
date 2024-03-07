@@ -76,6 +76,13 @@ export default function DashboardCredit({ file }) {
     return;
   }
 
+  const unclassified = debits.filter(
+    (t) => t["category"] === CATEGORIES.UNCLASSIFIED,
+  );
+
+  // TODO: pruning rules would be a good place to apply getLongestCommonPrefix
+  // group by category, find names with a prefix, replace them all with a single rule
+
   // TODO: use context to access debits
   // TODO: these should be tabs + a tab for each category
   return (
@@ -85,9 +92,9 @@ export default function DashboardCredit({ file }) {
       <CreditChart transactions={debits} />
       <RecurringCharges transactions={debits} />
       <CreditTransactions
-        transactions={debits}
+        title={CATEGORIES.UNCLASSIFIED}
+        transactions={unclassified}
         onCategorize={onCategorize}
-        category={CATEGORIES.UNCLASSIFIED}
       />
     </div>
   );
