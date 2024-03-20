@@ -1,5 +1,5 @@
 import React from "react";
-import { CATEGORIES, COLORS, parseName, formatAmount } from "../utils";
+import { CATEGORIES, COLORS, formatAmount } from "../utils";
 import moment from "moment";
 
 // TODO: move the category picker into its own file
@@ -32,7 +32,7 @@ function CategoryPicker({ current, onClick }) {
 }
 
 export default function Transaction({ onClick, ...t }) {
-  const handleCategory = (category) => onClick(parseName(t["name"]), category);
+  const handleCategory = (category) => onClick(category);
 
   return (
     <tr className="group border border-slate-600">

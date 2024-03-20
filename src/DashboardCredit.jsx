@@ -2,122 +2,117 @@ import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
 import CreditTransactions from "./credit/CreditTransactions";
-import {
-  CATEGORIES,
-  parseCreditFile,
-  getCategory,
-  normalizeName,
-} from "./utils";
+import { CATEGORIES, parseCreditFile } from "./utils";
 
-// import * as KNNClassifier from "@tensorflow-models/knn-classifier";
+import * as tf from "@tensorflow/tfjs";
+import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
 import * as use from "@tensorflow-models/universal-sentence-encoder";
 
-/*
-// Load the model.
-use.loadTokenizer().then((tokenizer) => {
-  // Embed an array of sentences.
-  console.log(tokenizer);
-
-  console.log(tokenizer.encode("Hello, how are you?")); // [341, 4125, 8, 140, 31, 19, 54]
-
-  return tokenizer.encode(str); // [341, 4125, 8, 140, 31, 19, 54]
-});
-
-/*
-async function vectorize(str) {
-  // https://www.npmjs.com/package/@tensorflow-models/universal-sentence-encoder
-  const tokenizer = await loadTokenizer();
-  console.log(tokenizer);
-
-  console.log(tokenizer.encode("Hello, how are you?")); // [341, 4125, 8, 140, 31, 19, 54]
-
-  return tokenizer.encode(str); // [341, 4125, 8, 140, 31, 19, 54]
-}
-*/
-
-/*
-function knn() {
-  // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
-  const classifier = KNNClassifier.create();
-
-  // TODO: category is my classification, can be string
-  classifier.addExample(embeddings, 0);
-  classifier.addExample(embeddings, 1);
-
-  // console.log("Predictions:");
-  // console.log(classifier.predictClass(xlogits));
-}
-*/
-
 // TODO: add arrow key handlers to zoom in/out and shift left/right
 export default function DashboardCredit({ file }) {
+  const [embeddings, setEmbeddings] = useState([]); // transaction names converted to numbers
   const [transactions, setTransactions] = useState([]);
   const [debits, setDebits] = useState([]);
-  const [rules, setRules] = useState({});
-  const [isCategorized, setIsCategorized] = useState(true);
+  const [isTokenized, setIsTokenized] = useState(false);
+  const [isCategorized, setIsCategorized] = useState(false);
+
   const [tokenizerModel, setTokenizerModel] = useState(null);
+  const [classifier, setClassifier] = useState(null);
 
   useEffect(() => {
-    // load existing rules from local storage, which persists across sessions
-    const existingRules = JSON.parse(localStorage.getItem("rules"));
-    if (existingRules && Object.keys(existingRules).length) {
-      setRules(existingRules);
-    }
-
     // load transactions from a file into component state
     let reader = new FileReader();
     reader.onload = (e) => {
       const lines = e.target.result.split(/\r?\n/); // FileReader
       setTransactions(parseCreditFile(lines));
-      setIsCategorized(false); // trigger re-categorization
     };
     reader.readAsText(file);
-  }, []);
 
-  useEffect(() => {
-    use.load().then((model) => {
-      setTokenizerModel(model);
-    });
+    // https://www.npmjs.com/package/@tensorflow-models/universal-sentence-encoder
+    use.load().then(setTokenizerModel);
+
+    // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
+    setClassifier(KNNClassifier.create());
   }, []); // run once on mount
 
   useEffect(() => {
-    if (tokenizerModel) {
-      // TODO: transaction memos converted to numbers
-      const sentences = ["Hello.", "How are you?"];
-      tokenizerModel.embed(sentences).then((embeddings) => {
-        // `embeddings` is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
-        // So in this example `embeddings` has the shape [2, 512].
-        embeddings.array().then((array) => console.log(array));
-        // Returns the flattened data that backs the tensor.
-        embeddings.data().then((data) => console.log(data));
-
-        console.log(embeddings);
-        console.log(embeddings.values);
-      });
+    // load existing classifier from local storage, which persists across sessions
+    const data = JSON.parse(localStorage.getItem("classifierDataset"));
+    if (classifier && data && Object.keys(data).length) {
+      console.log("setting classifier data");
+      console.log(data);
+      classifier.setClassifierDataset(data);
     }
-  }, [tokenizerModel]);
+  }, [classifier]);
 
-  // when rules change, persist them
+  // TODO: apply this function to every transaction
+  const predict = async (t, key) => {
+    // NOTE: must be a tensor + string label
+    const tensor = tf.tensor(embeddings[key]);
+    const prediction = await classifier.predictClass(tensor, 1); // neighborhood size
+
+    return {
+      ...t,
+      category: prediction.label,
+      confidences: prediction.confidences,
+    };
+  };
+
   useEffect(() => {
-    if (Object.keys(rules).length) {
-      localStorage.setItem("rules", JSON.stringify(rules));
+    if (isTokenized) {
+      return;
     }
-  }, [rules]);
+
+    // NOTE: model and transactions are loaded asynchronously
+    if (!tokenizerModel || !transactions.length) {
+      return;
+    }
+
+    const names = transactions.map((t) => t["name"]);
+    tokenizerModel.embed(names).then((tensor) => {
+      tensor
+        .array()
+        .then(setEmbeddings) // numeric vector of 512 values
+        .then(() => {
+          setIsTokenized(true);
+        });
+    });
+  }, [tokenizerModel, transactions]);
+
+  const categorize = () => {
+    console.log(`Reclassifiying with ${classifier.getNumClasses()} classes`);
+    // console.log(classifier.getClassExampleCount());
+
+    /*
+    predict(transactions[0], 0).then((v) =>
+      console.log(`${v.name} ${v.category}`),
+    );
+    */
+
+    // setTransactions((existing) => existing.map(predict));
+    setIsCategorized(true); // stop infinite re-categorization
+  };
 
   useEffect(() => {
-    // NOTE: rules and transactions are loaded asynchronously
-    // re-categorize when rules and transactions are loaded, but not categorized (initial state)
-    if (Object.keys(rules).length && transactions.length && !isCategorized) {
-      setTransactions((existing) =>
-        existing.map((t) => {
-          return { ...t, category: getCategory(t["name"], rules) };
-        }),
-      );
-
-      setIsCategorized(true); // stop infinite re-categorization
+    // re-categorize when classifier and transactions are loaded, but not categorized
+    if (!isTokenized) {
+      console.log(`No categorize, because not tokenized`);
+      return;
     }
-  }, [rules, isCategorized]);
+
+    if (isCategorized) {
+      console.log(`No categorize, because already categorized`);
+      return;
+    }
+
+    if (!classifier.getNumClasses()) {
+      console.log(`No categorize because no classes`);
+      return;
+    }
+
+    categorize();
+  }, [isTokenized, isCategorized]);
 
   // debits change when transactions change, but that only happens once per session
   useEffect(() => {
@@ -126,15 +121,24 @@ export default function DashboardCredit({ file }) {
     }
   }, [transactions]);
 
-  const onCategorize = (name, category) => {
-    // prune/normalize the name to remove any unique identifiers
-    name = normalizeName(name);
+  const onCategorize = (key, category) => {
+    // NOTE: it takes a while for these to load, so ignore clicks for now
+    if (!embeddings.length) {
+      console.log("Embeddings are empty");
+      return;
+    }
 
-    // overwrite any existing rules for that name
-    setRules((existing) => {
-      return { ...existing, [name]: category };
-    });
-    setIsCategorized(false); // trigger re-categorization
+    // NOTE: must be a tensor + string label
+    const tensor = tf.tensor(embeddings[key]);
+    classifier.addExample(tensor, category);
+
+    // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
+    localStorage.setItem(
+      "classifierDataset",
+      JSON.stringify(classifier.getClassifierDataset()),
+    );
+
+    categorize();
   };
 
   if (!debits.length) {
@@ -145,17 +149,24 @@ export default function DashboardCredit({ file }) {
     (t) => t["category"] === CATEGORIES.UNCLASSIFIED,
   );
 
-  // TODO: pruning rules would be a good place to apply getLongestCommonPrefix
-  // group by category, find a prefix, replace them all with a single rule
-
   // TODO: use context to access debits
   // TODO: these should be tabs + a tab for each category
+  // TODO: I can drag and drop a transaction on top of a tab to reclassify
   return (
     <div className="font-mono text-xs">
-      <div className="text-center">{Object.keys(rules).length} rules</div>
+      <div className="text-center">
+        {isTokenized ? "is Tokenized" : "is not Tokenized"} &nbsp;
+        {isCategorized ? "is Categorized" : "is not Categorized"} &nbsp;
+        {Object.keys(embeddings).length} embeddings
+      </div>
 
       <CreditChart transactions={debits} />
       <RecurringCharges transactions={debits} />
+      <CreditTransactions
+        title="ALL"
+        transactions={debits}
+        onCategorize={onCategorize}
+      />
       <CreditTransactions
         title={CATEGORIES.UNCLASSIFIED}
         transactions={unclassified}
