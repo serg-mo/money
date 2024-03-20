@@ -32,8 +32,7 @@ function CategoryPicker({ current, onClick }) {
 }
 
 export default function Transaction({ onClick, ...t }) {
-  const handleCategory = (category) => onClick(category);
-
+  // TODO: set the transparancy of the category to the confidence
   return (
     <tr className="group border border-slate-600">
       <td className="p-2 align-middle">{t["name"].substring(0, 23).trim()}</td>
@@ -43,7 +42,7 @@ export default function Transaction({ onClick, ...t }) {
         </div>
         <div className="hidden group-hover:block">
           {onClick && (
-            <CategoryPicker current={t["category"]} onClick={handleCategory} />
+            <CategoryPicker current={t["category"]} onClick={onClick} />
           )}
         </div>
       </td>

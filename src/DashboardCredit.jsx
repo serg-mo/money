@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
 import CreditTransactions from "./credit/CreditTransactions";
-import { CATEGORIES, parseCreditFile } from "./utils";
+import { CATEGORIES, parseCreditFile, normalizeName } from "./utils";
 
 import * as tf from "@tensorflow/tfjs";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
@@ -14,7 +14,6 @@ export default function DashboardCredit({ file }) {
   const [embeddings, setEmbeddings] = useState([]); // transaction names converted to numbers
   const [transactions, setTransactions] = useState([]);
   const [debits, setDebits] = useState([]);
-  const [isTokenized, setIsTokenized] = useState(false);
   const [isCategorized, setIsCategorized] = useState(false);
 
   const [tokenizerModel, setTokenizerModel] = useState(null);
@@ -38,11 +37,13 @@ export default function DashboardCredit({ file }) {
 
   useEffect(() => {
     // load existing classifier from local storage, which persists across sessions
-    const data = JSON.parse(localStorage.getItem("classifierDataset"));
-    if (classifier && data && Object.keys(data).length) {
-      console.log("setting classifier data");
-      console.log(data);
-      classifier.setClassifierDataset(data);
+    const str = JSON.parse(localStorage.getItem("classifierDataset"));
+    if (classifier && str && str.length) {
+      const unserialized = Object.fromEntries(
+        str.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
+      );
+
+      classifier.setClassifierDataset(unserialized);
     }
   }, [classifier]);
 
@@ -50,59 +51,41 @@ export default function DashboardCredit({ file }) {
   const predict = async (t, key) => {
     // NOTE: must be a tensor + string label
     const tensor = tf.tensor(embeddings[key]);
-    const prediction = await classifier.predictClass(tensor, 1); // neighborhood size
+    const { label, confidences } = await classifier.predictClass(tensor, 3); // neighborhood size
+
+    // TODO: do not replace anything unless it's above a minimum confidence
+    const minConfidence = 0.8;
+    let category = t.category; // original category
+
+    for (const [cat, confidence] of Object.entries(confidences)) {
+      if (confidence >= minConfidence) {
+        category = cat;
+      }
+    }
 
     return {
       ...t,
-      category: prediction.label,
-      confidences: prediction.confidences,
+      category,
+      confidences,
     };
   };
 
   useEffect(() => {
-    if (isTokenized) {
-      return;
-    }
-
     // NOTE: model and transactions are loaded asynchronously
-    if (!tokenizerModel || !transactions.length) {
+    if (!tokenizerModel || !transactions.length || embeddings.length) {
       return;
     }
 
-    const names = transactions.map((t) => t["name"]);
+    const names = transactions.map((t) => normalizeName(t["name"]));
     tokenizerModel.embed(names).then((tensor) => {
-      tensor
-        .array()
-        .then(setEmbeddings) // numeric vector of 512 values
-        .then(() => {
-          setIsTokenized(true);
-        });
+      tensor.array().then(setEmbeddings); // numeric vector of 512 values
     });
-  }, [tokenizerModel, transactions]);
+  }, [tokenizerModel, transactions, embeddings]);
 
-  const categorize = () => {
-    console.log(`Reclassifiying with ${classifier.getNumClasses()} classes`);
-    // console.log(classifier.getClassExampleCount());
-
-    /*
-    predict(transactions[0], 0).then((v) =>
-      console.log(`${v.name} ${v.category}`),
-    );
-    */
-
-    // setTransactions((existing) => existing.map(predict));
-    setIsCategorized(true); // stop infinite re-categorization
-  };
-
-  useEffect(() => {
+  const categorize = async () => {
     // re-categorize when classifier and transactions are loaded, but not categorized
-    if (!isTokenized) {
-      console.log(`No categorize, because not tokenized`);
-      return;
-    }
-
-    if (isCategorized) {
-      console.log(`No categorize, because already categorized`);
+    if (!embeddings.length) {
+      console.log(`No categorize, because no embeddings`);
       return;
     }
 
@@ -111,8 +94,18 @@ export default function DashboardCredit({ file }) {
       return;
     }
 
-    categorize();
-  }, [isTokenized, isCategorized]);
+    console.log(`Categorize with ${classifier.getNumClasses()} classes`);
+    console.log(classifier.getClassExampleCount());
+
+    const newTransactions = await Promise.all(transactions.map(predict));
+    console.log(
+      newTransactions.map(({ name, category, confidences }) => {
+        return { name, category, confidences };
+      }),
+    );
+
+    setTransactions(newTransactions);
+  };
 
   // debits change when transactions change, but that only happens once per session
   useEffect(() => {
@@ -133,12 +126,11 @@ export default function DashboardCredit({ file }) {
     classifier.addExample(tensor, category);
 
     // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
-    localStorage.setItem(
-      "classifierDataset",
-      JSON.stringify(classifier.getClassifierDataset()),
+    let serialized = Object.entries(classifier.getClassifierDataset()).map(
+      ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
     );
 
-    categorize();
+    localStorage.setItem("classifierDataset", JSON.stringify(serialized));
   };
 
   if (!debits.length) {
@@ -155,10 +147,11 @@ export default function DashboardCredit({ file }) {
   return (
     <div className="font-mono text-xs">
       <div className="text-center">
-        {isTokenized ? "is Tokenized" : "is not Tokenized"} &nbsp;
         {isCategorized ? "is Categorized" : "is not Categorized"} &nbsp;
         {Object.keys(embeddings).length} embeddings
       </div>
+
+      <button onClick={categorize}>Categorize</button>
 
       <CreditChart transactions={debits} />
       <RecurringCharges transactions={debits} />
