@@ -28,7 +28,7 @@ function isMonthly(transactions) {
 export default function RecurringCharges({ transactions }) {
   // name => transactions
   const summary = transactions.reduce((obj, transaction) => {
-    const group = transaction["name"]; // TODO: parse name here
+    const group = transaction["normalizedName"]; // TODO: parse name here
     obj[group] = [...(obj[group] || []), transaction];
     return obj;
   }, {});

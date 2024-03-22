@@ -2,40 +2,41 @@ import React, { useState, useEffect } from "react";
 import CreditChart from "./credit/CreditChart";
 import RecurringCharges from "./credit/RecurringCharges";
 import CreditTransactions from "./credit/CreditTransactions";
-import { CATEGORIES, parseCreditFile, normalizeName } from "./utils";
+import { CATEGORIES, parseCreditFile } from "./utils";
 
 import * as tf from "@tensorflow/tfjs";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
-import * as use from "@tensorflow-models/universal-sentence-encoder";
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
+// TODO: add count to tab names
 export default function DashboardCredit({ file }) {
-  const [embeddings, setEmbeddings] = useState([]); // transaction names converted to numbers
   const [transactions, setTransactions] = useState([]);
   const [debits, setDebits] = useState([]);
-  const [isCategorized, setIsCategorized] = useState(false);
-
-  const [tokenizerModel, setTokenizerModel] = useState(null);
   const [classifier, setClassifier] = useState(null);
+  const [tab, setTab] = useState(CATEGORIES.UNCLASSIFIED); // TODO: type CATEGORIES,
+  const [isUpdated, setIsUpdated] = useState(false);
+  const [neighborhoodSize, setNeighborhoodSize] = useState(2);
+
+  const MAX_NEIGHBORHOOD_SIZE = 3;
+  const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
+  const MIN_CONFIDENCE = 0.8;
 
   useEffect(() => {
     // load transactions from a file into component state
     let reader = new FileReader();
     reader.onload = (e) => {
       const lines = e.target.result.split(/\r?\n/); // FileReader
-      setTransactions(parseCreditFile(lines));
+      const rows = parseCreditFile(lines);
+      setTransactions(rows.filter((row) => row["transaction"] === "DEBIT"));
     };
     reader.readAsText(file);
-
-    // https://www.npmjs.com/package/@tensorflow-models/universal-sentence-encoder
-    use.load().then(setTokenizerModel);
 
     // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
     setClassifier(KNNClassifier.create());
   }, []); // run once on mount
 
-  useEffect(() => {
+  const initClassifier = () => {
     // load existing classifier from local storage, which persists across sessions
     const str = JSON.parse(localStorage.getItem("classifierDataset"));
     if (classifier && str && str.length) {
@@ -43,22 +44,41 @@ export default function DashboardCredit({ file }) {
         str.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
       );
 
+      console.log("Restoring classifierDataset");
       classifier.setClassifierDataset(unserialized);
+      setIsUpdated(true);
     }
-  }, [classifier]);
+    // categorize() does not work here
+  };
 
-  // TODO: apply this function to every transaction
+  const persistClassifier = () => {
+    // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
+    let serialized = Object.entries(classifier.getClassifierDataset()).map(
+      ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
+    );
+    localStorage.setItem("classifierDataset", JSON.stringify(serialized));
+  };
+
+  const resetClassifier = () => {
+    classifier.clearAllClasses();
+    localStorage.removeItem("classifierDataset");
+    setIsUpdated(true);
+  };
+
   const predict = async (t, key) => {
     // NOTE: must be a tensor + string label
-    const tensor = tf.tensor(embeddings[key]);
-    const { label, confidences } = await classifier.predictClass(tensor, 3); // neighborhood size
+    const tensor = tf.tensor(transactions[key]["vector"]);
+    const { label, confidences } = await classifier.predictClass(
+      tensor,
+      neighborhoodSize,
+    );
+
+    let category = label; // label predicted, t.category original
+    const maxConfidence = confidences[label];
 
     // TODO: do not replace anything unless it's above a minimum confidence
-    const minConfidence = 0.8;
-    let category = t.category; // original category
-
     for (const [cat, confidence] of Object.entries(confidences)) {
-      if (confidence >= minConfidence) {
+      if (confidence >= MIN_CONFIDENCE) {
         category = cat;
       }
     }
@@ -67,25 +87,24 @@ export default function DashboardCredit({ file }) {
       ...t,
       category,
       confidences,
+      maxConfidence, // TODO: sort by this
     };
   };
+  useEffect(initClassifier, [classifier]);
 
-  useEffect(() => {
-    // NOTE: model and transactions are loaded asynchronously
-    if (!tokenizerModel || !transactions.length || embeddings.length) {
-      return;
-    }
+  const getClassifierStats = () => {
+    // TODO: it would be nice to see a progress icon for this
+    const counts = classifier.getClassExampleCount();
+    const examples = Object.values(counts).reduce((a, c) => a + c, 0);
+    const classes = Object.values(counts).length;
 
-    const names = transactions.map((t) => normalizeName(t["name"]));
-    tokenizerModel.embed(names).then((tensor) => {
-      tensor.array().then(setEmbeddings); // numeric vector of 512 values
-    });
-  }, [tokenizerModel, transactions, embeddings]);
+    return [classes, examples];
+  };
 
-  const categorize = async () => {
+  const predictCategories = async () => {
     // re-categorize when classifier and transactions are loaded, but not categorized
-    if (!embeddings.length) {
-      console.log(`No categorize, because no embeddings`);
+    if (!transactions.length) {
+      console.log(`No categorize, because no transactions`);
       return;
     }
 
@@ -94,16 +113,18 @@ export default function DashboardCredit({ file }) {
       return;
     }
 
-    console.log(`Categorize with ${classifier.getNumClasses()} classes`);
-    console.log(classifier.getClassExampleCount());
+    // TODO: it would be nice to see a progress icon for this
+    const [classes, examples] = getClassifierStats();
+    if (examples < MIN_EXAMPLES) {
+      console.log(`No categorize because not enough examples`);
+      return;
+    }
 
-    const newTransactions = await Promise.all(transactions.map(predict));
     console.log(
-      newTransactions.map(({ name, category, confidences }) => {
-        return { name, category, confidences };
-      }),
+      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`,
     );
 
+    const newTransactions = await Promise.all(transactions.map(predict));
     setTransactions(newTransactions);
   };
 
@@ -114,55 +135,95 @@ export default function DashboardCredit({ file }) {
     }
   }, [transactions]);
 
-  const onCategorize = (key, category) => {
-    // NOTE: it takes a while for these to load, so ignore clicks for now
-    if (!embeddings.length) {
-      console.log("Embeddings are empty");
-      return;
-    }
-
+  // TODO: rename to addExample
+  // TODO: remember which transactions are classified manually and assert model guesses the same
+  const onCategorize = (transaction, category) => {
     // NOTE: must be a tensor + string label
-    const tensor = tf.tensor(embeddings[key]);
+    console.log(transaction);
+    const tensor = tf.tensor(transaction["vector"]);
     classifier.addExample(tensor, category);
+    persistClassifier();
 
-    // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
-    let serialized = Object.entries(classifier.getClassifierDataset()).map(
-      ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
+    const [classes, examples] = getClassifierStats();
+    console.log(
+      `ADD ${transaction["normalizedName"]} as ${category}, [${classes}:${examples}]`,
     );
-
-    localStorage.setItem("classifierDataset", JSON.stringify(serialized));
   };
 
   if (!debits.length) {
     return;
   }
 
-  const unclassified = debits.filter(
-    (t) => t["category"] === CATEGORIES.UNCLASSIFIED,
-  );
+  const [classes, examples] = getClassifierStats();
+  // TODO: do not classify until a minimum number of examples
 
-  // TODO: use context to access debits
+  const tabTransactions =
+    tab === "ALL"
+      ? transactions
+      : transactions.filter((t) => t["category"] === tab);
+
+  const buttonClass =
+    "m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:rotate-12";
+  const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
+  const activeTabClass = "bg-gray-400";
+
+  // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
+  // TODO: sort by max confidence
+  // TODO: add an undo button for the wrong classification
+  // TODO: use context to access transactions
   // TODO: these should be tabs + a tab for each category
   // TODO: I can drag and drop a transaction on top of a tab to reclassify
+  // TODO: consider showing the example counts in each category tab
   return (
     <div className="font-mono text-xs">
+      <div className="flex flex-row justify-center">
+        <button className={buttonClass} onClick={predictCategories}>
+          Categorize
+        </button>
+        <button className={buttonClass} onClick={resetClassifier}>
+          Reset
+        </button>
+      </div>
       <div className="text-center">
-        {isCategorized ? "is Categorized" : "is not Categorized"} &nbsp;
-        {Object.keys(embeddings).length} embeddings
+        <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
+        <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
+        <select
+          value={neighborhoodSize}
+          onChange={(e) => setNeighborhoodSize(e.target.value)}
+        >
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
       </div>
 
-      <button onClick={categorize}>Categorize</button>
+      {false && <RecurringCharges transactions={debits} />}
+      {false && (
+        <CreditTransactions
+          title="ALL"
+          transactions={debits}
+          onCategorize={onCategorize}
+        />
+      )}
 
       <CreditChart transactions={debits} />
-      <RecurringCharges transactions={debits} />
+
+      <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
+        {["ALL", ...Object.values(CATEGORIES)].map((category, key) => (
+          <button
+            className={`${tabClass} ${category === tab ? activeTabClass : ""}`}
+            key={key}
+            onClick={() => setTab(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
       <CreditTransactions
-        title="ALL"
-        transactions={debits}
-        onCategorize={onCategorize}
-      />
-      <CreditTransactions
-        title={CATEGORIES.UNCLASSIFIED}
-        transactions={unclassified}
+        title={tab}
+        transactions={tabTransactions}
         onCategorize={onCategorize}
       />
     </div>

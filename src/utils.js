@@ -3,6 +3,9 @@
 // maybe there is a default categories that you customize and that's what gets saved in browser storage
 // consider doing clusters with manual categories, then pick the nearest cluster for unknown ones
 
+// TODO: add typescript
+// TODO: write unit tests for all of these
+
 export const CATEGORIES = {
   CAR: "CAR",
   FUN: "FUN",
@@ -44,6 +47,10 @@ export const COLORS = {
   [CATEGORIES.UNCLASSIFIED]: "slate",
 };
 
+// TODO: make a constants file
+const MIN_NAME_LENGTH = 23;
+const MAX_NAME_LENGTH = 40;
+
 export function getCategory(name, rules) {
   // NOTE: name has a structure: description, city/phone/domain, state
   name = name.toUpperCase();
@@ -70,10 +77,8 @@ export function formatAmount(amount) {
 }
 
 export function parseName(name) {
-  // NOTE: some names have a * in it + unique id or just ignore any sequence of 3+ numbers
   // NOTE: splitting on spaces is not reliable
-
-  return name.toUpperCase().substring(0, 23).trim(); // ignore city/phone + state
+  return name.toUpperCase().substring(0, MAX_NAME_LENGTH).trim(); // ignore city/phone + state
 }
 
 export function parseCreditFile(lines) {
@@ -94,30 +99,58 @@ function parseCreditTransactions(lines, headers) {
     obj["amount"] = parseFloat(obj["amount"]);
     obj["category"] = CATEGORIES.UNCLASSIFIED;
 
+    obj["normalizedName"] = normalizeName(
+      obj["name"].substring(0, MIN_NAME_LENGTH),
+    );
+    obj["location"] = obj["name"].substring(MIN_NAME_LENGTH).trim();
+    obj["vector"] = nameToVector(obj["normalizedName"]);
+    obj["confidences"] = {};
+
     return obj;
   });
 }
 
-// TODO: add typescript
-// TODO: write unit tests for all of these
 export function normalizeName(name) {
+  // NOTE: some names have a * in it + unique id or just ignore any sequence of 3+ numbers
+  name = name.toUpperCase().trim();
+
   // remove processor prefixes, e.q., Square, Toast, WePay
-  const prefixes = [/SQ\ \*?/i, /^SP\ /i, /^TST\*/i, /^WPY\*/i, /^ZSK\*/i];
+  const prefixes = [
+    /SQ\ \*?/i,
+    /^SP\ /i,
+    /^TST\*/i,
+    /^WPY\*/i,
+    /^ZSK\*/i,
+    /^WF\*/i,
+  ];
   for (const prefix of prefixes) {
     name = name.replace(prefix, "");
   }
 
+  // TODO: consider stripping anything but letters, e.g., numbers and punctuation
   name = name.replace(/\*\S+$/, ""); // trailing star + nonspace sequence e.g., AMZN Mktp US*DC1M32GX3
   name = name.replace(/#\d+.+$/, ""); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
   name = name.replace(/\s\s\S+$/, ""); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
-  name = name.replace(/\d+$/, ""); // trailing digits, e.g., SHELL OIL 57444585400
-
+  name = name.replace(/\d{3,}$/, ""); // trailing digits, e.g., SHELL OIL 57444585400
   name = name.replace(/\*RECUR.+$/, ""); // e.g., GEICO *RECURING PMTS
+  name = name.replace(/LYFT\s+\*.+$/, "LYFT"); // e.g., LYFT *2 RIDES 09-20
+  name = name.replace(/AMZN MKTP US\*.+$/, "AMZN MKTP US"); // e.g., AMZN MKTP US*HT4P35MN2
+  name = name.replace(/AMAZON.COM\*.+$/, "AMAZON.COM"); // e.g., AMAZON.COM*H058W0GR0
 
-  name = name.trim();
-
-  return name;
+  // all must be the same length, see parseName()
+  return name.trim().padEnd(MIN_NAME_LENGTH, " ");
 }
+//console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
+//console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
+
+export function nameToVector(name) {
+  // normalize, then convert each charater into it's ASCII code equivalent
+  return name.split("").map((chr) => chr.charCodeAt(0));
+}
+
+console.assert(nameToVector("A"), [65]);
+console.assert(nameToVector("AB"), [65, 66]);
+console.assert(nameToVector("ABC"), [65, 66, 67]);
 
 // given a list of strings, return the longest common prefix (for rule pruning)
 function getLongestCommonPrefix(names) {
@@ -155,3 +188,17 @@ console.log(
 );
 // "LYFT   *"
 */
+
+export function formatConfidence(value) {
+  return `${Math.round(value * 100 * 100) / 100}%`;
+}
+
+export function getOpacity(value) {
+  const opacities = ["opacity-25", "opacity-50", "opacity-75", "opacity-100"];
+
+  // 0..1 => 0..last index
+  const scaled = Math.floor(value * (opacities.length - 1));
+  const index = Math.min(opacities.length - 1, Math.max(scaled, 0));
+
+  return opacities[index];
+}

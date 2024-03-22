@@ -33,7 +33,7 @@ export default function CreditTransactions({
           <CreditTransaction
             key={key}
             {...t}
-            onClick={(category) => onCategorize(key, category)}
+            onClick={(category) => onCategorize(t, category)}
           />
         ))}
       </tbody>
