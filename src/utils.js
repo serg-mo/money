@@ -90,23 +90,25 @@ export function parseCreditFile(lines) {
 
 function parseCreditTransactions(lines, headers) {
   // convert each line from an array of strings into an object, where keys are headers
-  return lines.map(parseCSV).map((values) => {
+  return lines.map(parseCSV).map((values, key) => {
     const obj = Object.fromEntries(
       headers.map((header, index) => [header, values[index]]),
     );
 
-    // TODO: consider inspecting the last character instead
-    obj["amount"] = parseFloat(obj["amount"]);
-    obj["category"] = CATEGORIES.UNCLASSIFIED;
-
-    obj["normalizedName"] = normalizeName(
+    const normalizedName = normalizeName(
       obj["name"].substring(0, MIN_NAME_LENGTH),
     );
-    obj["location"] = obj["name"].substring(MIN_NAME_LENGTH).trim();
-    obj["vector"] = nameToVector(obj["normalizedName"]);
-    obj["confidences"] = {};
 
-    return obj;
+    return {
+      ...obj,
+      key: key,
+      amount: parseFloat(obj["amount"]),
+      category: CATEGORIES.UNCLASSIFIED,
+      location: obj["name"].substring(MIN_NAME_LENGTH).trim(),
+      normalizedName: normalizedName,
+      vector: nameToVector(normalizedName),
+      confidences: {},
+    };
   });
 }
 

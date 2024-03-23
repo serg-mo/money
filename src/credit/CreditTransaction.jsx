@@ -23,7 +23,7 @@ export default function Transaction({ onClick, ...t }) {
       <td className="px-2 py-4 align-middle" title={t["name"]}>
         {t["normalizedName"]}
       </td>
-      <td className="px-2 py-4 text-center">
+      <td className="px-2 text-center">
         <div className="block group-hover:hidden">{t["location"]}</div>
         <div className="hidden group-hover:block">
           {onClick && <CategoryPicker transaction={t} onClick={onClick} />}

@@ -19,8 +19,7 @@ export default function CategoryPicker({ transaction, onClick }) {
 				// TODO: decide on opacity based on
 				const isCurrent = transaction["category"] === category;
 				const confidence = transaction["confidences"][category];
-				// ${isCurrent ? "opacity-100" : "opacity-70"} hover:opacity-100
-				const className = `my-1 rounded-md bg-slate-500 cursor-pointer p-1 ${getOpacity(confidence)}`;
+				const className = `my-1 rounded-md bg-gray-200 hover:bg-gray-400 cursor-pointer p-1 ${isCurrent ? "opacity-100" : "opacity-70"} hover:opacity-100 ${confidence && getOpacity(confidence)}`;
 
 				return (
 					<div
