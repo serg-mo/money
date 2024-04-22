@@ -31,10 +31,10 @@ function makeNewCandidate(mins, maxes) {
 }
 
 function mutateCandidate(candidate, jitter = 0.1) {
-  return candidate.map((value, index) => {
+  return candidate.map((value) => {
     const direction = Math.random() < 0.5 ? 1 : -1;
-    const magnitude = Math.random() * value * jitter;
-    return originalValue + Math.floor(direction * magnitude);
+    const magnitude = Math.random() * jitter;
+    return parseInt(value * (1 + direction * magnitude));
   });
 }
 
@@ -54,8 +54,13 @@ function evaluateCandidate(candidate, expenses, dividends, prices) {
   };
 }
 
-function formatGoal({ monthly, total }) {
-  return `${monthly.toFixed(0)}/mo @ ${(total / 1000).toFixed(2)}k`;
+function formatGoal({ monthly, total, roi, exp, ratio }) {
+  return (
+    <>
+      <p>{`${monthly.toFixed(0)}/mo @ ${(total / 1000).toFixed(2)}k`}</p>
+      <p>{`${roi}/${exp}=${ratio}`}</p>
+    </>
+  );
 }
 
 /*
@@ -83,8 +88,9 @@ console.log(
 
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
 export default function AppDividends() {
-  const TOP_SIZE = 10; // only show this many top candidates
-  const SEARCH_SIZE = 100_000; // consider this many candidates
+  const TOP_SIZE = 9;
+  const SEARCH_SIZE = 100_000;
+  const MUTATE_SIZE = 5;
 
   const REQUIRED_COLS = [
     "COST",
@@ -134,50 +140,64 @@ export default function AppDividends() {
     return { values, totals };
   };
 
-  const getTopCandidates = ({
-    mins,
-    maxes,
-    expenses,
-    dividends,
-    prices,
-    isPass,
-  }) => {
+  const getTopCandidates = ({ mins, maxes, getStats, isPass }) => {
     let candidates = [];
     for (let i = 0; i < SEARCH_SIZE; i++) {
-      // TODO: mutate top candidates by 10% in either direction
       const candidate = makeNewCandidate(mins, maxes);
-      const stats = evaluateCandidate(candidate, expenses, dividends, prices);
-
+      const stats = getStats(candidate);
       if (isPass(stats)) {
-        const payload = { candidate, ...stats };
+        // do not add the original candidate, mutate it first
+        for (let j = 0; j < MUTATE_SIZE; j++) {
+          const mutatedCandidate = mutateCandidate(candidate);
+          const mutatedStats = getStats(mutatedCandidate);
+          //console.log([candidate.join(","), mutatedCandidate.join(",")]);
 
-        if (candidates.length < TOP_SIZE) {
-          candidates.push(payload);
-        } else {
-          // replace the worst candidate if the current candidate has a better ratio
-          if (stats.ratio > candidates[candidates.length - 1].ratio) {
-            candidates[candidates.length - 1] = payload;
+          if (isPass(mutatedStats)) {
+            candidates.push({
+              candidate: mutatedCandidate,
+              stats: mutatedStats,
+            });
           }
         }
-        candidates.sort((a, b) => b.ratio - a.ratio); // descending
       }
     }
-    return candidates;
+
+    console.log(`${candidates.length} candidates to sort`);
+
+    let top = [];
+    for (const payload of candidates) {
+      if (top.length < TOP_SIZE) {
+        top.push(payload);
+      } else {
+        // replace the worst candidate if the current candidate has a better ratio
+        if (payload.stats.ratio > top[top.length - 1].stats.ratio) {
+          top[top.length - 1] = payload;
+        }
+      }
+      top.sort((a, b) => b.stats.ratio - a.stats.ratio); // descending, best -> worst ratio
+    }
+
+    return top;
   };
 
   const optimize = ({ values, totals }) => {
     const goalTotal = parseFloat(totals["COST"]);
     const goalMonthly = parseFloat(totals["PRICE"]);
-    setPassingCriteria(formatGoal({ monthly: goalMonthly, total: goalTotal }));
 
-    // const current = values.map((v) => parseInt(v["NOW"]));
     const mins = values.map((v) => parseFloat(v["MIN"]));
     const maxes = values.map((v) => parseFloat(v["MAX"]));
     const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
     const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
     const prices = values.map((v) => parseFloat(v["PRICE"]));
-    // console.log(evaluateCandidate(current, expenses, dividends, prices));
 
+    const current = values.map((v) => parseInt(v["NOW"]));
+    const currentStats = evaluateCandidate(
+      current,
+      expenses,
+      dividends,
+      prices,
+    );
+    setPassingCriteria(formatGoal(currentStats));
     setIsThinking(true);
 
     // schedule this for the next render
@@ -186,51 +206,50 @@ export default function AppDividends() {
       let candidates = getTopCandidates({
         mins,
         maxes,
-        expenses,
-        dividends,
-        prices,
-        isPass: ({ total, monthly }) =>
-          total <= goalTotal && monthly >= goalMonthly,
+        getStats: (candidate) =>
+          evaluateCandidate(candidate, expenses, dividends, prices),
+        isPass: ({ total, monthly, ratio }) =>
+          total <= goalTotal &&
+          monthly >= goalMonthly &&
+          ratio >= currentStats.ratio,
       });
       setTopCandidates(candidates);
       setIsThinking(false);
     }, 0);
   };
 
-  const top = (
-    <>
-      <div className="text-sm text-gray-300">
-        REQUIRED: {REQUIRED_COLS.join(",")}
-      </div>
-      <h1 className="text-3xl text-gray-600 leading-tight mb-4">
-        {passingCriteria}
-      </h1>
-
-      <div className="flex flex-wrap justify-between text-sm font-mono w-2/3">
-        {topCandidates.map(({ candidate, ...stats }, index) => (
-          <div
-            className="select-none shadow-md rounded-md py-4 px-2 cursor-pointer hover:bg-gray-200 "
-            key={index}
-            onClick={() => loadCandidate(candidate)}
-          >
-            <p>{formatGoal(stats)}</p>
-            <p>{`${stats.roi}/${stats.exp}=${stats.ratio}`}</p>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center text-center text-gray-800">
-      {topCandidates.length > 0 && top}
-      <button
-        className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${isThinking ? "opacity-50 cursor-not-allowed" : ""}`}
-        onClick={parseClipboard}
-        disabled={isThinking}
-      >
-        Parse Clipboard
-      </button>
+      {topCandidates.length > 0 ? (
+        <>
+          <div className="text-sm text-gray-400">
+            REQUIRED: {REQUIRED_COLS.join(",")}
+          </div>
+          <h1 className="text-3xl text-gray-600 leading-tight mb-4">
+            {passingCriteria}
+          </h1>
+
+          <div className="grid grid-cols-3 gap-4 text-sm font-mono">
+            {topCandidates.map(({ candidate, stats }, index) => (
+              <div
+                className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200 "
+                key={index}
+                onClick={() => loadCandidate(candidate)}
+              >
+                {formatGoal(stats)}
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <button
+          className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded ${isThinking ? "opacity-50 cursor-not-allowed" : ""}`}
+          onClick={parseClipboard}
+          disabled={isThinking}
+        >
+          Parse Clipboard
+        </button>
+      )}
     </div>
   );
 }
