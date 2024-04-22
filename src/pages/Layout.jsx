@@ -34,7 +34,9 @@ export default function Layout() {
         </ul>
       </nav>
 
-      <Outlet />
+      <div className="min-h-screen flex flex-col justify-center items-center text-center text-gray-800">
+        <Outlet />
+      </div>
     </>
   );
 }
