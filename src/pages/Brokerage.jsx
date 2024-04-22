@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 // TODO: move all of these into ./brokerage/
-import BalanceChart from "./BalanceChart";
-import CashFlowChart from "./CashFlowChart";
-import IncomeChart from "./IncomeChart";
+import BalanceChart from "../components/BalanceChart";
+import CashFlowChart from "../components/CashFlowChart";
+import IncomeChart from "../components/IncomeChart";
 
 const parseCSV = (str) =>
   str.split('","').map((one) => one.replace(/^"|"$/g, ""));
@@ -34,8 +34,13 @@ function parseFile(lines) {
   return parseTransactions(middle, headers);
 }
 
+export default function Brokerage() {
+  return <div>I am brokerage</div>;
+}
+
+/*
 // TODO: add arrow key handlers to zoom in/out and shift left/right
-export default function DashboardBrokerage({ file }) {
+export default function Brokerage({ file }) {
   const [transactions, setTransactions] = useState([]);
 
   // TODO: combine the two files
@@ -56,3 +61,4 @@ export default function DashboardBrokerage({ file }) {
     </div>
   );
 }
+*/

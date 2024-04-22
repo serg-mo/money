@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
-import CreditChart from "./credit/CreditChart";
-import RecurringCharges from "./credit/RecurringCharges";
-import CreditTransactions from "./credit/CreditTransactions";
-import { CATEGORIES, parseCreditFile } from "./utils";
+import CreditChart from "../credit/CreditChart";
+import RecurringCharges from "../credit/RecurringCharges";
+import CreditTransactions from "../credit/CreditTransactions";
+import { CATEGORIES, parseCreditFile } from "../utils";
 
 import * as tf from "@tensorflow/tfjs";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
 
+export default function Credit() {
+  return <div>I am credit</div>;
+}
+
 // TODO: add arrow key handlers to zoom in/out and shift left/right
 // TODO: add count to tab names
-export default function DashboardCredit({ file }) {
+/*
+export default function Credit({ file }) {
   const [transactions, setTransactions] = useState([]);
   const [debits, setDebits] = useState([]);
   const [classifier, setClassifier] = useState(null);
@@ -38,26 +43,21 @@ export default function DashboardCredit({ file }) {
   }, []); // run once on mount
 
   // TODO: consider saving the classifier state manually
-  /*
-  // load existing classifier from local storage, which persists across sessions
-  const data = JSON.parse(localStorage.getItem("classifierDataset"));
-  if (data && data.length) {
-    const unserialized = Object.fromEntries(
-      data.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
-    );
-
-    console.log("Restoring classifierDataset");
-    classifier.setClassifierDataset(unserialized);
-    setIsUpdated(true);
-  }
-
-
-  // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
-  let serialized = Object.entries(classifier.getClassifierDataset()).map(
-    ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
-  );
-  localStorage.setItem("classifierDataset", JSON.stringify(serialized));
-  */
+  // // load existing classifier from local storage, which persists across sessions
+  // const data = JSON.parse(localStorage.getItem("classifierDataset"));
+  // if (data && data.length) {
+  //   const unserialized = Object.fromEntries(
+  //     data.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
+  //   );
+  //   console.log("Restoring classifierDataset");
+  //   classifier.setClassifierDataset(unserialized);
+  //   setIsUpdated(true);
+  // }
+  // // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
+  // let serialized = Object.entries(classifier.getClassifierDataset()).map(
+  //   ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
+  // );
+  // localStorage.setItem("classifierDataset", JSON.stringify(serialized));
 
   useEffect(() => {
     const manuals = JSON.parse(localStorage.getItem("manualCategories"));
@@ -200,18 +200,16 @@ export default function DashboardCredit({ file }) {
     tabTransactions = transactions.filter((t) => t["category"] === tab);
   }
 
-  /*
-  if (Object.values(manualCategories).length) {
-    tabTransactions = tabTransactions.map((transaction) => {
-      return {
-        ...transaction,
-        category:
-          manualCategories[transaction["key"]] ?? transaction["category"],
-      };
-    });
-    console.log(tabTransactions);
-  }
-  */
+  // if (Object.values(manualCategories).length) {
+  //   tabTransactions = tabTransactions.map((transaction) => {
+  //     return {
+  //       ...transaction,
+  //       category:
+  //         manualCategories[transaction["key"]] ?? transaction["category"],
+  //     };
+  //   });
+  //   console.log(tabTransactions);
+  // }
 
   const buttonClass =
     "m-1 p-2 text-xl text-white bg-blue-400 hover:bg-blue-500 rounded-xl";
@@ -305,3 +303,4 @@ export default function DashboardCredit({ file }) {
     </div>
   );
 }
+*/

@@ -87,7 +87,7 @@ console.log(
 */
 
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
-export default function AppDividends() {
+export default function Dividends() {
   const TOP_SIZE = 9;
   const SEARCH_SIZE = 100_000;
   const MUTATE_SIZE = 5;
