@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 
+// TODO: have a radio picking a premade objective
+function maxCashFlow() {}
+function maxGains() {}
+function minTotal() {}
+
 function sumProduct(...arrays) {
   const size = arrays[0].length;
 
