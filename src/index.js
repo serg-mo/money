@@ -1,6 +1,6 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ReactDOM from "react-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Dividends from "./pages/Dividends";
 import Brokerage from "./pages/Brokerage";
 import Credit from "./pages/Credit";
@@ -9,9 +9,10 @@ import Layout from "./pages/Layout";
 
 import "../styles/tailwind.css";
 
+// NOTE: Github pages do not support BrowserRouter, hence HashRouter
 export default function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
@@ -20,8 +21,8 @@ export default function App() {
           <Route path="credit" element={<Credit />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+ReactDOM.render(<App />, document.getElementById("root"));

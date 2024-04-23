@@ -38,7 +38,7 @@ export default function App() {
 */
 
 export default function Home() {
-  return <></>;
+  return <div>HOME</div>;
 }
 
 /*

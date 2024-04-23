@@ -1,11 +1,14 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
+// "docs" is the only folder name github pages can serve with no config
 module.exports = {
   entry: "./src/index.js",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "docs"),
+    publicPath: "https://serg-mo.github.io/money-charts/",
     filename: "bundle.js",
+    clean: true,
   },
   module: {
     rules: [
@@ -34,7 +37,7 @@ module.exports = {
     extensions: [".js", ".jsx"],
   },
   devServer: {
-    static: "./dist",
+    static: "./docs",
     open: true,
     hot: true,
   },
