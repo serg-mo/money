@@ -97,16 +97,7 @@ export default function Dividends() {
   const SEARCH_SIZE = 100_000;
   const MUTATE_SIZE = 5;
 
-  const REQUIRED_COLS = [
-    "COST",
-    "PRICE",
-    "NOW",
-    "MIN",
-    "MAX",
-    "EXP",
-    "NEXT",
-    "PRICE",
-  ];
+  const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
 
   const [topCandidates, setTopCandidates] = useState([]);
   const [passingCriteria, setPassingCriteria] = useState("");
@@ -223,13 +214,15 @@ export default function Dividends() {
     }, 0);
   };
 
+  // TODO: trigger button/file input should look the same
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center text-center text-gray-800">
+    <>
+      <div className="text-sm text-gray-400">
+        REQUIRED: {REQUIRED_COLS.join(",")}
+      </div>
+
       {topCandidates.length > 0 ? (
         <>
-          <div className="text-sm text-gray-400">
-            REQUIRED: {REQUIRED_COLS.join(",")}
-          </div>
           <h1 className="text-3xl text-gray-600 leading-tight mb-4">
             {passingCriteria}
           </h1>
@@ -255,6 +248,6 @@ export default function Dividends() {
           Parse Clipboard
         </button>
       )}
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import React from "reac";
 
-// TODO: this should receive a single child component for which to set files
+// TODO: this should receive a single child component
+// TODO: make a context so that children can access the files
 export default function DragAndDrop({ children }) {
   // multiple files, e.g., brokerage, checking, credit
   const [files, setFiles] = useState([]);
