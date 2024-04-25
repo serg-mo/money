@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 
+// TODO: keep looking (in batches) as long as the objective keeps improving
 // TODO: have a radio picking a premade objective
-function maxCashFlow() {}
-function maxGains() {}
-function minTotal() {}
+const maxMonthly = (a, b) => b.stats.monthly - a.stats.monthly; // DESC, highest first
+const minTotal = (a, b) => a.stats.total - b.stats.total; // ASC, lowest first
+const maxRatio = (a, b) => b.stats.ratio - a.stats.ratio; // DESC, highest first
 
 function sumProduct(...arrays) {
   const size = arrays[0].length;
@@ -23,7 +24,7 @@ function sumProduct(...arrays) {
   return sum;
 }
 
-function makeNewCandidate(mins, maxes) {
+function makeRandomCandidate(mins, maxes) {
   if (mins.length !== maxes.length) {
     throw new Error("Arrays must have the same length");
   }
@@ -35,12 +36,44 @@ function makeNewCandidate(mins, maxes) {
   });
 }
 
-function mutateCandidate(candidate, jitter = 0.1) {
+function mutateCandidate(candidate, jitter) {
   return candidate.map((value) => {
     const direction = Math.random() < 0.5 ? 1 : -1;
     const magnitude = Math.random() * jitter;
     return parseInt(value * (1 + direction * magnitude));
   });
+}
+
+function getCandidates({ mins, maxes, getStats, isPass }) {
+  const SEARCH_SIZE = 100_000;
+  const MUTATE_SIZE = 5;
+  const MUTATE_JITTER = 0.1;
+
+  let candidates = [];
+  for (let i = 0; i < SEARCH_SIZE; i++) {
+    const candidate = makeRandomCandidate(mins, maxes);
+    const stats = getStats(candidate);
+
+    // TODO: update progress here
+    // console.log(`considering ${i}/${SEARCH_SIZE} candidate`);
+
+    if (isPass(stats)) {
+      // do not add the original candidate, mutate it first
+      for (let j = 0; j < MUTATE_SIZE; j++) {
+        const mutatedCandidate = mutateCandidate(candidate, MUTATE_JITTER);
+        const mutatedStats = getStats(mutatedCandidate);
+        //console.log([candidate.join(","), mutatedCandidate.join(",")]);
+
+        if (isPass(mutatedStats)) {
+          candidates.push({
+            candidate: mutatedCandidate,
+            stats: mutatedStats,
+          });
+        }
+      }
+    }
+  }
+  return candidates;
 }
 
 function evaluateCandidate(candidate, expenses, dividends, prices) {
@@ -59,7 +92,7 @@ function evaluateCandidate(candidate, expenses, dividends, prices) {
   };
 }
 
-function formatGoal({ monthly, total, roi, exp, ratio }) {
+function formatStats({ monthly, total, roi, exp, ratio }) {
   return (
     <>
       <p>{`${monthly.toFixed(0)}/mo @ ${(total / 1000).toFixed(2)}k`}</p>
@@ -93,10 +126,6 @@ console.log(
 
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
 export default function Dividends() {
-  const TOP_SIZE = 9;
-  const SEARCH_SIZE = 100_000;
-  const MUTATE_SIZE = 5;
-
   const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
 
   const [topCandidates, setTopCandidates] = useState([]);
@@ -104,14 +133,19 @@ export default function Dividends() {
   const [isThinking, setIsThinking] = useState(false);
 
   async function parseClipboard() {
-    await navigator.clipboard.readText().then(parseCSV).then(optimize);
+    await navigator.clipboard
+      .readText()
+      .then(parseValues)
+      .then(parseColumns)
+      .then(getCandidates)
+      .then(showTopCandidates);
   }
 
   async function loadCandidate(candidate) {
     await navigator.clipboard.writeText(candidate.join("\n"));
   }
 
-  const parseCSV = (csv) => {
+  const parseValues = (csv) => {
     const cells = csv
       .split(/\r?\n/) // rows
       .map((v) => v.split(/\s/).map((v) => v.replace(/[\$,%]/g, ""))); // columns as bare numbers
@@ -136,48 +170,8 @@ export default function Dividends() {
     return { values, totals };
   };
 
-  const getTopCandidates = ({ mins, maxes, getStats, isPass }) => {
-    let candidates = [];
-    for (let i = 0; i < SEARCH_SIZE; i++) {
-      const candidate = makeNewCandidate(mins, maxes);
-      const stats = getStats(candidate);
-      if (isPass(stats)) {
-        // do not add the original candidate, mutate it first
-        for (let j = 0; j < MUTATE_SIZE; j++) {
-          const mutatedCandidate = mutateCandidate(candidate);
-          const mutatedStats = getStats(mutatedCandidate);
-          //console.log([candidate.join(","), mutatedCandidate.join(",")]);
-
-          if (isPass(mutatedStats)) {
-            candidates.push({
-              candidate: mutatedCandidate,
-              stats: mutatedStats,
-            });
-          }
-        }
-      }
-    }
-
-    console.log(`${candidates.length} candidates to sort`);
-
-    let top = [];
-    for (const payload of candidates) {
-      if (top.length < TOP_SIZE) {
-        top.push(payload);
-      } else {
-        // replace the worst candidate if the current candidate has a better ratio
-        if (payload.stats.ratio > top[top.length - 1].stats.ratio) {
-          top[top.length - 1] = payload;
-        }
-      }
-      top.sort((a, b) => b.stats.ratio - a.stats.ratio); // descending, best -> worst ratio
-    }
-
-    return top;
-  };
-
-  const optimize = ({ values, totals }) => {
-    const goalTotal = parseFloat(totals["COST"]);
+  const parseColumns = ({ values, totals }) => {
+    const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
     const goalMonthly = parseFloat(totals["PRICE"]);
 
     const mins = values.map((v) => parseFloat(v["MIN"]));
@@ -186,30 +180,44 @@ export default function Dividends() {
     const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
     const prices = values.map((v) => parseFloat(v["PRICE"]));
 
+    const getStats = (candidate) =>
+      evaluateCandidate(candidate, expenses, dividends, prices);
+
     const current = values.map((v) => parseInt(v["NOW"]));
-    const currentStats = evaluateCandidate(
-      current,
-      expenses,
-      dividends,
-      prices,
-    );
-    setPassingCriteria(formatGoal(currentStats));
+    const currentStats = getStats(current);
+    console.log("currentStats", currentStats);
+    console.log("Passing Criteria", {
+      goalTotal,
+      goalMonthly,
+      ratio: currentStats.ratio,
+    });
+
+    const isPass = ({ total, monthly, ratio }) =>
+      total <= goalTotal &&
+      monthly >= goalMonthly &&
+      ratio >= currentStats.ratio;
+
+    setPassingCriteria(formatStats(currentStats));
     setIsThinking(true);
 
+    return {
+      mins,
+      maxes,
+      getStats,
+      isPass,
+    };
+  };
+
+  const showTopCandidates = (candidates) => {
+    const TOP_SIZE = 9;
+    candidates.sort(maxRatio);
+
     // schedule this for the next render
+    const top = candidates.slice(0, TOP_SIZE);
+
     setTimeout(() => {
       // TODO: build some kind of progress bar here
-      let candidates = getTopCandidates({
-        mins,
-        maxes,
-        getStats: (candidate) =>
-          evaluateCandidate(candidate, expenses, dividends, prices),
-        isPass: ({ total, monthly, ratio }) =>
-          total <= goalTotal &&
-          monthly >= goalMonthly &&
-          ratio >= currentStats.ratio,
-      });
-      setTopCandidates(candidates);
+      setTopCandidates(top);
       setIsThinking(false);
     }, 0);
   };
@@ -234,7 +242,7 @@ export default function Dividends() {
                 key={index}
                 onClick={() => loadCandidate(candidate)}
               >
-                {formatGoal(stats)}
+                {formatStats(stats)}
               </div>
             ))}
           </div>
