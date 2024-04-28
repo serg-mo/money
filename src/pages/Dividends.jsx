@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
+import RadioSelector from "../components/RadioSelector";
 
 // TODO: keep looking (in batches) as long as the objective keeps improving
 // TODO: have a radio picking a premade objective
-const maxMonthly = (a, b) => b.stats.monthly - a.stats.monthly; // DESC, highest first
-const minTotal = (a, b) => a.stats.total - b.stats.total; // ASC, lowest first
-const maxRatio = (a, b) => b.stats.ratio - a.stats.ratio; // DESC, highest first
+// TODO: compute delta/buy/sell/total for a given candidate
+
+const sortOptions = {
+  maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
+  minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
+  maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
+};
 
 function sumProduct(...arrays) {
   const size = arrays[0].length;
@@ -96,7 +101,7 @@ function formatStats({ monthly, total, roi, exp, ratio }) {
   return (
     <>
       <p>{`${monthly.toFixed(0)}/mo @ ${(total / 1000).toFixed(2)}k`}</p>
-      <p>{`${roi}/${exp}=${ratio}`}</p>
+      <p>{roi && exp ? `${roi}/${exp}=${ratio}` : ratio}</p>
     </>
   );
 }
@@ -128,17 +133,24 @@ console.log(
 export default function Dividends() {
   const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
 
+  const [candidates, setCandidates] = useState([]);
   const [topCandidates, setTopCandidates] = useState([]);
+  const [currentStats, setCurrentStats] = useState(null);
   const [passingCriteria, setPassingCriteria] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [sortOptionKey, setSortOptionKey] = useState("maxRatio"); // TODO: make it a constant
 
   async function parseClipboard() {
+    setIsThinking(true);
+
     await navigator.clipboard
       .readText()
       .then(parseValues)
       .then(parseColumns)
       .then(getCandidates)
-      .then(showTopCandidates);
+      .then(setCandidates);
+
+    setIsThinking(false);
   }
 
   async function loadCandidate(candidate) {
@@ -173,7 +185,11 @@ export default function Dividends() {
   const parseColumns = ({ values, totals }) => {
     const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
     const goalMonthly = parseFloat(totals["PRICE"]);
+    // TODO: show these
+    const minPercent = parseFloat(totals["MIN"]);
+    const maxPercent = parseFloat(totals["MAX"]);
 
+    const current = values.map((v) => parseInt(v["NOW"]));
     const mins = values.map((v) => parseFloat(v["MIN"]));
     const maxes = values.map((v) => parseFloat(v["MAX"]));
     const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
@@ -183,22 +199,11 @@ export default function Dividends() {
     const getStats = (candidate) =>
       evaluateCandidate(candidate, expenses, dividends, prices);
 
-    const current = values.map((v) => parseInt(v["NOW"]));
-    const currentStats = getStats(current);
-    console.log("currentStats", currentStats);
-    console.log("Passing Criteria", {
-      goalTotal,
-      goalMonthly,
-      ratio: currentStats.ratio,
-    });
-
     const isPass = ({ total, monthly, ratio }) =>
-      total <= goalTotal &&
-      monthly >= goalMonthly &&
-      ratio >= currentStats.ratio;
+      total <= goalTotal && monthly >= goalMonthly;
 
-    setPassingCriteria(formatStats(currentStats));
-    setIsThinking(true);
+    setCurrentStats(getStats(current));
+    setPassingCriteria(formatStats({ total: goalTotal, monthly: goalMonthly }));
 
     return {
       mins,
@@ -208,54 +213,74 @@ export default function Dividends() {
     };
   };
 
-  const showTopCandidates = (candidates) => {
-    const TOP_SIZE = 9;
-    candidates.sort(maxRatio);
+  // NOTE: changing the goal just re-shuffles the candidates
+  const computeTopCandidates = () => {
+    if (!candidates.length || !sortOptionKey) {
+      return;
+    }
 
-    // schedule this for the next render
+    console.log(`Sorting ${candidates.length} candidates`);
+    const TOP_SIZE = 9;
+    candidates.sort(sortOptions[sortOptionKey]);
+
     const top = candidates.slice(0, TOP_SIZE);
 
-    setTimeout(() => {
-      // TODO: build some kind of progress bar here
-      setTopCandidates(top);
-      setIsThinking(false);
-    }, 0);
+    setTopCandidates(top);
+  };
+  useEffect(computeTopCandidates, [candidates, sortOptionKey]);
+
+  const CandidateCard = ({ candidate, stats }) => {
+    const onClick = candidate ? () => loadCandidate(candidate) : undefined;
+
+    return (
+      <div
+        className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200"
+        onClick={onClick}
+      >
+        {formatStats(stats)}
+      </div>
+    );
   };
 
   // TODO: trigger button/file input should look the same
   return (
-    <>
+    <div className="flex flex-col items-center gap-2">
       <div className="text-sm text-gray-400">
         REQUIRED: {REQUIRED_COLS.join(",")}
       </div>
 
-      {topCandidates.length > 0 ? (
+      <RadioSelector
+        options={Object.keys(sortOptions)}
+        value={sortOptionKey}
+        onChange={(e) => setSortOptionKey(e.target.value)}
+      />
+
+      {currentStats && (
         <>
+          <CandidateCard stats={currentStats} />
           <h1 className="text-3xl text-gray-600 leading-tight mb-4">
             {passingCriteria}
           </h1>
+        </>
+      )}
 
+      {topCandidates.length > 0 && (
+        <>
           <div className="grid grid-cols-3 gap-4 text-sm font-mono">
-            {topCandidates.map(({ candidate, stats }, index) => (
-              <div
-                className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200 "
-                key={index}
-                onClick={() => loadCandidate(candidate)}
-              >
-                {formatStats(stats)}
-              </div>
+            {topCandidates.map((payload, index) => (
+              <CandidateCard key={index} {...payload} />
             ))}
           </div>
         </>
-      ) : (
+      )}
+      {!isThinking && (
         <button
-          className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded ${isThinking ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded`}
           onClick={parseClipboard}
-          disabled={isThinking}
         >
           Parse Clipboard
         </button>
       )}
-    </>
+    </div>
   );
 }
