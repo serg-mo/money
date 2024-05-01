@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
 import RadioSelector from "../components/RadioSelector";
+import CandidateCard, {
+  CandidateStats,
+} from "../components/dividends/CandidateCard";
+import {
+  sumProduct,
+  makeRandomCandidate,
+  mutateCandidate,
+  evaluateCandidate,
+} from "../utils/dividends";
 
 // TODO: compute delta/buy/sell/total for a given candidate
 const sortOptions = {
@@ -8,108 +17,6 @@ const sortOptions = {
   maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
 };
 
-function sumProduct(...arrays) {
-  const size = arrays[0].length;
-
-  if (!arrays.every((arr) => arr.length === size)) {
-    throw new Error("All arrays must be of the same length");
-  }
-
-  let sum = 0;
-  for (let i = 0; i < size; i++) {
-    let product = 1;
-    for (let j = 0; j < arrays.length; j++) {
-      product *= parseFloat(arrays[j][i]);
-    }
-    sum += parseFloat(product.toFixed(32));
-  }
-  return sum;
-}
-
-function makeRandomCandidate(mins, maxes, multiple = 10) {
-  if (mins.length !== maxes.length) {
-    throw new Error("Arrays must have the same length");
-  }
-
-  // NOTE: includes min and max
-  return mins.map((min, index) => {
-    const range = maxes[index] - min + 1;
-    const next = Math.floor(Math.random() * range) + min;
-    return Math.round(next / multiple) * multiple;
-  });
-}
-
-function mutateCandidate(candidate, jitter, multiple = 10) {
-  return candidate.map((value) => {
-    const direction = Math.random() < 0.5 ? 1 : -1;
-    const magnitude = Math.floor(Math.random() * jitter);
-    return Math.round((value + direction * magnitude) / multiple) * multiple;
-  });
-}
-
-function evaluateCandidate(candidate, expenses, dividends, prices) {
-  const total = sumProduct(candidate, prices);
-  const monthly = sumProduct(candidate, dividends);
-  const exp = sumProduct(candidate, prices, expenses) / total;
-  const roi = (monthly * 12) / total;
-  const ratio = roi / exp; // NOTE: this is what we're trying to maximize
-
-  return {
-    total: Math.round(total),
-    monthly: Math.round(monthly),
-    exp: parseFloat((100 * exp).toFixed(2)),
-    roi: parseFloat((100 * roi).toFixed(2)),
-    ratio: parseFloat(ratio.toFixed(2)),
-  };
-}
-
-function formatStats({ monthly, total, roi, exp, ratio }) {
-  return (
-    <>
-      <p>{`${monthly.toFixed(0)}/mo @ ${(total / 1000).toFixed(2)}k`}</p>
-      <p>{roi && exp ? `${roi}/${exp}=${ratio}` : ratio}</p>
-    </>
-  );
-}
-
-/*
-console.log(
-  evaluateCandidate(
-    [300, 50, 70, 80, 300, 220, 210, 90, 90, 70],
-    [0.45, 0.55, 0.35, 0.68, 0.6, 0.66, 0.61, 0.3, 0.59, 0.6].map(
-      (v) => v / 100, // percent to float
-    ),
-    [0.11, 0.14, 0.44, 0.14, 0.16, 0.17, 0.22, 0.18, 0.13, 0.31],
-    [16.93, 37.94, 55.45, 22.58, 17.28, 16.26, 21.05, 43.23, 19.2, 39.74],
-  ),
-);
-*/
-
-// should be 261
-/*
-console.log(
-  sumProduct(
-    [0.11, 0.14, 0.44, 0.14, 0.16, 0.17, 0.22, 0.18, 0.13, 0.31],
-    [300, 50, 70, 80, 300, 220, 210, 90, 90, 70],
-  ),
-);
-*/
-
-function CandidateCard({ candidate, stats }) {
-  // copy values to be pasted into the streadsheet
-  const load = async (text) => await navigator.clipboard.writeText(text);
-  const onClick = candidate ? () => load(candidate.join("\n")) : undefined;
-
-  return (
-    <div
-      className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200"
-      onClick={onClick}
-    >
-      {formatStats(stats)}
-    </div>
-  );
-}
-
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
 export default function Dividends() {
   const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
@@ -117,7 +24,7 @@ export default function Dividends() {
   const [context, setContext] = useState(null); // TODO: make this a real context
   const [topCandidates, setTopCandidates] = useState([]);
   const [currentStats, setCurrentStats] = useState(null);
-  const [passingCriteria, setPassingCriteria] = useState("");
+  const [passingCriteria, setPassingCriteria] = useState({});
   const [isThinking, setIsThinking] = useState(false);
   const [sortOption, setSortOption] = useState("maxRatio"); // TODO: make it a constant
 
@@ -178,7 +85,7 @@ export default function Dividends() {
       total <= goalTotal && monthly >= goalMonthly;
 
     setCurrentStats(getStats(current));
-    setPassingCriteria(formatStats({ total: goalTotal, monthly: goalMonthly }));
+    setPassingCriteria({ total: goalTotal, monthly: goalMonthly });
 
     setContext({
       mins,
@@ -274,6 +181,7 @@ export default function Dividends() {
   // TODO: trigger button/file input should look the same
   // TODO: continuously evaluate candidates in batches of 10
   // TODO: chart current batch candidate performance
+  // TODO: do not show the parse button if clipboard is empty
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="text-sm text-gray-400">
@@ -288,9 +196,9 @@ export default function Dividends() {
 
       {currentStats && (
         <>
-          <CandidateCard stats={currentStats} />
+          <CandidateCard stats={currentStats}>Current</CandidateCard>
           <h1 className="text-3xl text-gray-600 leading-tight mb-4">
-            {passingCriteria}
+            <CandidateStats {...passingCriteria} />
           </h1>
         </>
       )}
