@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import RadioSelector from "../components/RadioSelector";
 
-// TODO: keep looking (in batches) as long as the objective keeps improving
-// TODO: have a radio picking a premade objective
 // TODO: compute delta/buy/sell/total for a given candidate
-
 const sortOptions = {
   maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
   minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
@@ -29,7 +26,7 @@ function sumProduct(...arrays) {
   return sum;
 }
 
-function makeRandomCandidate(mins, maxes) {
+function makeRandomCandidate(mins, maxes, multiple = 10) {
   if (mins.length !== maxes.length) {
     throw new Error("Arrays must have the same length");
   }
@@ -37,7 +34,8 @@ function makeRandomCandidate(mins, maxes) {
   // NOTE: includes min and max
   return mins.map((min, index) => {
     const range = maxes[index] - min + 1;
-    return Math.floor(Math.random() * range) + min;
+    const next = Math.floor(Math.random() * range) + min;
+    return Math.round(next / multiple) * multiple;
   });
 }
 
@@ -47,38 +45,6 @@ function mutateCandidate(candidate, jitter, multiple = 10) {
     const magnitude = Math.floor(Math.random() * jitter);
     return Math.round((value + direction * magnitude) / multiple) * multiple;
   });
-}
-
-function getCandidates({ mins, maxes, getStats, isPass }) {
-  const SEARCH_SIZE = 100_000;
-  const MUTATE_SIZE = 5;
-  const MUTATE_JITTER = 0.1;
-
-  let candidates = [];
-  for (let i = 0; i < SEARCH_SIZE; i++) {
-    const candidate = makeRandomCandidate(mins, maxes);
-    const stats = getStats(candidate);
-
-    // TODO: update progress here
-    // console.log(`considering ${i}/${SEARCH_SIZE} candidate`);
-
-    if (isPass(stats)) {
-      // do not add the original candidate, mutate it first
-      for (let j = 0; j < MUTATE_SIZE; j++) {
-        const mutatedCandidate = mutateCandidate(candidate, MUTATE_JITTER);
-        const mutatedStats = getStats(mutatedCandidate);
-        //console.log([candidate.join(","), mutatedCandidate.join(",")]);
-
-        if (isPass(mutatedStats)) {
-          candidates.push({
-            candidate: mutatedCandidate,
-            stats: mutatedStats,
-          });
-        }
-      }
-    }
-  }
-  return candidates;
 }
 
 function evaluateCandidate(candidate, expenses, dividends, prices) {
@@ -148,27 +114,25 @@ function CandidateCard({ candidate, stats }) {
 export default function Dividends() {
   const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
 
-  const [candidates, setCandidates] = useState([]);
+  const [context, setContext] = useState(null); // TODO: make this a real context
   const [topCandidates, setTopCandidates] = useState([]);
   const [currentStats, setCurrentStats] = useState(null);
   const [passingCriteria, setPassingCriteria] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [sortOption, setSortOption] = useState("maxRatio"); // TODO: make it a constant
 
+  // NOTE: document must be focuses to read clipboard, so a click is necessary
   async function parseClipboard() {
     setIsThinking(true);
 
     await navigator.clipboard
       .readText()
-      .then(parseValues)
+      .then(parseCells)
       .then(parseColumns)
-      .then(getCandidates)
-      .then(setCandidates);
-
-    setIsThinking(false);
+      .then(() => setIsThinking(false));
   }
 
-  const parseValues = (csv) => {
+  const parseCells = (csv) => {
     const cells = csv
       .split(/\r?\n/) // rows
       .map((v) => v.split(/\s/).map((v) => v.replace(/[\$,%]/g, ""))); // columns as bare numbers
@@ -216,29 +180,96 @@ export default function Dividends() {
     setCurrentStats(getStats(current));
     setPassingCriteria(formatStats({ total: goalTotal, monthly: goalMonthly }));
 
-    return {
+    setContext({
       mins,
       maxes,
       getStats,
       isPass,
-    };
+    });
   };
 
-  // NOTE: changing the goal just re-shuffles the candidates
-  const computeTopCandidates = () => {
-    if (!candidates.length || !sortOption) {
+  function initializeCandidates(size = 100_000) {
+    if (!context) {
       return;
     }
+    // TODO: add sortOptions[sortOption] to context
+    const { mins, maxes, getStats, isPass } = context;
 
-    console.log(`Sorting ${candidates.length} candidates`);
+    // TODO: update progress here
+    // console.log(`considering ${i}/${SEARCH_SIZE} candidate`);
+
+    let candidates = [];
+    for (let i = 0; i < size; i++) {
+      const candidate = makeRandomCandidate(mins, maxes);
+      const stats = getStats(candidate);
+      candidates.push({ candidate, stats });
+    }
+
+    return candidates
+      .filter(({ stats }) => isPass(stats))
+      .sort(sortOptions[sortOption]);
+  }
+
+  function mutateCandidates(candidates) {
+    const MUTATE_JITTER = 0.1;
+
+    const { getStats, isPass } = context;
+
+    // TODO: refactor, this part is redundand candidates.push(getPassingMutations())
+    // TODO: mutate, then filter, then sort, then chop
+    return candidates
+      .map((candidate) => {
+        const mutatedCandidate = mutateCandidate(candidate, MUTATE_JITTER);
+        const mutatedStats = getStats(mutatedCandidate);
+        //console.log([candidate.join(","), mutatedCandidate.join(",")]);
+        return {
+          candidate: mutatedCandidate,
+          stats: mutatedStats,
+        };
+      })
+      .filter(({ stats }) => isPass(stats))
+      .sort(sortOptions[sortOption]);
+  }
+
+  // TODO: changing the goal just re-shuffles the candidates
+  //useEffect(initializeCandidates, [sortOption]);
+
+  // NOTE: chart fitness
+  const optimize = () => {
     const TOP_SIZE = 9;
-    candidates.sort(sortOptions[sortOption]);
 
-    const top = candidates.slice(0, TOP_SIZE);
+    // TODO: keep looking (in batches) as long as the objective keeps improving
+    // TODO: start with a hardcoded for loop
 
-    setTopCandidates(top);
+    // TODO: each iteration must be based on the previous one
+    let evaluations = initializeCandidates();
+    const fitnesses = [evaluations[0].stats.ratio];
+    setTopCandidates(evaluations.slice(0, TOP_SIZE));
+    console.log(`Initial Fitness: ${fitnesses[0]}`);
+
+    // TODO: this is where backtracking algo would work well
+    // TODO: sometimes the mutations are not better than originals
+    /*
+    for (let i = 1; i < 1; i++) {
+      evaluations = mutateCandidates(
+        evaluations.map(({ candidate }) => candidate),
+      );
+      fitnesses[i] = evaluations[0].stats.ratio;
+      console.log(`Fitness ${i}: ${fitnesses[i]}`);
+
+      const delta = Math.round((fitnesses[i] - fitnesses[i - 1]) * 1000) / 1000;
+      console.log(`Delta: ${delta}`);
+      if (delta == 0) {
+        console.log(`Quitting because delta is small`);
+        setTopCandidates(evaluations);
+        break;
+      }
+
+      // TODO: chart this
+      // TODO: compare the current fitness to the previous one, quit if not making progress
+    }
+    */
   };
-  useEffect(computeTopCandidates, [candidates, sortOption]);
 
   // TODO: trigger button/file input should look the same
   // TODO: continuously evaluate candidates in batches of 10
@@ -273,12 +304,21 @@ export default function Dividends() {
           </div>
         </>
       )}
-      {!isThinking && (
+      {!isThinking && !context && (
         <button
           className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded`}
           onClick={parseClipboard}
         >
-          Parse Clipboard
+          Parse
+        </button>
+      )}
+
+      {!!context && !isThinking && (
+        <button
+          className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded`}
+          onClick={optimize}
+        >
+          Optimize
         </button>
       )}
     </div>
