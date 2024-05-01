@@ -41,11 +41,11 @@ function makeRandomCandidate(mins, maxes) {
   });
 }
 
-function mutateCandidate(candidate, jitter) {
+function mutateCandidate(candidate, jitter, multiple = 10) {
   return candidate.map((value) => {
     const direction = Math.random() < 0.5 ? 1 : -1;
-    const magnitude = Math.random() * jitter;
-    return parseInt(value * (1 + direction * magnitude));
+    const magnitude = Math.floor(Math.random() * jitter);
+    return Math.round((value + direction * magnitude) / multiple) * multiple;
   });
 }
 
@@ -129,6 +129,21 @@ console.log(
 );
 */
 
+function CandidateCard({ candidate, stats }) {
+  // copy values to be pasted into the streadsheet
+  const load = async (text) => await navigator.clipboard.writeText(text);
+  const onClick = candidate ? () => load(candidate.join("\n")) : undefined;
+
+  return (
+    <div
+      className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200"
+      onClick={onClick}
+    >
+      {formatStats(stats)}
+    </div>
+  );
+}
+
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
 export default function Dividends() {
   const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW", "MIN", "MAX"];
@@ -138,7 +153,7 @@ export default function Dividends() {
   const [currentStats, setCurrentStats] = useState(null);
   const [passingCriteria, setPassingCriteria] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-  const [sortOptionKey, setSortOptionKey] = useState("maxRatio"); // TODO: make it a constant
+  const [sortOption, setSortOption] = useState("maxRatio"); // TODO: make it a constant
 
   async function parseClipboard() {
     setIsThinking(true);
@@ -151,10 +166,6 @@ export default function Dividends() {
       .then(setCandidates);
 
     setIsThinking(false);
-  }
-
-  async function loadCandidate(candidate) {
-    await navigator.clipboard.writeText(candidate.join("\n"));
   }
 
   const parseValues = (csv) => {
@@ -215,34 +226,23 @@ export default function Dividends() {
 
   // NOTE: changing the goal just re-shuffles the candidates
   const computeTopCandidates = () => {
-    if (!candidates.length || !sortOptionKey) {
+    if (!candidates.length || !sortOption) {
       return;
     }
 
     console.log(`Sorting ${candidates.length} candidates`);
     const TOP_SIZE = 9;
-    candidates.sort(sortOptions[sortOptionKey]);
+    candidates.sort(sortOptions[sortOption]);
 
     const top = candidates.slice(0, TOP_SIZE);
 
     setTopCandidates(top);
   };
-  useEffect(computeTopCandidates, [candidates, sortOptionKey]);
-
-  const CandidateCard = ({ candidate, stats }) => {
-    const onClick = candidate ? () => loadCandidate(candidate) : undefined;
-
-    return (
-      <div
-        className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md py-6 px-2 cursor-pointer hover:bg-gray-200"
-        onClick={onClick}
-      >
-        {formatStats(stats)}
-      </div>
-    );
-  };
+  useEffect(computeTopCandidates, [candidates, sortOption]);
 
   // TODO: trigger button/file input should look the same
+  // TODO: continuously evaluate candidates in batches of 10
+  // TODO: chart current batch candidate performance
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="text-sm text-gray-400">
@@ -251,8 +251,8 @@ export default function Dividends() {
 
       <RadioSelector
         options={Object.keys(sortOptions)}
-        value={sortOptionKey}
-        onChange={(e) => setSortOptionKey(e.target.value)}
+        value={sortOption}
+        onChange={(e) => setSortOption(e.target.value)}
       />
 
       {currentStats && (
