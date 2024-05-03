@@ -95,7 +95,7 @@ export default function Dividends() {
     });
   };
 
-  function initializeCandidates(size = 100_000) {
+  function initializeCandidates(size = 1000_000) {
     if (!context) {
       return;
     }

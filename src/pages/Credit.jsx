@@ -12,7 +12,7 @@ import "@tensorflow/tfjs-backend-webgl"; // this is important
 // TODO: add arrow key handlers to zoom in/out and shift left/right
 // TODO: add count to tab names
 
-function Credit({ file }) {
+function Credit({ files }) {
   const [transactions, setTransactions] = useState([]);
   const [debits, setDebits] = useState([]);
   const [classifier, setClassifier] = useState(null);
@@ -33,7 +33,7 @@ function Credit({ file }) {
       const rows = parseCreditFile(lines);
       setTransactions(rows.filter((row) => row["transaction"] === "DEBIT"));
     };
-    reader.readAsText(file);
+    reader.readAsText(files[0]);
 
     // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
     setClassifier(KNNClassifier.create());
