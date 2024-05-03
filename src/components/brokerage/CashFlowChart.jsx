@@ -14,13 +14,24 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
 defaults.font.family = "Monaco";
 
-export default function CashFlowChart({ transactions }) {
+export const COLORS = [
+  "rgba(153, 102, 255)",
+  "rgba(255, 159, 64)",
+  "rgba(255, 99, 132)",
+  "rgba(54, 162, 235)",
+  "rgba(255, 206, 86)",
+  "rgba(75, 192, 192)",
+  "rgba(153, 102, 255)",
+  "rgba(255, 159, 64)",
+];
+
+export default function CashFlowChart({ transactions, title, columns }) {
   const options = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: "Deposits & Withdrawals",
+        text: title,
       },
     },
     scales: {
@@ -29,34 +40,18 @@ export default function CashFlowChart({ transactions }) {
     },
   };
 
+  const datasets = columns.map((column, index) => {
+    return {
+      label: column,
+      data: transactions.map((fields) => fields[column]),
+      borderColor: COLORS[index],
+      backgroundColor: COLORS[index],
+    };
+  });
+
   const data = {
-    labels: transactions.map((fields) => fields["Month"]),
-    datasets: [
-      {
-        label: "Deposits",
-        data: transactions.map((fields) => fields["Deposits"]),
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(23,130,171,1)",
-      },
-      {
-        label: "Withdrawals",
-        data: transactions.map((fields) => -1 * fields["Withdrawals"]),
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(19,100,134,1)",
-      },
-      {
-        label: "Market Change Minus Fees",
-        data: transactions.map((fields) => fields["Market Change Minus Fees"]),
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(23,130,171,1)",
-      },
-      {
-        label: "Dividends & Interest",
-        data: transactions.map((fields) => fields["Dividends & Interest"]),
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(19,100,134,1)",
-      },
-    ],
+    labels: transactions.map((fields) => fields["month"]),
+    datasets: datasets,
   };
 
   return <Bar options={options} data={data} />;

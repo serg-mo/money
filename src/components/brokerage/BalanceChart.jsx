@@ -20,34 +20,23 @@ ChartJS.register(
   Tooltip,
 );
 
-// same columns for brokerage and checking
-const titles = [
-  // "Month",
-  "Beginning Balance",
-  "Market Change Minus Fees",
-  "Dividends & Interest",
-  "Deposits",
-  "Withdrawals",
-  "Ending Balance",
-];
-
-export default function BalanceChart({ transactions }) {
+export default function BalanceChart({ transactions, column }) {
   const options = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: "Ending Balance",
+        text: column,
       },
     },
   };
 
   // NOTE: ending balance of one month is the same as the beginning balance of the next one
   const data = {
-    labels: transactions.map((fields) => fields["Month"]),
+    labels: transactions.map((fields) => fields["month"]),
     datasets: [
       {
-        data: transactions.map((fields) => fields["Ending Balance"]),
+        data: transactions.map((fields) => fields[column]),
         borderColor: "rgb(100, 100, 100)",
         backgroundColor: "rgba(100, 100, 100, 1)",
       },
