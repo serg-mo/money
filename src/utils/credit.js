@@ -81,7 +81,8 @@ export function parseName(name) {
   return name.toUpperCase().substring(0, MAX_NAME_LENGTH).trim(); // ignore city/phone + state
 }
 
-export function parseCreditFile(lines) {
+export function parseCreditFile(txt) {
+  const lines = txt.split(/\r?\n/);
   const headers = parseCSV(lines[0]).map((v) => v.toLowerCase()); // "date","transaction","name","memo","amount"
   const tail = lines.slice(1, lines.length - 1);
 
@@ -101,7 +102,7 @@ function parseCreditTransactions(lines, headers) {
 
     return {
       ...obj,
-      key: key,
+      key: obj["memo"],
       amount: parseFloat(obj["amount"]),
       category: CATEGORIES.UNCLASSIFIED,
       location: obj["name"].substring(MIN_NAME_LENGTH).trim(),

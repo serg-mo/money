@@ -7,7 +7,7 @@ import { CATEGORIES, parseCreditFile } from "../utils/credit";
 import DragAndDrop from "../components/DragAndDrop";
 import CreditClassifier from "../components/credit/CreditClassifier";
 
-import * as tf from "@tensorflow/tfjs";
+import { tensor } from "@tensorflow/tfjs";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
 
@@ -27,11 +27,9 @@ function Credit({ files }) {
   const MIN_CONFIDENCE = 0.8;
 
   useEffect(() => {
-    // load transactions from a file into component state
     let reader = new FileReader();
     reader.onload = (e) => {
-      const lines = e.target.result.split(/\r?\n/); // FileReader
-      const rows = parseCreditFile(lines);
+      const rows = parseCreditFile(e.target.result);
       setTransactions(rows.filter((row) => row["transaction"] === "DEBIT"));
     };
     reader.readAsText(files[0]);
@@ -57,15 +55,16 @@ function Credit({ files }) {
   // );
   // localStorage.setItem("classifierDataset", JSON.stringify(serialized));
 
-  useEffect(() => {
+  const initializeManualCategories = () => {
     const manuals = JSON.parse(localStorage.getItem("manualCategories"));
     if (manuals && Object.values(manuals).length) {
       console.log("Restoring manualCategories");
       setManualCategories(manuals);
     }
-  }, []);
+  };
+  useEffect(initializeManualCategories, []);
 
-  const persistState = () => {
+  const persistManualCategories = () => {
     if (manualCategories && Object.values(manualCategories).length) {
       console.log("Persisting manualCategories");
       localStorage.setItem(
@@ -78,7 +77,7 @@ function Credit({ files }) {
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
-    const tensor = tf.tensor(transaction["vector"]);
+    const tensor = tensor(transaction["vector"]);
     const { label, confidences } = await classifier.predictClass(
       tensor,
       neighborhoodSize,
@@ -102,15 +101,6 @@ function Credit({ files }) {
     };
   };
 
-  const getClassifierStats = () => {
-    // TODO: it would be nice to see a progress icon for this
-    const counts = classifier.getClassExampleCount();
-    const examples = Object.values(counts).reduce((a, c) => a + c, 0);
-    const classes = Object.values(counts).length;
-
-    return [classes, examples];
-  };
-
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
     setManualCategories({
@@ -118,56 +108,23 @@ function Credit({ files }) {
       [transaction["key"]]: category,
     });
 
-    persistState();
+    persistManualCategories();
   };
 
   if (!transactions.length) {
     return;
   }
-  // TODO: classifier is its own component + buttons + stats
-
-  const [classes, examples] = getClassifierStats();
   // TODO: do not classify until a minimum number of examples
-
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: add an undo button for the wrong classification
-  // TODO: use context to access transactions
+  // TODO: use context to access transactions and classifier
   // TODO: drag and drop a transaction on top of a tab to reclassify
   return (
     <div className="font-mono text-xs">
-      <CreditClassifier />
-      <div className="text-center">
-        <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
-        <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
-        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div>
-        <select
-          value={neighborhoodSize}
-          onChange={(e) => setNeighborhoodSize(e.target.value)}
-        >
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-        <div>neighborhood</div>
-      </div>
-
-      {false && <RecurringCharges transactions={transactions} />}
-      {false && (
-        <CreditTransactions
-          title="ALL"
-          transactions={transactions}
-          onCategorize={onCategorize}
-        />
-      )}
-
+      <CreditClassifier classifier={classifier} />
       <CreditChart transactions={transactions} />
-
-      <CreditTransactionsCategory
-        transactions={transactions}
-        onCategorize={onCategorize}
-      />
+      <CreditTransactionsCategory {...{ transactions, onCategorize }} />
     </div>
   );
 }

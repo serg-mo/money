@@ -1,59 +1,38 @@
 import React, { useState, useEffect } from "react";
-// TODO: move all of these into ./brokerage/
-import BalanceChart from "../components/BalanceChart";
-import CashFlowChart from "../components/CashFlowChart";
-import IncomeChart from "../components/IncomeChart";
+import BalanceChart from "../components/brokerage/BalanceChart";
+import CashFlowChart from "../components/brokerage/CashFlowChart";
 import DragAndDrop from "../components/DragAndDrop";
-
-const parseCSV = (str) =>
-  str.split('","').map((one) => one.replace(/^"|"$/g, ""));
-
-function parseTransactions(lines, headers) {
-  return lines.map(parseCSV).map((fields) => {
-    return headers.reduce((obj, header, index) => {
-      let value = "";
-
-      // reformat first field, "MMM YYYY" -> "MMM YY"
-      if (index === 0) {
-        value = fields[index].slice(0, 3) + " " + fields[index].slice(-2); // e.g., Jan 22
-      } else {
-        value = parseFloat(fields[index].replace(/[$,]/g, ""));
-      }
-
-      return { ...obj, [header]: value };
-    }, {});
-  });
-}
-
-function parseFile(lines) {
-  const header = lines.slice(0, 4); // title, account, date range, headers
-  const middle = lines.slice(4, lines.length - 8);
-  // const tail = lines.slice(lines.length - 8); // blank, report date, 6 lines of junk
-
-  const headers = parseCSV(header[3]);
-
-  return parseTransactions(middle, headers);
-}
+import { parseBrokerageFile } from "../utils/brokerage";
+import Frame from "../components/Frame";
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
-function Brokerage({ file }) {
+function Brokerage({ files }) {
   const [transactions, setTransactions] = useState([]);
 
-  // TODO: combine the two files
   if (!transactions.length) {
     let reader = new FileReader();
     reader.onload = (e) => {
-      const lines = e.target.result.split(/\r?\n/); // FileReader
-      setTransactions(parseFile(lines));
+      const rows = parseBrokerageFile(e.target.result);
+      setTransactions(rows);
     };
-    reader.readAsText(file);
+    reader.readAsText(files[0]); // first file
   }
 
+  // TODO: what I want is a double chart of balance + color coded changes, e.g., intetrest, dividends, deposits, withdrawals
+  // TODO: then add ability to show/hide certain changes
   return (
-    <div>
-      <BalanceChart transactions={transactions} />
-      <IncomeChart transactions={transactions} />
-      <CashFlowChart transactions={transactions} />
+    <div className="w-3/4 flex flex-col justify-center">
+      <Frame
+        render={(left, right) => {
+          const filtered = transactions.slice(left, right);
+          return (
+            <>
+              <BalanceChart transactions={filtered} />
+              <CashFlowChart transactions={filtered} />
+            </>
+          );
+        }}
+      />
     </div>
   );
 }

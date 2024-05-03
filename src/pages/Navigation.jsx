@@ -31,7 +31,7 @@ function NavLink({ path, label }) {
 
 export default function Navigation() {
   return (
-    <nav className="flex flex-col min-w-max bg-gray-200 rounded-lg overflow-hidden">
+    <nav className="m-4 flex flex-col min-w-max bg-gray-200 rounded-lg">
       <NavEdge>Money Charts</NavEdge>
       <ul>{NAV_LINKS.map(NavLink)}</ul>
       <NavEdge>
