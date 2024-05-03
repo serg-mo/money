@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
-import CreditChart from "../credit/CreditChart";
-import RecurringCharges from "../credit/RecurringCharges";
-import CreditTransactions from "../credit/CreditTransactions";
-import { CATEGORIES, parseCreditFile } from "../utils";
+import CreditChart from "../components/credit/CreditChart";
+import RecurringCharges from "../components/credit/RecurringCharges";
+import CreditTransactions from "../components/credit/CreditTransactions";
+import CreditTransactionsCategory from "../components/credit/CreditTransactionsCategory";
+import { CATEGORIES, parseCreditFile } from "../utils/credit";
 import DragAndDrop from "../components/DragAndDrop";
+import CreditClassifier from "../components/credit/CreditClassifier";
 
 import * as tf from "@tensorflow/tfjs";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
-// TODO: add count to tab names
+// TODO: add counts to tab names
 
 function Credit({ files }) {
   const [transactions, setTransactions] = useState([]);
-  const [debits, setDebits] = useState([]);
+
   const [classifier, setClassifier] = useState(null);
-  const [tab, setTab] = useState(CATEGORIES.UNCLASSIFIED); // TODO: type CATEGORIES,
   const [isUpdated, setIsUpdated] = useState(false);
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);
   const [manualCategories, setManualCategories] = useState({}); // TODO: consider making it an array of transactions
@@ -74,14 +75,6 @@ function Credit({ files }) {
     }
   };
 
-  const resetState = () => {
-    classifier.clearAllClasses();
-    localStorage.removeItem("manualCategories");
-    setManualCategories({});
-
-    setIsUpdated(true);
-  };
-
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
@@ -118,58 +111,6 @@ function Credit({ files }) {
     return [classes, examples];
   };
 
-  const predictAll = async () => {
-    // re-categorize when classifier and transactions are loaded, but not categorized
-    if (!transactions.length) {
-      console.log(`No categorize, because no transactions`);
-      return;
-    }
-
-    if (!classifier.getNumClasses()) {
-      console.log(`No categorize because no classes`);
-      return;
-    }
-
-    // TODO: it would be nice to see a progress icon for this
-    const [classes, examples] = getClassifierStats();
-    if (examples < MIN_EXAMPLES) {
-      console.log(`No categorize because not enough examples`);
-      return;
-    }
-
-    console.log(
-      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`,
-    );
-
-    const newTransactions = await Promise.all(transactions.map(predictOne));
-    setTransactions(newTransactions);
-  };
-
-  const getErrorRate = () => {
-    const total = Object.values(manualCategories).length;
-
-    // TODO: loop through manualCategories, reconstruct the dataset, pick a neighborhood size
-    Object.entries(manualCategories).map(([key, category]) => {
-      // NOTE: must be a tensor + string label
-      const tensor = tf.tensor(transactions[key]["vector"]);
-      classifier.addExample(tensor, category);
-
-      console.log(`Learning that transaction ${key} is ${category}`);
-    });
-
-    const [classes, examples] = getClassifierStats();
-    console.log(`${classes} classes and ${examples} examples`);
-
-    // TODO: loop through manualCategories, predictOne, compare to actual
-  };
-
-  // debits change when transactions change, but that only happens once per session
-  useEffect(() => {
-    if (transactions.length) {
-      setDebits(transactions.filter((row) => row["transaction"] === "DEBIT"));
-    }
-  }, [transactions]);
-
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
     setManualCategories({
@@ -180,80 +121,22 @@ function Credit({ files }) {
     persistState();
   };
 
-  if (!debits.length) {
+  if (!transactions.length) {
     return;
   }
+  // TODO: classifier is its own component + buttons + stats
 
   const [classes, examples] = getClassifierStats();
   // TODO: do not classify until a minimum number of examples
-
-  let tabTransactions = transactions; // default to ALL
-
-  if (tab === "ACTUALS") {
-    // TODO: make actuals
-  } else if (tab === "GUESSES") {
-    // TODO: make guesses
-  } else {
-    tabTransactions = transactions.filter((t) => t["category"] === tab);
-  }
-
-  // if (Object.values(manualCategories).length) {
-  //   tabTransactions = tabTransactions.map((transaction) => {
-  //     return {
-  //       ...transaction,
-  //       category:
-  //         manualCategories[transaction["key"]] ?? transaction["category"],
-  //     };
-  //   });
-  //   console.log(tabTransactions);
-  // }
-
-  const buttonClass =
-    "m-1 p-2 text-xl text-white bg-blue-400 hover:bg-blue-500 rounded-xl";
-  const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
-  const activeTabClass = "bg-gray-400";
 
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: add an undo button for the wrong classification
   // TODO: use context to access transactions
-  // TODO: these should be tabs + a tab for each category
-  // TODO: I can drag and drop a transaction on top of a tab to reclassify
-  // TODO: consider showing the example counts in each category tab
+  // TODO: drag and drop a transaction on top of a tab to reclassify
   return (
     <div className="font-mono text-xs">
-      <div className="flex flex-row justify-center">
-        <button
-          className={buttonClass}
-          onClick={() => (tabTransactions = transactions)}
-        >
-          ALL
-        </button>
-        <button
-          className={buttonClass}
-          onClick={() => (tabTransactions = transactions)}
-        >
-          Actuals (TODO)
-        </button>
-        <button
-          className={buttonClass}
-          onClick={() => (tabTransactions = transactions)}
-        >
-          Guesses (TODO)
-        </button>
-        <button className={buttonClass} onClick={predictAll}>
-          Categorize
-        </button>
-        <button
-          className={buttonClass}
-          onClick={() => confirm("Are you sure?") && resetState()}
-        >
-          Reset
-        </button>
-        <button className={buttonClass} onClick={getErrorRate}>
-          Errors
-        </button>
-      </div>
+      <CreditClassifier />
       <div className="text-center">
         <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
         <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
@@ -267,38 +150,28 @@ function Credit({ files }) {
           <option value="4">4</option>
           <option value="5">5</option>
         </select>
+        <div>neighborhood</div>
       </div>
 
-      {false && <RecurringCharges transactions={debits} />}
+      {false && <RecurringCharges transactions={transactions} />}
       {false && (
         <CreditTransactions
           title="ALL"
-          transactions={debits}
+          transactions={transactions}
           onCategorize={onCategorize}
         />
       )}
 
-      <CreditChart transactions={debits} />
+      <CreditChart transactions={transactions} />
 
-      <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
-        {Object.values(CATEGORIES).map((category, key) => (
-          <button
-            className={`${tabClass} ${category === tab ? activeTabClass : ""}`}
-            key={key}
-            onClick={() => setTab(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      <CreditTransactions
-        title={tab}
-        transactions={tabTransactions}
+      <CreditTransactionsCategory
+        transactions={transactions}
         onCategorize={onCategorize}
       />
     </div>
   );
 }
 
-export default () => <DragAndDrop render={(files) => <Credit files={files} />} />
+export default () => (
+  <DragAndDrop render={(files) => <Credit files={files} />} />
+);

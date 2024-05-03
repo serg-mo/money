@@ -1,4 +1,4 @@
-import React, {useState } from "react";
+import React, { useState } from "react";
 
 export default function DragAndDrop({ render }) {
   // multiple files, e.g., brokerage, checking, credit
@@ -19,7 +19,7 @@ export default function DragAndDrop({ render }) {
         multiple
         onChange={handleChange}
         accept="text/csv"
-        className="absolute inset-0 flex justify-center items-center z-10 w-full opacity-0"
+        className="absolute inset-0 flex justify-center items-center z-10 w-full opacity-0 cursor-pointer"
       />
       <div className="w-96 h-96 flex justify-center items-center text-center text-5xl p-10 border-2 rounded-xl">
         Drag and Drop CSV

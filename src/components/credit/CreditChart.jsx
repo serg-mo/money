@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { groupBy, sumBy } from "lodash";
-import { COLORS, CATEGORIES } from "../utils";
+import { COLORS, CATEGORIES } from "../../utils/credit";
 
 import {
   Chart as ChartJS,

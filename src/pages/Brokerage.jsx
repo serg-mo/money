@@ -58,4 +58,6 @@ function Brokerage({ file }) {
   );
 }
 
-export default () => <DragAndDrop render={(files) => <Brokerage files={files} />} />
+export default () => (
+  <DragAndDrop render={(files) => <Brokerage files={files} />} />
+);

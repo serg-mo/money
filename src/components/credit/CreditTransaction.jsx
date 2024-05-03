@@ -5,9 +5,9 @@ import {
   formatAmount,
   formatConfidence,
   getOpacity,
-} from "../utils";
+} from "../../utils/credit";
 import moment from "moment";
-import CategoryPicker from "../components/CategoryPicker";
+import CategoryPicker from "./CategoryPicker";
 
 // TODO: maybe show categories vertically + animate their appearance disappearance
 export default function Transaction({ onClick, ...t }) {

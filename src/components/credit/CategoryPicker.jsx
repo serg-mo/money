@@ -1,5 +1,10 @@
 import React from "react";
-import { CATEGORIES, COLORS, formatConfidence, getOpacity } from "../utils";
+import {
+  CATEGORIES,
+  COLORS,
+  formatConfidence,
+  getOpacity,
+} from "../../utils/credit";
 
 // TODO: scale categories by their respective rule sizes, i.e., many examples - bigger scale
 // TODO: consider setting opacity based on the confidences

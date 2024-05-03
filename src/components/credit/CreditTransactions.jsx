@@ -1,6 +1,6 @@
 import React from "react";
 import CreditTransaction from "./CreditTransaction";
-import { CATEGORIES } from "../utils";
+import { CATEGORIES } from "../../utils/credit";
 
 // TODO: add column sort toggle
 export default function CreditTransactions({

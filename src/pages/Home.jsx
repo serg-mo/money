@@ -6,4 +6,3 @@ import Brokerage from "./Brokerage";
 export default function Home() {
   return <div>Welcome</div>;
 }
-
