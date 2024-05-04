@@ -23,28 +23,48 @@ ChartJS.register(
   annotationPlugin,
 );
 
-export default function CandidatesChart({ cards, dims, split, onClick }) {
+export const colors = {
+  candidate: "gray", // default
+  goal: "green",
+  highlight: "blue",
+  split: "red",
+};
+
+export default function CandidatesChart({
+  cards,
+  dims,
+  highlight,
+  goal,
+  split,
+  onClick,
+}) {
   // TODO: consider filtering data here, based on the split
+  // TODO: maybe dedupe here by label
   const [x, y] = dims; // order is relevant
 
-  const annotations = [
-    split.stats[x] && {
+  const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}`;
+  const getAnnotations = ({ stats }, color) => [
+    {
       type: "line",
       mode: "vertical",
       scaleID: "x",
-      value: split.stats[x],
-      borderColor: "red",
+      value: stats[x],
+      borderColor: color,
       borderWidth: 1,
     },
-    split.stats[y] && {
+    {
       type: "line",
       mode: "horizontal",
       scaleID: "y",
-      value: split.stats[y],
-      borderColor: "red",
+      value: stats[y],
+      borderColor: color,
       borderWidth: 1,
     },
   ];
+
+  // only show goal when we're close to the total
+  const distance =
+    Math.abs(split.stats.total - goal.stats.total) / goal.stats.total;
 
   const options = {
     responsive: true,
@@ -55,14 +75,14 @@ export default function CandidatesChart({ cards, dims, split, onClick }) {
       },
       tooltip: {
         callbacks: {
-          label: ({ dataIndex }) => {
-            const { stats } = cards[dataIndex];
-            return `${stats[y]} vs ${stats[x]}`;
-          },
+          label: ({ dataIndex }) => getLabel(cards[dataIndex]),
         },
       },
       annotation: {
-        annotations,
+        annotations: [
+          ...getAnnotations(split, colors.split),
+          ...(distance < 0.3 ? getAnnotations(goal, colors.goal) : []),
+        ],
       },
     },
     parsing: {
@@ -75,15 +95,22 @@ export default function CandidatesChart({ cards, dims, split, onClick }) {
       }
     },
   };
+  // console.log(options);
+
+  // TODO: make the dots look pretty
+  const pointBackgroundColor = ({ dataIndex }) => colors.candidate;
+  //highlight && highlight === dataIndex ? colors.highlight : colors.candidate;
+
+  const pointRadius = ({ dataIndex }) => 3;
+  //highlight && highlight === dataIndex ? 8 : 3;
 
   const data = {
     datasets: [
       {
         data: cards.map(({ stats }) => stats),
         backgroundColor: "rgb(255, 99, 132)",
-        pointBackgroundColor: ({ dataIndex }) =>
-          dataIndex === 0 ? "red" : "#CCCCCC", // highlight the first point
-        pointRadius: ({ dataIndex }) => (dataIndex === 0 ? 6 : 3),
+        pointBackgroundColor,
+        pointRadius,
       },
     ],
   };

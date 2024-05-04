@@ -3,10 +3,11 @@ import { createContext } from "react";
 export const DividendContext = createContext();
 
 // NOTE: this only works with a specific shape
-export const STATS_SORTS = {
+export const CARD_SORTS = {
   maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
   minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
   maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
+  maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
 };
 
 export const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW"];
