@@ -9,7 +9,7 @@ export function CandidateStats({ monthly, total, roi, exp, ratio }) {
   );
 }
 
-export default function CandidateCard({ candidate, stats, children }) {
+export default function CandidateCard({ candidate, stats }) {
   // copy values to be pasted into the streadsheet
   const load = async (text) => await navigator.clipboard.writeText(text);
   const onClick = candidate ? () => load(candidate.join("\n")) : undefined;
@@ -19,7 +19,6 @@ export default function CandidateCard({ candidate, stats, children }) {
       className="max-w-44 min-w-min select-none bg-gray-100 shadow-md rounded-md p-2 cursor-pointer hover:bg-gray-200"
       onClick={onClick}
     >
-      <div>{children}</div>
       <CandidateStats {...stats} />
     </div>
   );

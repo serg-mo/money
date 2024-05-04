@@ -1,3 +1,24 @@
+import { createContext } from "react";
+
+export const DividendContext = createContext();
+
+// NOTE: this only works with a specific shape
+export const STATS_SORTS = {
+  maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
+  minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
+  maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
+};
+
+export const REQUIRED_COLS = [
+  "EXP",
+  "NEXT",
+  "COST",
+  "PRICE",
+  "NOW",
+  "MIN",
+  "MAX",
+];
+
 export function sumProduct(...arrays) {
   const size = arrays[0].length;
 
@@ -29,7 +50,11 @@ export function makeRandomCandidate(mins, maxes, multiple = 10) {
   });
 }
 
-export function mutateCandidate(candidate, jitter, multiple = 10) {
+export function mutateCandidates(candidates) {
+  return candidates.map(mutateCandidate);
+}
+
+export function mutateCandidate(candidate, jitter = 0.1, multiple = 10) {
   return candidate.map((value) => {
     const direction = Math.random() < 0.5 ? 1 : -1;
     const magnitude = Math.floor(Math.random() * jitter);
