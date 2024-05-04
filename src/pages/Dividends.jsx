@@ -80,7 +80,7 @@ export default function Dividends() {
 
   if (!Object.keys(context).length) {
     return (
-      <div className="w-full flex justify-center">
+      <div className="flex justify-center items-center h-screen">
         <button
           className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded`}
           onClick={parseClipboard}
@@ -93,7 +93,9 @@ export default function Dividends() {
 
   return (
     <DividendContext.Provider value={context}>
-      <DividendDash />
+      <div className="flex justify-center items-center h-screen">
+        <DividendDash />
+      </div>
     </DividendContext.Provider>
   );
 }
