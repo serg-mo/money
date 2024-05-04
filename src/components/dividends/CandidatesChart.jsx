@@ -10,12 +10,42 @@ import {
   defaults,
 } from "chart.js";
 import { Scatter } from "react-chartjs-2";
+import annotationPlugin from "chartjs-plugin-annotation";
 
 defaults.font.family = "Monaco";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  annotationPlugin,
+);
 
-export default function CandidatesChart({ cards, x, y, onClick }) {
+export default function CandidatesChart({ cards, dims, split, onClick }) {
+  // TODO: consider filtering data here, based on the split
+  const [x, y] = dims; // order is relevant
+
+  const annotations = [
+    split.stats[x] && {
+      type: "line",
+      mode: "vertical",
+      scaleID: "x",
+      value: split.stats[x],
+      borderColor: "red",
+      borderWidth: 1,
+    },
+    split.stats[y] && {
+      type: "line",
+      mode: "horizontal",
+      scaleID: "y",
+      value: split.stats[y],
+      borderColor: "red",
+      borderWidth: 1,
+    },
+  ];
+
   const options = {
     responsive: true,
     plugins: {
@@ -30,6 +60,9 @@ export default function CandidatesChart({ cards, x, y, onClick }) {
             return `${stats[y]} vs ${stats[x]}`;
           },
         },
+      },
+      annotation: {
+        annotations,
       },
     },
     parsing: {

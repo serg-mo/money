@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  mutateCandidate,
   DividendContext,
-  deDupeCards,
-  candidateToCard,
+  deDupeCardsByStat,
   makeCandidates,
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
@@ -12,24 +10,31 @@ import CandidatesChart from "./CandidatesChart";
 // TODO: hovering over a point should highlight the same candidate elsewhere
 // TODO: color code a third dimension, like ROI to transparency
 // TODO: add horizontal and vertical cutoffs for both charts
-
+// TODO: consider making goal just a x/y coordinate on both charts, i.e., they maintain their own
+// TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
   const INIT_SIZE = 1_000;
-  const CLICK_SIZE = 1_000;
+  const CLICK_SIZE = 100;
 
   const { current, goalTotal, goalMonthly, isPass, getStats } =
     useContext(DividendContext);
-  const { monthly, total } = getStats(current);
-  const [topCards, setTopCards] = useState([]);
 
   const candidateToCard = (candidate) => ({
     candidate,
     stats: getStats(candidate),
   });
 
+  const currentCard = candidateToCard(current);
+  const { monthly, total } = getStats(current);
+  const [topCards, setTopCards] = useState([]);
+  const [jitter, setJitter] = useState(0.1); // TODO: this should change with every click
+
+  const [roiSplitCard, setRoiSplitCard] = useState(currentCard);
+  const [ratioSplitCard, setRatioSplitCard] = useState(currentCard);
+
   // there is always a source candidate
-  const updateTopCards = (size, src) => {
-    const passing = makeCandidates(size, src); //.filter(isPass);
+  const addTopCards = (size, src) => {
+    const passing = makeCandidates(size, src, jitter); //.filter(isPass);
 
     // NOTE: must be this shape, because we need to sort by stats, CandidateCard shape
     const cards = [
@@ -37,24 +42,29 @@ export default function DividendDash() {
       ...topCards,
       ...passing.map(candidateToCard),
     ];
-    const deDuped = cards; // deDupeCards(cards);
-    console.log(`updateTopCards: ${cards.length} -> ${deDuped.length}`);
+    const deDuped = deDupeCardsByStat(cards, "total");
+    console.log(`deDupeCards: ${cards.length} -> ${deDuped.length}`);
 
     setTopCards(deDuped);
   };
 
   useEffect(() => {
     if (Object.keys(current).length) {
-      updateTopCards(INIT_SIZE, current);
+      addTopCards(INIT_SIZE, current);
     }
   }, [current]);
 
   // explore by clicking on a data point, which generates new mutations
-  const onClick = ({ candidate }) => {
+  const onClick = (card) => {
+    const { candidate } = card;
     const load = async (text) => await navigator.clipboard.writeText(text);
     load(candidate.join("\n")); // newlines for the spreadsheet
 
-    updateTopCards(CLICK_SIZE, candidate);
+    // TODO: setJitter(prev => prev * 0.9); // less jitter with each click
+    setRoiSplitCard(card);
+    setRatioSplitCard(card);
+
+    addTopCards(CLICK_SIZE, candidate);
   };
 
   return (
@@ -74,14 +84,14 @@ export default function DividendDash() {
           <>
             <CandidatesChart
               cards={topCards}
-              x="total"
-              y="monthly"
+              dims={["total", "monthly"]}
+              split={roiSplitCard}
               onClick={onClick}
             />
             <CandidatesChart
               cards={topCards}
-              x="exp"
-              y="roi"
+              dims={["exp", "roi"]}
+              split={ratioSplitCard}
               onClick={onClick}
             />
           </>
