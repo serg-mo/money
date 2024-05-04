@@ -53,7 +53,7 @@ export default function CandidatesChart({ cards, x, y }) {
         backgroundColor: "rgb(255, 99, 132)",
         pointBackgroundColor: ({ dataIndex }) =>
           dataIndex === 0 ? "red" : "blue", // highlight the first point
-        pointRadius: 5, // Customize point radius
+        pointRadius: ({ dataIndex }) => (dataIndex === 0 ? 5 : 2),
       },
     ],
   };

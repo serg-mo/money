@@ -20,7 +20,6 @@ export default function DividendDash() {
     useContext(DividendContext);
 
   const [topCandidates, setTopCandidates] = useState([]);
-  const [sortOption, setSortOption] = useState("maxRatio"); // TODO: make it a constant
 
   const makeCandidates = (size) => {
     let candidates = [];
@@ -53,9 +52,9 @@ export default function DividendDash() {
 
     if (passing.length > 0) {
       // NOTE: must be this shape, because we need to sort by stats, CandidateCard shape
-      const newTop = [...topCandidates, ...passing.map(toCard)]
-        .sort(STATS_SORTS[sortOption])
-        .slice(0, TOP_SIZE);
+      const newTop = [...topCandidates, ...passing.map(toCard)];
+      // .sort(STATS_SORTS[sortOption])
+      // .slice(0, TOP_SIZE);
 
       // unique stats -> candidates
       const groups = groupBy(newTop, ({ stats }) => JSON.stringify(stats));
@@ -75,11 +74,6 @@ export default function DividendDash() {
   return (
     <div className="w-1/2 p-4 space-y-3 flex flex-col items-center">
       <div className="text-sm text-gray-300">{REQUIRED_COLS.join(",")}</div>
-      <RadioSelector
-        options={Object.keys(STATS_SORTS)}
-        value={sortOption}
-        onChange={(e) => setSortOption(e.target.value)}
-      />
       <CandidateCard candidate={current} stats={getStats(current)} />
       <button
         className="text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded"
