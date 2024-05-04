@@ -9,15 +9,7 @@ export const STATS_SORTS = {
   maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
 };
 
-export const REQUIRED_COLS = [
-  "EXP",
-  "NEXT",
-  "COST",
-  "PRICE",
-  "NOW",
-  "MIN",
-  "MAX",
-];
+export const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW"];
 
 export function sumProduct(...arrays) {
   const size = arrays[0].length;
@@ -37,29 +29,31 @@ export function sumProduct(...arrays) {
   return sum;
 }
 
-export function makeRandomCandidate(mins, maxes, multiple = 10) {
-  if (mins.length !== maxes.length) {
-    throw new Error("Arrays must have the same length");
-  }
-
-  // NOTE: includes min and max
-  return mins.map((min, index) => {
-    const range = maxes[index] - min + 1;
-    const next = Math.floor(Math.random() * range) + min;
-    return Math.round(next / multiple) * multiple;
-  });
+console.assert(mutateValueRange(300) !== 300, "mutateValueRange");
+export function mutateValueRange(value, jitter = 0.1, multiple = 10) {
+  const [min, max] = [value - jitter * value, value + jitter * value];
+  const range = max - min + 1;
+  const next = Math.floor(Math.random() * range) + min;
+  return Math.round(next / multiple) * multiple;
 }
 
 export function mutateCandidates(candidates) {
   return candidates.map(mutateCandidate);
 }
 
-export function mutateCandidate(candidate, jitter = 0.1, multiple = 10) {
-  return candidate.map((value) => {
-    const direction = Math.random() < 0.5 ? 1 : -1;
-    const magnitude = Math.floor(Math.random() * jitter);
-    return Math.round((value + direction * magnitude) / multiple) * multiple;
-  });
+// console.log(mutateCandidate([300, 50, 70, 80, 300, 220, 210, 90, 90, 70]));
+export function mutateCandidate(candidate, jitter, multiple = 10) {
+  const mutate = (value) => mutateValue(value, jitter, multiple);
+  return [...candidate.map(mutate)]; // new array instance
+}
+
+// console.assert(mutateValue(300) !== 300, "mutateValue");
+// TODO: positive values only, but somehow I get negatives
+export function mutateValue(value, jitter, multiple) {
+  const direction = Math.random() < 0.5 ? 1 : -1;
+  const magnitude = Math.floor(Math.random() * jitter * value);
+  return Math.round((value + direction * magnitude) / multiple) * multiple;
+  //return Math.round(value + direction * magnitude);
 }
 
 export function evaluateCandidate(candidate, expenses, dividends, prices) {
@@ -76,6 +70,32 @@ export function evaluateCandidate(candidate, expenses, dividends, prices) {
     roi: parseFloat((100 * roi).toFixed(2)),
     ratio: parseFloat(ratio.toFixed(2)),
   };
+}
+
+export function makeCandidates(size, src, jitter) {
+  // TODO: all candidates are mutations of the current one
+  let candidates = [];
+  for (let i = 0; i < size; i++) {
+    // TODO: figure out mutation strategy
+    const candidate = mutateCandidate(src, jitter);
+    candidates.push(candidate);
+  }
+  return candidates;
+}
+
+// TODO: check that prop is keyof typeof card.stats
+export function deDupeCardsByStat(cards, prop) {
+  const seen = new Set();
+  const out = ({ stats }) => stats[prop];
+
+  return cards.filter((card) => {
+    const key = out(card);
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 /*

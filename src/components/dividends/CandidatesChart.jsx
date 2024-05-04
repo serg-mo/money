@@ -15,7 +15,7 @@ defaults.font.family = "Monaco";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
-export default function CandidatesChart({ cards, x, y }) {
+export default function CandidatesChart({ cards, x, y, onClick }) {
   const options = {
     responsive: true,
     plugins: {
@@ -38,10 +38,7 @@ export default function CandidatesChart({ cards, x, y }) {
     },
     onClick: (event, elements) => {
       if (elements.length) {
-        const { candidate } = cards[elements[0].index];
-        // copy values to be pasted into the streadsheet
-        const load = async (text) => await navigator.clipboard.writeText(text);
-        load(candidate.join("\n"));
+        onClick(cards[elements[0].index]);
       }
     },
   };
@@ -52,8 +49,8 @@ export default function CandidatesChart({ cards, x, y }) {
         data: cards.map(({ stats }) => stats),
         backgroundColor: "rgb(255, 99, 132)",
         pointBackgroundColor: ({ dataIndex }) =>
-          dataIndex === 0 ? "red" : "blue", // highlight the first point
-        pointRadius: ({ dataIndex }) => (dataIndex === 0 ? 5 : 2),
+          dataIndex === 0 ? "red" : "#CCCCCC", // highlight the first point
+        pointRadius: ({ dataIndex }) => (dataIndex === 0 ? 6 : 3),
       },
     ],
   };

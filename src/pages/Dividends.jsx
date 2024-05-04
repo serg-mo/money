@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { evaluateCandidate, DividendContext } from "../utils/dividends";
+import {
+  REQUIRED_COLS,
+  evaluateCandidate,
+  DividendContext,
+} from "../utils/dividends";
 import DividendDash from "../components/dividends/DividendDash";
+import Target from "../components/Target";
 
 // TODO: compute delta/buy/sell/total for a given candidate
 
@@ -38,6 +43,7 @@ export default function Dividends() {
       headers.map((header, index) => [header, lastRow[index]]),
     );
     // console.log({ values, totals });
+    // TODO: throw exception if any of the required columns is missing
 
     return { values, totals };
   };
@@ -45,13 +51,8 @@ export default function Dividends() {
   const getContext = ({ values, totals }) => {
     const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
     const goalMonthly = parseFloat(totals["PRICE"]);
-    // TODO: show these
-    const minPercent = parseFloat(totals["MIN"]);
-    const maxPercent = parseFloat(totals["MAX"]);
 
     const current = values.map((v) => parseInt(v["NOW"]));
-    const mins = values.map((v) => parseFloat(v["MIN"]));
-    const maxes = values.map((v) => parseFloat(v["MAX"]));
     const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
     const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
     const prices = values.map((v) => parseFloat(v["PRICE"]));
@@ -66,34 +67,26 @@ export default function Dividends() {
 
     return {
       current,
-      mins,
-      maxes,
+      goalTotal,
+      goalMonthly,
       getStats,
       isPass,
     };
   };
 
-  // TODO: trigger button/file input should look the same
-  // TODO: continuously evaluate candidates in batches of 10
-  // TODO: chart current batch candidate performance
   // TODO: do not show the parse button if clipboard is empty
 
   if (!Object.keys(context).length) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <button
-          className={`text-lg text-white font-bold my-4 p-4 bg-blue-500 hover:bg-blue-700 rounded`}
-          onClick={parseClipboard}
-        >
-          Parse
-        </button>
-      </div>
+      <Target onClick={parseClipboard}>
+        <div className="text-sm text-gray-300">{REQUIRED_COLS.join(",")}</div>
+      </Target>
     );
   }
 
   return (
     <DividendContext.Provider value={context}>
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex flex-col justify-center items-center">
         <DividendDash />
       </div>
     </DividendContext.Provider>
