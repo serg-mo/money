@@ -99,6 +99,41 @@ export function deDupeCardsByStat(cards, prop) {
   });
 }
 
+export function getUnitDistanceOnStat(a, b, stat) {
+  return a.stats[stat] - b.stats[stat];
+}
+
+export function getPercentDistanceOnStat(a, b, stat) {
+  return getUnitDistanceOnStat(a, b, stat) / b.stats[stat];
+}
+
+function isCloseStats(a, b, totalMargin = 0, monthlyMargin = 0) {
+  // either total (less, +margin) and monthly (more, -margin)
+  return (
+    getUnitDistanceOnStat(a, b, "total") < totalMargin ||
+    getUnitDistanceOnStat(a, b, "monthly") > -monthlyMargin
+  );
+}
+
+function isBetterStats(a, b, totalMargin, monthlyMargin) {
+  // both total (less, +margin) and monthly (more, -margin)
+  return (
+    getUnitDistanceOnStat(a, b, "total") < totalMargin &&
+    getUnitDistanceOnStat(a, b, "monthly") > -monthlyMargin
+  );
+}
+
+export function isCloseToCard(focusCard, totalMargin = 50, monthlyMargin = 1) {
+  return (card) => isCloseStats(card, focusCard, totalMargin, monthlyMargin);
+}
+
+export function isBetterThanCard(
+  focusCard,
+  totalMargin = 0,
+  monthlyMargin = 0,
+) {
+  return (card) => isBetterStats(card, focusCard, totalMargin, monthlyMargin);
+}
 /*
 // TODO: convert these to assertions
 console.log(

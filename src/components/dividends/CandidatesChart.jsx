@@ -37,67 +37,78 @@ export default function CandidatesChart({
   goal,
   split,
   onClick,
+  onHover,
 }) {
-  // TODO: consider filtering data here, based on the split
-  // TODO: maybe dedupe here by label
-  const [x, y] = dims; // order is relevant
-
-  const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}`;
-  const getAnnotations = ({ stats }, color) => [
-    {
-      type: "line",
-      mode: "vertical",
-      scaleID: "x",
-      value: stats[x],
-      borderColor: color,
-      borderWidth: 1,
-    },
-    {
-      type: "line",
-      mode: "horizontal",
-      scaleID: "y",
-      value: stats[y],
-      borderColor: color,
-      borderWidth: 1,
-    },
-  ];
-
-  // only show goal when we're close to the total
-  const distance =
-    Math.abs(split.stats.total - goal.stats.total) / goal.stats.total;
-
-  const options = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: `${y} vs ${x}`,
+  const getOptions = (x, y) => {
+    const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}`;
+    const getAnnotations = ({ stats }, color) => [
+      {
+        type: "line",
+        mode: "vertical",
+        scaleID: "x",
+        value: stats[x],
+        borderColor: color,
+        borderWidth: 1,
       },
-      tooltip: {
-        callbacks: {
-          label: ({ dataIndex }) => getLabel(cards[dataIndex]),
+      {
+        type: "line",
+        mode: "horizontal",
+        scaleID: "y",
+        value: stats[y],
+        borderColor: color,
+        borderWidth: 1,
+      },
+    ];
+
+    // only show goal when we're close to the total
+    const distance =
+      Math.abs(split.stats.total - goal.stats.total) / goal.stats.total;
+
+    return {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: split
+            ? `${split.stats[y]} ${y} vs ${split.stats[x]} ${x}`
+            : `${y} vs ${x}`,
+        },
+        tooltip: {
+          callbacks: {
+            label: ({ dataIndex }) => getLabel(cards[dataIndex]),
+          },
+        },
+        annotation: {
+          annotations: [
+            ...getAnnotations(split, colors.split),
+            ...getAnnotations(goal, colors.goal),
+          ],
         },
       },
-      annotation: {
-        annotations: [
-          ...getAnnotations(split, colors.split),
-          ...(distance < 0.3 ? getAnnotations(goal, colors.goal) : []),
-        ],
+      parsing: {
+        xAxisKey: x,
+        yAxisKey: y,
       },
-    },
-    parsing: {
-      xAxisKey: x,
-      yAxisKey: y,
-    },
-    onClick: (event, elements) => {
-      if (elements.length) {
-        onClick(cards[elements[0].index]);
-      }
-    },
+      onClick: (event, elements) => {
+        if (elements.length) {
+          onClick(cards[elements[0].index]);
+        }
+      },
+      onHover: (event, elements) => {
+        if (elements.length) {
+          onHover(cards[elements[0].index]);
+        }
+      },
+    };
+    // console.log(options);
   };
-  // console.log(options);
+  // TODO: consider filtering data here, based on the split
+  // TODO: maybe dedupe here by label
+  const cashFlowOptions = getOptions("total", "monthly");
+  const ratioOptions = getOptions("exp", "roi");
 
   // TODO: make the dots look pretty
+  // TODO: maintain a history of bestNew candidates to highlight by filling them in
   const pointBackgroundColor = ({ dataIndex }) => colors.candidate;
   //highlight && highlight === dataIndex ? colors.highlight : colors.candidate;
 
@@ -115,5 +126,10 @@ export default function CandidatesChart({
     ],
   };
 
-  return <Scatter options={options} data={data} />;
+  return (
+    <>
+      <Scatter options={cashFlowOptions} data={data} />
+      <Scatter options={ratioOptions} data={data} />
+    </>
+  );
 }

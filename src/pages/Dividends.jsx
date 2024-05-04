@@ -12,6 +12,7 @@ import Target from "../components/Target";
 // google sheets solver has been broken for a while, so this is my own evolutionary solver
 export default function Dividends() {
   const [context, setContext] = useState({}); // TODO: make this a real context
+  const [error, setError] = useState(null);
 
   // NOTE: document must be focuses to read clipboard, so a click is necessary
   async function parseClipboard() {
@@ -19,32 +20,33 @@ export default function Dividends() {
       .readText()
       .then(parseCells)
       .then(getContext)
-      .then(setContext);
+      .then(setContext)
+      .catch((e) => setError(e.message));
   }
 
   const parseCells = (csv) => {
+    // split on newlines, whitespace, and prase bare numbers
     const cells = csv
-      .split(/\r?\n/) // rows
-      .map((v) => v.split(/\s/).map((v) => v.replace(/[\$,%]/g, ""))); // columns as bare numbers
+      .split(/\r?\n/)
+      .map((row) => row.split(/\s/).map((v) => v.replace(/[\$,%]/g, "")));
 
-    const headers = cells[0];
-    const lastRow = cells[cells.length - 1];
+    const [headers, footers] = [cells[0], cells[cells.length - 1]];
 
-    // ignore first and last row, i.e., headers and totals
-    const values = cells
-      .slice(1, -1)
-      .map((row) =>
-        Object.fromEntries(
-          headers.map((header, index) => [header, row[index]]),
-        ),
+    if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
+      throw new Error("Empty clipboard");
+    }
+
+    const rowToObject = (row) => {
+      return Object.fromEntries(
+        headers.map((header, index) => [header, row[index]]),
       );
+    };
 
-    const totals = Object.fromEntries(
-      headers.map((header, index) => [header, lastRow[index]]),
-    );
+    // rows to header-keyed objects, ignore headers and footers
+    const values = cells.slice(1, -1).map(rowToObject);
+    const totals = rowToObject(footers);
+
     // console.log({ values, totals });
-    // TODO: throw exception if any of the required columns is missing
-
     return { values, totals };
   };
 
@@ -57,20 +59,11 @@ export default function Dividends() {
     const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
     const prices = values.map((v) => parseFloat(v["PRICE"]));
 
-    const getStats = (candidate) =>
-      evaluateCandidate(candidate, expenses, dividends, prices);
-
-    const isPass = (candidate) => {
-      const { total, monthly } = getStats(candidate);
-      return total <= goalTotal && monthly >= goalMonthly;
-    };
-
     return {
       current,
       goalTotal,
       goalMonthly,
-      getStats,
-      isPass,
+      getStats: (c) => evaluateCandidate(c, expenses, dividends, prices),
     };
   };
 
@@ -79,7 +72,11 @@ export default function Dividends() {
   if (!Object.keys(context).length) {
     return (
       <Target onClick={parseClipboard}>
-        <div className="text-sm text-gray-300">{REQUIRED_COLS.join(",")}</div>
+        {error ? (
+          <div className="text-red-300">{error}</div>
+        ) : (
+          <div className="text-sm text-gray-300">{REQUIRED_COLS.join(",")}</div>
+        )}
       </Target>
     );
   }
