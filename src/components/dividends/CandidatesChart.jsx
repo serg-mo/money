@@ -6,7 +6,6 @@ import {
   LinearScale,
   BarElement,
   Title,
-  Tooltip,
   defaults,
 } from "chart.js";
 import { Scatter } from "react-chartjs-2";
@@ -19,7 +18,6 @@ ChartJS.register(
   LinearScale,
   BarElement,
   Title,
-  Tooltip,
   annotationPlugin,
 );
 
@@ -32,7 +30,6 @@ export const colors = {
 
 export default function CandidatesChart({
   cards,
-  dims,
   highlight,
   goal,
   split,

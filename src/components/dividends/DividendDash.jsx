@@ -17,7 +17,7 @@ import CandidateChart from "./CandidateChart";
 // TODO: consider making goal just a x/y coordinate on both charts, i.e., they maintain their own
 // TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
-  const TOP_SIZE = 50;
+  const TOP_SIZE = 30;
   const INIT_SIZE = 1_000;
   const HOVER_SIZE = 3;
 

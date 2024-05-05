@@ -54,12 +54,14 @@ export default function Dividends() {
     const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
     const goalMonthly = parseFloat(totals["PRICE"]);
 
+    const names = values.map((v) => v["NAME"]);
     const current = values.map((v) => parseInt(v["NOW"]));
     const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
     const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
     const prices = values.map((v) => parseFloat(v["PRICE"]));
 
     return {
+      names,
       current,
       goalTotal,
       goalMonthly,

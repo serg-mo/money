@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-
+import React, { useContext } from "react";
+import { DividendContext } from "../../utils/dividends";
 import { Chart as ChartJS, ArcElement, Tooltip, defaults } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
@@ -32,9 +32,15 @@ defaults.font.family = "Monaco";
 // }
 
 // TODO: come up with a color for each fund
+// TODO: these should be stacked, so I can see the relative difference
 export default function CandidateChart({ card: { candidate }, title }) {
+  const { names } = useContext(DividendContext);
+
   const options = {
     responsive: true,
+    tooltips: {
+      enabled: false,
+    },
     plugins: {
       legend: {
         position: "top",
@@ -47,10 +53,9 @@ export default function CandidateChart({ card: { candidate }, title }) {
   };
 
   const data = {
-    labels: candidate, // TODO: these should be symbols
+    labels: names,
     datasets: [
       {
-        label: "Dataset 1",
         data: candidate,
         backgroundColor: "rgb(255, 99, 132)",
       },
