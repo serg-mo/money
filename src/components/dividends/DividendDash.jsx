@@ -8,6 +8,7 @@ import {
   isBetterThanCard,
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
+import CandidateChart from "./CandidateChart";
 
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere
@@ -18,7 +19,7 @@ import CandidatesChart from "./CandidatesChart";
 export default function DividendDash() {
   const TOP_SIZE = 50;
   const INIT_SIZE = 1_000;
-  const HOVER_SIZE = 10;
+  const HOVER_SIZE = 3;
 
   const { current, goalTotal, goalMonthly, isPass, getStats } =
     useContext(DividendContext);
@@ -31,7 +32,7 @@ export default function DividendDash() {
   const currentCard = candidateToCard(current);
   const [isThinking, setIsThinking] = useState(false);
   const [topCards, setTopCards] = useState([]);
-  const [jitter, setJitter] = useState(0.5); // TODO: this should change with every click
+  const [jitter, setJitter] = useState(0.3); // TODO: this should change with every click
 
   const [splitCard, setSplitCard] = useState(currentCard);
   const [highlightIndex] = useState(0); // TODO: this should not be static
@@ -44,7 +45,7 @@ export default function DividendDash() {
     // TODO: maintain the focused data point as state
     // TODO: start with currentCard, then splitCard, then goalCard
     const isBetterThanGoal = isBetterThanCard(goalCard);
-    const isCloseToSplit = isCloseToCard(splitCard);
+    const isCloseToSplit = isCloseToCard(splitCard, 1000, 100);
 
     // split is how I set focus
     return isBetterThanGoal(splitCard)
@@ -73,6 +74,7 @@ export default function DividendDash() {
           .slice(0, TOP_SIZE),
       );
 
+      // TODO: splitCard needs to point to one of these, find which one
       setIsThinking(false);
       return [...prev, ...bests].filter(getFocus());
     });
@@ -95,16 +97,17 @@ export default function DividendDash() {
     const load = async (text) => await navigator.clipboard.writeText(text);
     load(candidate.join("\n")); // newlines for the spreadsheet
 
-    setJitter((prev) => prev * 0.95); // less jitter with each click
+    setJitter((prev) => prev * 0.92); // less jitter with each click
     setSplitCard(card);
   };
 
-  const onHover = ({ candidate }) => {
+  const onHover = (card) => {
     // append only, no filtering
     // setTopCards((prev) => [
     //   ...prev,
-    //   makeUniqueCandidates(HOVER_SIZE, candidate, jitter),
+    //   makeUniqueCandidates(HOVER_SIZE, card.candidate),
     // ]);
+    // setSplitCard(card);
   };
 
   // TODO: rename to current, goal, and active (split) cards
@@ -116,6 +119,11 @@ export default function DividendDash() {
           Current ({jitter}):
           {JSON.stringify(currentCard.stats).replace(/\"/g, "")}
         </h2>
+
+        <div className="h-[20em] flex flex-row justify-between w-full">
+          <CandidateChart card={currentCard} title="current" />
+          <CandidateChart card={splitCard} title="split" />
+        </div>
       </header>
       <div className="w-full h-full">
         {isThinking && <div className="text-blue-400">Thinking...</div>}

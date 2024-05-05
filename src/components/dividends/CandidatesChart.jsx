@@ -129,7 +129,7 @@ export default function CandidatesChart({
   return (
     <>
       <Scatter options={cashFlowOptions} data={data} />
-      <Scatter options={ratioOptions} data={data} />
+      {/* <Scatter options={ratioOptions} data={data} /> */}
     </>
   );
 }

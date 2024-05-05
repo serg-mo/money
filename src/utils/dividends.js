@@ -108,31 +108,27 @@ export function getPercentDistanceOnStat(a, b, stat) {
 }
 
 function isCloseStats(a, b, totalMargin = 0, monthlyMargin = 0) {
-  // either total (less, +margin) and monthly (more, -margin)
+  // either total OR monthly are within unit margin
   return (
-    getUnitDistanceOnStat(a, b, "total") < totalMargin ||
-    getUnitDistanceOnStat(a, b, "monthly") > -monthlyMargin
+    Math.abs(getUnitDistanceOnStat(a, b, "total")) < totalMargin ||
+    Math.abs(getUnitDistanceOnStat(a, b, "monthly")) < monthlyMargin
   );
 }
 
-function isBetterStats(a, b, totalMargin, monthlyMargin) {
-  // both total (less, +margin) and monthly (more, -margin)
+function isBetterStats(a, b) {
+  // both less total AND more monthly
   return (
-    getUnitDistanceOnStat(a, b, "total") < totalMargin &&
-    getUnitDistanceOnStat(a, b, "monthly") > -monthlyMargin
+    getUnitDistanceOnStat(a, b, "total") < 0 &&
+    getUnitDistanceOnStat(a, b, "monthly") > 0
   );
 }
 
-export function isCloseToCard(focusCard, totalMargin = 50, monthlyMargin = 1) {
+export function isCloseToCard(focusCard, totalMargin, monthlyMargin) {
   return (card) => isCloseStats(card, focusCard, totalMargin, monthlyMargin);
 }
 
-export function isBetterThanCard(
-  focusCard,
-  totalMargin = 0,
-  monthlyMargin = 0,
-) {
-  return (card) => isBetterStats(card, focusCard, totalMargin, monthlyMargin);
+export function isBetterThanCard(focusCard) {
+  return (card) => isBetterStats(card, focusCard);
 }
 /*
 // TODO: convert these to assertions
