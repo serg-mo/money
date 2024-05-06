@@ -121,8 +121,7 @@ export default function DividendDash() {
         </h2>
 
         <div className="h-[20em] flex flex-row justify-between w-full">
-          <CandidateChart card={currentCard} title="current" />
-          <CandidateChart card={splitCard} title="split" />
+          <CandidateChart current={currentCard} split={splitCard} />
         </div>
       </header>
       <div className="w-full h-full">

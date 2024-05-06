@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { DividendContext } from "../../utils/dividends";
 import { Chart as ChartJS, ArcElement, Tooltip, defaults } from "chart.js";
-import { Pie } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip);
 
@@ -31,9 +31,22 @@ defaults.font.family = "Monaco";
 //   );
 // }
 
+const COLORS = [
+  "#2b50b6", // DIV
+  "#5578b5", // DIVO
+  "#829caf", // JEPI
+  "#b3bfa3", // NUSI
+  "#e5e08f", // QYLD
+  "#ffe892", // RYLD
+  "#fed6af", // SDIV
+  "#fdc2c7", // SPHD
+  "#fcaedd", // SRET
+  "#fa97f0", // XYLD
+];
+
 // TODO: come up with a color for each fund
 // TODO: these should be stacked, so I can see the relative difference
-export default function CandidateChart({ card: { candidate }, title }) {
+export default function CandidateChart({ current, split }) {
   const { names } = useContext(DividendContext);
 
   const options = {
@@ -45,22 +58,26 @@ export default function CandidateChart({ card: { candidate }, title }) {
       legend: {
         position: "top",
       },
-      title: {
-        display: true,
-        text: title,
-      },
+      legend: false,
     },
+    animation: false,
   };
 
   const data = {
     labels: names,
     datasets: [
       {
-        data: candidate,
-        backgroundColor: "rgb(255, 99, 132)",
+        label: "current",
+        data: current.candidate,
+        backgroundColor: COLORS,
+      },
+      {
+        label: "split",
+        data: split.candidate,
+        backgroundColor: COLORS,
       },
     ],
   };
 
-  return <Pie options={options} data={data} />;
+  return <Doughnut options={options} data={data} />;
 }

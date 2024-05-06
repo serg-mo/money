@@ -81,6 +81,7 @@ export default function CandidatesChart({
             ...getAnnotations(goal, colors.goal),
           ],
         },
+        legend: false,
       },
       parsing: {
         xAxisKey: x,
