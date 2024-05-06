@@ -12,8 +12,7 @@ function Brokerage({ files }) {
   if (!transactions.length) {
     let reader = new FileReader();
     reader.onload = (e) => {
-      const rows = parseBrokerageFile(e.target.result);
-      setTransactions(rows);
+      setTransactions(parseBrokerageFile(e.target.result));
     };
     reader.readAsText(files[0]); // first file
   }
@@ -37,30 +36,17 @@ function Brokerage({ files }) {
   // charts use canvas, the size of which can't be easily set with tailwind
   const render = (slice) => {
     return (
-      <div className="flex flex-col justify-center items-center">
+      <div className="w-full flex flex-col justify-center items-center">
         <div className="w-3/5">
           <BalanceChart transactions={slice} column={"ending balance"} />
         </div>
         <div className="w-3/5">
-          <CashFlowChart
-            transactions={slice}
-            title="Cash Flow"
-            columns={["deposits", "withdrawals"]}
-          />
-        </div>
-        <div className="w-3/5">
-          <CashFlowChart
-            transactions={slice}
-            title="Returns & Income"
-            columns={["market change minus fees", "dividends & interest"]}
-          />
+          <CashFlowChart transactions={slice} title="cash flow" />
         </div>
       </div>
     );
   };
 
-  // TODO: what I want is a double chart of balance + color coded changes, e.g., intetrest, dividends, deposits, withdrawals
-  // TODO: then add ability to show/hide certain changes
   return <Frame transactions={transactions} render={render} />;
 }
 

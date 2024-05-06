@@ -91,7 +91,7 @@ export function parseCreditFile(txt) {
 
 function parseCreditTransactions(lines, headers) {
   // convert each line from an array of strings into an object, where keys are headers
-  return lines.map(parseCSV).map((values, key) => {
+  return lines.map(parseCSV).map((values) => {
     const obj = Object.fromEntries(
       headers.map((header, index) => [header, values[index]]),
     );

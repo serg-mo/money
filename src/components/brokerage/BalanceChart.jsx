@@ -28,6 +28,7 @@ export default function BalanceChart({ transactions, column }) {
         display: true,
         text: column,
       },
+      legend: false,
     },
     animation: false,
   };
