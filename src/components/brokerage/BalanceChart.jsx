@@ -29,6 +29,7 @@ export default function BalanceChart({ transactions, column }) {
         text: column,
       },
     },
+    animation: false,
   };
 
   // NOTE: ending balance of one month is the same as the beginning balance of the next one

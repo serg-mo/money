@@ -2,15 +2,16 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
 export const NAV_LINKS = [
-  { path: "/", label: "Home" },
   { path: "/dividends", label: "Dividends" },
   { path: "/brokerage", label: "Brokerage" },
   { path: "/credit", label: "Credit" },
 ];
 
-function NavEdge({ children }) {
+function NavEdge({ children, className }) {
   return (
-    <div className="font-bold bg-gray-300 flex items-center px-4 py-2">
+    <div
+      className={`font-bold bg-gray-300 flex items-center px-4 py-2 ${className}`}
+    >
       {children}
     </div>
   );
@@ -31,10 +32,10 @@ function NavLink({ path, label }) {
 
 export default function Navigation() {
   return (
-    <nav className="m-4 flex flex-col min-w-max bg-gray-200 rounded-lg">
-      <NavEdge>Money Charts</NavEdge>
+    <nav className="m-4 flex flex-col bg-gray-200 rounded-t-lg rounded-b-lg">
+      <NavEdge className="rounded-t-lg">Money Charts</NavEdge>
       <ul>{NAV_LINKS.map(NavLink)}</ul>
-      <NavEdge>
+      <NavEdge className="rounded-b-lg">
         <img
           src="/profile.jpg"
           alt="Profile"
