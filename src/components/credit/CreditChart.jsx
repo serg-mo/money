@@ -7,7 +7,6 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
   Tooltip,
   defaults,
 } from "chart.js";
@@ -15,16 +14,17 @@ import { Bar } from "react-chartjs-2";
 
 defaults.font.family = "Monaco";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
 
 export default function CreditChart({ transactions }) {
   const options = {
     responsive: true,
-    plugins: {},
+    plugins: {
+      legend: false,
+    },
     scales: {
-      x: { stacked: true },
       y: { stacked: true },
     },
   };

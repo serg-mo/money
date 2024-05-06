@@ -49,9 +49,6 @@ export default function CashFlowChart({ transactions, title }) {
       y: { stacked: true },
     },
     animation: false,
-    legend: {
-      display: true,
-    },
   };
 
   const datasets = columns.map((column, index) => {

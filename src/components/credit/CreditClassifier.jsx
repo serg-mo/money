@@ -1,7 +1,59 @@
-import React from "react";
+import React, { useState } from "react";
 import { CATEGORIES } from "../../utils/credit";
+import { tensor } from "@tensorflow/tfjs";
 
 export default function CreditClassifier({ classifier }) {
+  // TODO: do not classify until a minimum number of examples
+  const MAX_NEIGHBORHOOD_SIZE = 3;
+  const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
+  const MIN_CONFIDENCE = 0.8;
+
+  const [neighborhoodSize, setNeighborhoodSize] = useState(2);
+
+  // TODO: consider saving the classifier state manually
+  // // load existing classifier from local storage, which persists across sessions
+  // const data = JSON.parse(localStorage.getItem("classifierDataset"));
+  // if (data && data.length) {
+  //   const unserialized = Object.fromEntries(
+  //     data.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
+  //   );
+  //   console.log("Restoring classifierDataset");
+  //   classifier.setClassifierDataset(unserialized);
+  //   setIsUpdated(true);
+  // }
+  // // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
+  // let serialized = Object.entries(classifier.getClassifierDataset()).map(
+  //   ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
+  // );
+  // localStorage.setItem("classifierDataset", JSON.stringify(serialized));
+
+  // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
+  const predictOne = async (transaction) => {
+    // NOTE: must be a tensor + string label
+    const tensor = tensor(transaction["vector"]);
+    const { label, confidences } = await classifier.predictClass(
+      tensor,
+      neighborhoodSize,
+    );
+
+    let category = label; // label predicted, t.category original
+    const maxConfidence = confidences[label];
+
+    // TODO: do not replace anything unless it's above a minimum confidence
+    for (const [cat, confidence] of Object.entries(confidences)) {
+      if (confidence >= MIN_CONFIDENCE) {
+        category = cat;
+      }
+    }
+
+    return {
+      ...t,
+      category,
+      confidences,
+      maxConfidence, // TODO: sort by this
+    };
+  };
+
   const predictAll = async () => {
     // // re-categorize when classifier and transactions are loaded, but not categorized
     // if (!transactions.length) {
@@ -89,9 +141,9 @@ export default function CreditClassifier({ classifier }) {
         </button>
       </div>
       <div className="text-center">
-        <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
+        {/* <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
         <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
-        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div>
+        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div> */}
         <select
           value={neighborhoodSize}
           onChange={(e) => setNeighborhoodSize(e.target.value)}

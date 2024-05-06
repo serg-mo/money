@@ -5,21 +5,21 @@
 
 // TODO: add typescript
 // TODO: write unit tests for all of these
+import { createContext } from "react";
+
+export const CreditContext = createContext();
 
 export const CATEGORIES = {
   CAR: "CAR",
   FUN: "FUN",
   OTHER: "OTHER",
   FOOD: "FOOD",
-  GIFTS: "GIFTS",
-  GYM: "GYM",
   HEALTH: "HEALTH",
   INSURANCE: "INSURANCE",
   PET: "PET",
   SHOPPING: "SHOPPING",
   SUBSCRIPTIONS: "SUBSCRIPTIONS",
   TRAVEL: "TRAVEL",
-  UTILITIES: "UTILITIES",
   UNCLASSIFIED: "UNCLASSIFIED",
 };
 

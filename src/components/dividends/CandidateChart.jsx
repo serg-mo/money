@@ -55,9 +55,6 @@ export default function CandidateChart({ current, split }) {
       enabled: false,
     },
     plugins: {
-      legend: {
-        position: "top",
-      },
       legend: false,
     },
     animation: false,
