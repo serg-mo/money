@@ -22,16 +22,8 @@ ChartJS.register(
 
 defaults.font.family = "Monaco";
 
-export const COLORS = [
-  "rgba(153, 102, 255)",
-  "rgba(255, 159, 64)",
-  "rgba(255, 99, 132)",
-  "rgba(54, 162, 235)",
-  "rgba(255, 206, 86)",
-  "rgba(75, 192, 192)",
-  "rgba(153, 102, 255)",
-  "rgba(255, 159, 64)",
-];
+// https://colorkit.co/color-palette-generator
+export const COLORS = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
 
 const columns = [
   "deposits",
@@ -50,9 +42,6 @@ export default function CashFlowChart({ transactions, title }) {
       },
       legend: {
         display: true,
-        labels: {
-          color: "rgb(255, 99, 132)",
-        },
       },
     },
     scales: {
