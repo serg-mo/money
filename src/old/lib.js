@@ -424,22 +424,3 @@ function double_reducer(group_a, group_b, aggregate = "amount") {
     return sum;
   };
 }
-
-function sync_dataset_property(destination, source, property = "hidden") {
-  // stack has datasets per category, e.g., rent, food, gym
-  // pie has one dataset with categories as labels
-
-  // if the destination has no datasets or source / destination datasets are of equal length
-  if (
-    !destination.datasets.length ||
-    destination.datasets.length == source.datasets.length
-  ) {
-    for (let i = 0; i < source.datasets.length; i++) {
-      // destination.datasets[i][property] = source.datasets[i][property]; // THIS DOES NOT WOEK
-    }
-  } else {
-    console.log(destination.datasets.length);
-    console.log(source.datasets.length);
-    console.log("Source and destination datasets can not be synced");
-  }
-}
