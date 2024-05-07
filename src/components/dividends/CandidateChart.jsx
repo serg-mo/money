@@ -46,6 +46,10 @@ const COLORS = [
   "#fa97f0", // XYLD
 ];
 
+// TODO: compute the similar colors for the split and current
+// TODO: add the similiarity to the middle of the doughnut chart
+// https://quickchart.io/documentation/chart-js/custom-pie-doughnut-chart-labels/#using-the-doughnutlabel-plugin
+
 // TODO: come up with a color for each fund
 // TODO: these should be stacked, so I can see the relative difference
 export default function CandidateChart({ current, split }) {

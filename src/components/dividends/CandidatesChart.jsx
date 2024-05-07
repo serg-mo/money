@@ -124,6 +124,7 @@ export default function CandidatesChart({
     ],
   };
 
+  // TODO: color code each point on the scatter chart to show similarity to current
   return (
     <>
       <Scatter options={cashFlowOptions} data={data} />
