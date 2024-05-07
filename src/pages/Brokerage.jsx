@@ -4,20 +4,17 @@ import CashFlowChart from "../components/brokerage/CashFlowChart";
 import DragAndDrop from "../components/DragAndDrop";
 import { parseBrokerageFile } from "../utils/brokerage";
 import Frame from "../components/Frame";
+import { loadFileContent } from "../utils/common";
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
 function Brokerage({ files }) {
   const [transactions, setTransactions] = useState([]);
+  const [error, setError] = useState(null);
 
   if (!transactions.length) {
-    let reader = new FileReader();
-    reader.onload = (e) => {
-      setTransactions(parseBrokerageFile(e.target.result));
-    };
-    reader.readAsText(files[0]); // first file
-  }
+    // first file only
+    loadFileContent(files[0]).then(parseBrokerageFile).then(setTransactions);
 
-  if (!transactions.length) {
     return <div className="h-dvh w-3/4">Loading...</div>;
   }
 

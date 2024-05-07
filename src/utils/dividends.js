@@ -1,5 +1,5 @@
 import { createContext } from "react";
-
+import { splitCells, rowToObjectWithKeys } from "./common";
 export const DividendContext = createContext();
 
 // NOTE: this only works with a specific shape
@@ -11,6 +11,43 @@ export const CARD_SORTS = {
 };
 
 export const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW"];
+
+export function parseDividendFile(txt) {
+  const lastValueRowIndex = 11; // header + 10 funds
+
+  // only look at the first few columns, because headers repeat, e.g., weight
+  const cells = splitCells(txt).map((row) => row.slice(0, 9));
+  const [headers, footers] = [cells[0], cells[lastValueRowIndex + 1]];
+  //console.log({ cells, headers, footers });
+
+  if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
+    throw new Error("Empty clipboard");
+  }
+
+  const objectify = rowToObjectWithKeys(headers);
+  const values = cells.slice(1, lastValueRowIndex).map(objectify); // ignore header/footer
+  const totals = objectify(footers);
+  //console.log({ totals });
+
+  const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
+  const goalMonthly = parseFloat(totals["PRICE"]);
+
+  const names = values.map((v) => v["NAME"]);
+  const current = values.map((v) => parseInt(v["NOW"]));
+  const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
+  const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
+  const prices = values.map((v) => parseFloat(v["PRICE"]));
+
+  const getStats = (c) => evaluateCandidate(c, expenses, dividends, prices);
+
+  return {
+    names,
+    current,
+    goalTotal,
+    goalMonthly,
+    getStats,
+  };
+}
 
 export function sumProduct(...arrays) {
   const size = arrays[0].length;

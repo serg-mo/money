@@ -2,8 +2,10 @@ import React, { useContext } from "react";
 import { DividendContext } from "../../utils/dividends";
 import { Chart as ChartJS, ArcElement, Tooltip, defaults } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
-ChartJS.register(ArcElement, Tooltip);
+// https://chartjs-plugin-datalabels.netlify.app/samples/charts/doughnut.html
+ChartJS.register(ArcElement, Tooltip /*ChartDataLabels*/);
 
 defaults.font.family = "Monaco";
 
@@ -56,6 +58,7 @@ export default function CandidateChart({ current, split }) {
     },
     plugins: {
       legend: false,
+      ChartDataLabels,
     },
     animation: false,
   };

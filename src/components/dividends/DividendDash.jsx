@@ -21,7 +21,7 @@ export default function DividendDash() {
   const INIT_SIZE = 1_000;
   const HOVER_SIZE = 3;
 
-  const { current, goalTotal, goalMonthly, isPass, getStats } =
+  const { current, goalTotal, goalMonthly, getStats } =
     useContext(DividendContext);
 
   const candidateToCard = (candidate) => ({
@@ -32,7 +32,7 @@ export default function DividendDash() {
   const currentCard = candidateToCard(current);
   const [isThinking, setIsThinking] = useState(false);
   const [topCards, setTopCards] = useState([]);
-  const [jitter, setJitter] = useState(0.3); // TODO: this should change with every click
+  const [jitter, setJitter] = useState(0.3);
 
   const [splitCard, setSplitCard] = useState(currentCard);
   const [highlightIndex] = useState(0); // TODO: this should not be static
@@ -63,6 +63,7 @@ export default function DividendDash() {
   // TODO: flatMap is how I can inject more candidates into existing array
   // TODO: somehow the actual best candidate does not get picked
   // TODO: the logic for current/split needs to be animatable differently
+  // TODO: jitter is really a measure of how much to mutate the current candidate
   const makeCardsForCandidate = (src) => {
     setIsThinking(true);
 
@@ -85,11 +86,6 @@ export default function DividendDash() {
     makeCardsForCandidate(current);
   }, [current]);
 
-  // changing the split card generates more cadidates
-  useEffect(() => {
-    makeCardsForCandidate(splitCard.candidate);
-  }, [splitCard]);
-
   // TODO: explore by HOVERING
   // explore by clicking on a data point, which generates new mutations
   const onClick = (card) => {
@@ -98,7 +94,9 @@ export default function DividendDash() {
     load(candidate.join("\n")); // newlines for the spreadsheet
 
     setJitter((prev) => prev * 0.92); // less jitter with each click
+
     setSplitCard(card);
+    makeCardsForCandidate(card.candidate);
   };
 
   const onHover = (card) => {
@@ -107,20 +105,21 @@ export default function DividendDash() {
     //   ...prev,
     //   makeUniqueCandidates(HOVER_SIZE, card.candidate),
     // ]);
-    // setSplitCard(card);
+    setSplitCard(card);
   };
+
+  const cardStats = [currentCard, splitCard, goalCard].map((card, index) => (
+    <div key={index}>{JSON.stringify(card.stats).replace(/\"/g, "")}</div>
+  ));
 
   // TODO: rename to current, goal, and active (split) cards
   // TODO: show a pie chart of the split card
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
       <header className="text-center rounded p-2 select-none">
-        <h2 className="text-blue-500">
-          Current ({jitter}):
-          {JSON.stringify(currentCard.stats).replace(/\"/g, "")}
-        </h2>
+        <div className="text-sm text-blue-500">{cardStats}</div>
 
-        <div className="h-[20em] flex flex-row justify-between w-full">
+        <div className="h-[20em] flex flex-col items-center">
           <CandidateChart current={currentCard} split={splitCard} />
         </div>
       </header>
