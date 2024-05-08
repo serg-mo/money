@@ -35,7 +35,7 @@ export default function DividendDash() {
   const [jitter, setJitter] = useState(0.3);
 
   const [splitCard, setSplitCard] = useState(currentCard);
-  const [highlightIndex] = useState(0); // TODO: this should not be static
+  const [highlights, setHighlights] = useState([]);
   const [goalCard] = useState({
     ...currentCard,
     stats: { ...currentCard.stats, total: goalTotal, monthly: goalMonthly },
@@ -92,6 +92,7 @@ export default function DividendDash() {
     const load = async (text) => await navigator.clipboard.writeText(text);
     load(candidate.join("\n")); // newlines for the spreadsheet
 
+    setHighlights((prev) => [...prev, card]);
     setJitter((prev) => prev * 0.92); // less jitter with each click
 
     setSplitCard(card);
@@ -122,6 +123,8 @@ export default function DividendDash() {
         <div className="h-[20em] flex flex-col items-center">
           <CandidateChart current={currentCard} split={splitCard} />
         </div>
+
+        {/* <div>{ JSON.stringify(highlights)}</div> */}
       </header>
       <div className="w-full h-full">
         {isThinking && <div className="text-blue-400">Thinking...</div>}
