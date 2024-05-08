@@ -18,8 +18,8 @@ import CandidateChart from "./CandidateChart";
 // TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
   const TOP_SIZE = 30;
-  const INIT_SIZE = 1_000;
-  const HOVER_SIZE = 3;
+  const INIT_SIZE = 1000;
+  const CLICK_SIZE = 100;
 
   const { current, goalTotal, goalMonthly, getStats } =
     useContext(DividendContext);
@@ -53,24 +53,20 @@ export default function DividendDash() {
       : isCloseToSplit; // split to the middle
   };
 
-  const makeUniqueCandidates = (size, src) => {
-    const cards = makeCandidates(size, src, jitter).map(candidateToCard);
-    return deDupeCardsByStat(cards, "monthly");
-  };
-
   // TODO: decide on the best candidate, but mutate the whole thing
   // TODO: fix the sort, best candidate is not always the first
   // TODO: flatMap is how I can inject more candidates into existing array
   // TODO: somehow the actual best candidate does not get picked
   // TODO: the logic for current/split needs to be animatable differently
   // TODO: jitter is really a measure of how much to mutate the current candidate
-  const makeCardsForCandidate = (src) => {
+  const makeCardsForCandidate = (src, size) => {
     setIsThinking(true);
 
     setTopCards((prev) => {
       // multiple sorts, multiple best candidates combined into one array
       const bests = Object.keys(CARD_SORTS).flatMap((sortKey) =>
-        makeUniqueCandidates(INIT_SIZE, src)
+        makeCandidates(src, size, jitter)
+          .map(candidateToCard)
           .sort(CARD_SORTS[sortKey])
           .slice(0, TOP_SIZE),
       );
@@ -83,7 +79,23 @@ export default function DividendDash() {
 
   // initialize the top cards
   useEffect(() => {
-    makeCardsForCandidate(current);
+    const isBetterThanGoal = isBetterThanCard(goalCard);
+    let cards = [];
+    for (let i = 0; i < 10; i++) {
+      // do not use makeCardsForCandidate here, because we need to see the cards
+      // multiple sorts, multiple best candidates combined into one array
+      cards = deDupeCardsByStat([...cards, ...makeCandidates(current, INIT_SIZE, jitter).map(candidateToCard)], 'monthly')
+      
+      if (cards.some(isBetterThanGoal)) {
+        console.log(`Found a card that's better than goal on ${i} iteration`);
+        cards = cards.filter(isBetterThanGoal);
+        
+        setSplitCard(cards[0]); // otherwise it stays at current, initial value
+        break;
+      }
+    }
+
+    setTopCards(cards);
   }, [current]);
 
   // explore by clicking on a data point, which generates new mutations
@@ -96,7 +108,7 @@ export default function DividendDash() {
     setJitter((prev) => prev * 0.92); // less jitter with each click
 
     setSplitCard(card);
-    makeCardsForCandidate(candidate);
+    makeCardsForCandidate(candidate, CLICK_SIZE);
   };
 
   const onHover = (card) => {
@@ -104,12 +116,12 @@ export default function DividendDash() {
     // append only, no filtering
     // setTopCards((prev) => [
     //   ...prev,
-    //   makeUniqueCandidates(HOVER_SIZE, card.candidate),
+    //   makeCandidates(card.candidate, HOVER_SIZE),
     // ]);
     setSplitCard(card);
   };
 
-  const cardStats = Object.entries({ currentCard, splitCard, goalCard }).map(
+  const cardStats = Object.entries({ 'current': currentCard, "split": splitCard, "goal": goalCard }).map(
     ([key, { stats }]) => (
       <div key={key}>
         {key}: {JSON.stringify(stats).replace(/\"/g, "")}

@@ -110,7 +110,7 @@ export function evaluateCandidate(candidate, expenses, dividends, prices) {
   };
 }
 
-export function makeCandidates(size, src, jitter) {
+export function makeCandidates(src, size, jitter) {
   // TODO: all candidates are mutations of the current one
   let candidates = [];
   for (let i = 0; i < size; i++) {
