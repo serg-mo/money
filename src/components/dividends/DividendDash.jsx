@@ -77,7 +77,7 @@ export default function DividendDash() {
 
       // TODO: splitCard needs to point to one of these, find which one
       setIsThinking(false);
-      return [...prev, ...bests].filter(getFocus());
+      return deDupeCardsByStat([...prev, ...bests], 'monthly').filter(getFocus());
     });
   };
 
@@ -86,7 +86,6 @@ export default function DividendDash() {
     makeCardsForCandidate(current);
   }, [current]);
 
-  // TODO: explore by HOVERING
   // explore by clicking on a data point, which generates new mutations
   const onClick = (card) => {
     const { candidate } = card;
@@ -96,10 +95,11 @@ export default function DividendDash() {
     setJitter((prev) => prev * 0.92); // less jitter with each click
 
     setSplitCard(card);
-    makeCardsForCandidate(card.candidate);
+    makeCardsForCandidate(candidate);
   };
 
   const onHover = (card) => {
+    // TODO: explore by HOVERING
     // append only, no filtering
     // setTopCards((prev) => [
     //   ...prev,

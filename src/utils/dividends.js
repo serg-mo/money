@@ -124,10 +124,8 @@ export function makeCandidates(size, src, jitter) {
 // TODO: check that prop is keyof typeof card.stats
 export function deDupeCardsByStat(cards, prop) {
   const seen = new Set();
-  const out = ({ stats }) => stats[prop];
-
   return cards.filter((card) => {
-    const key = out(card);
+    const key = card.stats[prop];
     if (seen.has(key)) {
       return false;
     }
