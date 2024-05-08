@@ -109,9 +109,13 @@ export default function DividendDash() {
     setSplitCard(card);
   };
 
-  const cardStats = [currentCard, splitCard, goalCard].map((card, index) => (
-    <div key={index}>{JSON.stringify(card.stats).replace(/\"/g, "")}</div>
-  ));
+  const cardStats = Object.entries({ currentCard, splitCard, goalCard }).map(
+    ([key, { stats }]) => (
+      <div key={key}>
+        {key}: {JSON.stringify(stats).replace(/\"/g, "")}
+      </div>
+    ),
+  );
 
   // TODO: rename to current, goal, and active (split) cards
   // TODO: show a pie chart of the split card
