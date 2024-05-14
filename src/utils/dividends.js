@@ -13,11 +13,11 @@ export const CARD_SORTS = {
 export const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW"];
 
 export function parseDividendFile(txt) {
-  const lastValueRowIndex = 11; // header + 10 funds
-
   // only look at the first few columns, because headers repeat, e.g., weight
   const cells = splitCells(txt).map((row) => row.slice(0, 9));
-  const [headers, footers] = [cells[0], cells[lastValueRowIndex + 1]];
+
+  // 0 - header, 1-10 funds, 11 - footer
+  const [headers, footers] = [cells[0], cells[11]];
   //console.log({ cells, headers, footers });
 
   if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
@@ -25,12 +25,13 @@ export function parseDividendFile(txt) {
   }
 
   const objectify = rowToObjectWithKeys(headers);
-  const values = cells.slice(1, lastValueRowIndex).map(objectify); // ignore header/footer
+  const values = cells.slice(1, 11).map(objectify); // ignore header/footer
   const totals = objectify(footers);
-  //console.log({ totals });
+  // console.log({ values, totals });
 
   const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
   const goalMonthly = parseFloat(totals["PRICE"]);
+  // console.log({ goalTotal, goalMonthly });
 
   const names = values.map((v) => v["NAME"]);
   const current = values.map((v) => parseInt(v["NOW"]));

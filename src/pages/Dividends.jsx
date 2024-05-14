@@ -11,8 +11,6 @@ function Dividends({ files }) {
   const [context, setContext] = useState({});
   const [error, setError] = useState(null);
 
-  // NOTE: with csv files, I can see the whole file, not just the selection
-  // NOTE: the hard part is parsing commas in the cell values
   useEffect(() => {
     // first file only
     loadFileContent(files[0]).then(parseDividendFile).then(setContext);
