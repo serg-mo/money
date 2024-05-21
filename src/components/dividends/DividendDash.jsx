@@ -59,6 +59,7 @@ export default function DividendDash() {
   // TODO: somehow the actual best candidate does not get picked
   // TODO: the logic for current/split needs to be animatable differently
   // TODO: jitter is really a measure of how much to mutate the current candidate
+  // TODO: csv has "since" column + I only do one transaction at a time, so mutate one fund at a time
   const makeCardsForCandidate = (src, size) => {
     setIsThinking(true);
 
@@ -73,7 +74,9 @@ export default function DividendDash() {
 
       // TODO: splitCard needs to point to one of these, find which one
       setIsThinking(false);
-      return deDupeCardsByStat([...prev, ...bests], 'monthly').filter(getFocus());
+      return deDupeCardsByStat([...prev, ...bests], "monthly").filter(
+        getFocus(),
+      );
     });
   };
 
@@ -84,12 +87,18 @@ export default function DividendDash() {
     for (let i = 0; i < 10; i++) {
       // do not use makeCardsForCandidate here, because we need to see the cards
       // multiple sorts, multiple best candidates combined into one array
-      cards = deDupeCardsByStat([...cards, ...makeCandidates(current, INIT_SIZE, jitter).map(candidateToCard)], 'monthly')
-      
+      cards = deDupeCardsByStat(
+        [
+          ...cards,
+          ...makeCandidates(current, INIT_SIZE, jitter).map(candidateToCard),
+        ],
+        "monthly",
+      );
+
       if (cards.some(isBetterThanGoal)) {
         console.log(`Found a card that's better than goal on ${i} iteration`);
         cards = cards.filter(isBetterThanGoal);
-        
+
         setSplitCard(cards[0]); // otherwise it stays at current, initial value
         break;
       }
@@ -121,13 +130,15 @@ export default function DividendDash() {
     setSplitCard(card);
   };
 
-  const cardStats = Object.entries({ 'current': currentCard, "split": splitCard, "goal": goalCard }).map(
-    ([key, { stats }]) => (
-      <div key={key}>
-        {key}: {JSON.stringify(stats).replace(/\"/g, "")}
-      </div>
-    ),
-  );
+  const cardStats = Object.entries({
+    current: currentCard,
+    split: splitCard,
+    goal: goalCard,
+  }).map(([key, { stats }]) => (
+    <div key={key}>
+      {key}: {JSON.stringify(stats).replace(/\"/g, "")}
+    </div>
+  ));
 
   // TODO: rename to current, goal, and active (split) cards
   // TODO: show a pie chart of the split card
