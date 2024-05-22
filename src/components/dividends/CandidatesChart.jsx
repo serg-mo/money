@@ -100,18 +100,17 @@ export default function CandidatesChart({
     };
     // console.log(options);
   };
+  // TODO: make the dots look pretty
+  // TODO: maintain a history of bestNew candidates to highlight by filling them in
   // TODO: consider filtering data here, based on the split
   // TODO: maybe dedupe here by label
   const cashFlowOptions = getOptions("total", "monthly");
   const ratioOptions = getOptions("exp", "roi");
 
-  // TODO: make the dots look pretty
-  // TODO: maintain a history of bestNew candidates to highlight by filling them in
-  const pointBackgroundColor = ({ dataIndex }) => colors.candidate;
-  //highlight && highlight === dataIndex ? colors.highlight : colors.candidate;
+  const pointBackgroundColor = ({ dataIndex }) =>
+    highlight === dataIndex ? colors.highlight : colors.candidate;
 
-  const pointRadius = ({ dataIndex }) => 3;
-  //highlight && highlight === dataIndex ? 8 : 3;
+  const pointRadius = ({ dataIndex }) => (highlight === dataIndex ? 5 : 3);
 
   const data = {
     datasets: [

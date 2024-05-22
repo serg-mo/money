@@ -162,9 +162,10 @@ export default function DividendDash() {
 
         {topCards.length > 0 && (
           <CandidatesChart
-            cards={topCards}
+            cards={[currentCard, ...topCards]}
             goal={goalCard}
             split={splitCard}
+            highlight={0}
             onClick={onClick}
             onHover={onHover}
           />
