@@ -27,24 +27,24 @@ export const CATEGORIES = {
 // slate, gray, zinc, neutral, stone,
 // red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose
 
+// TODO: have two layers of categories, so that subcategory can have shades of the main category
 // TODO: first classify everything, then sort categories by size, then pick the colors
 // category buttons will appear in this order
 export const COLORS = {
-  [CATEGORIES.FOOD]: "#1782ab",
-  [CATEGORIES.SHOPPING]: "#136486",
-  [CATEGORIES.CAR]: "#0f4865",
-  [CATEGORIES.PET]: "#0d2d43",
-  [CATEGORIES.SUBSCRIPTIONS]: "#eb5519",
-  [CATEGORIES.TRAVEL]: "#ce3818",
-
-  [CATEGORIES.HEALTH]: "#e69a2b",
-  [CATEGORIES.FUN]: "#e97822",
-  [CATEGORIES.GIFTS]: "#e5bf35",
-  [CATEGORIES.UTILITIES]: "#4d9880",
-  [CATEGORIES.GYM]: "#91ac59",
-  [CATEGORIES.INSURANCE]: "#b01b16",
-  [CATEGORIES.OTHER]: "#c8c8c8",
-  [CATEGORIES.UNCLASSIFIED]: "#c8c8c8",
+  [CATEGORIES.FOOD]: "rgba(23, 130, 171, 0.9)",
+  [CATEGORIES.SHOPPING]: "rgba(19, 100, 134, 0.85)",
+  [CATEGORIES.CAR]: "rgba(15, 72, 101, 0.8)",
+  [CATEGORIES.PET]: "rgba(13, 45, 67, 0.75)",
+  [CATEGORIES.SUBSCRIPTIONS]: "rgba(235, 85, 25, 0.9)",
+  [CATEGORIES.TRAVEL]: "rgba(206, 56, 24, 0.85)",
+  [CATEGORIES.HEALTH]: "rgba(230, 154, 43, 0.9)",
+  [CATEGORIES.FUN]: "rgba(233, 120, 34, 0.85)",
+  [CATEGORIES.GIFTS]: "rgba(229, 191, 53, 0.9)",
+  [CATEGORIES.UTILITIES]: "rgba(77, 152, 128, 0.8)",
+  [CATEGORIES.GYM]: "rgba(145, 172, 89, 0.85)",
+  [CATEGORIES.INSURANCE]: "rgba(176, 27, 22, 0.9)",
+  [CATEGORIES.OTHER]: "rgba(200, 200, 200, 0.8)",
+  [CATEGORIES.UNCLASSIFIED]: "rgba(200, 200, 200, 0.75)",
 };
 
 // TODO: make a constants file

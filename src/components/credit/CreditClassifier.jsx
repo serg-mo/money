@@ -52,6 +52,7 @@ export default function CreditClassifier() {
       classifier.addExample(tensor(parsed), category); // must be a tensor + string label
     });
 
+    predictAll();
     setIsLoaded(true);
 
     // if (classifierState && classifierState.length) {
