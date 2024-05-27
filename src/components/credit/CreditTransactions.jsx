@@ -30,11 +30,11 @@ export default function CreditTransactions({
   };
 
   const sortedTransactions = useMemo(() => {
-    // if (sortConfig.key) {
-    //   return [...transactions].sort(
-    //     sortByKey(sortConfig.key, sortConfig.direction),
-    //   );
-    // }
+    if (sortConfig.key) {
+      return [...transactions].sort(
+        sortByKey(sortConfig.key, sortConfig.direction),
+      );
+    }
     return transactions;
   }, [transactions, sortConfig]);
 
@@ -57,8 +57,13 @@ export default function CreditTransactions({
           {columns.map((column) => (
             <th
               key={column}
-              className="border border-slate-600"
-              // onClick={() => setSortConfig({ key: column, direction: "asc" })}
+              className="border border-slate-600 cursor-pointer"
+              onClick={() =>
+                setSortConfig({
+                  key: column,
+                  direction: sortConfig.direction === "asc" ? "desc" : "asc", // toggle
+                })
+              }
             >
               {column.toUpperCase()}
               {sortConfig.key === column && getChevron()}
