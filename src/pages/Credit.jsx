@@ -44,6 +44,7 @@ function Credit({ files }) {
         transactions,
         setTransactions,
         manualCategories,
+        setManualCategories,
         onCategorize,
         tab,
         setTab,

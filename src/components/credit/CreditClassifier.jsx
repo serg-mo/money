@@ -16,32 +16,52 @@ function cosineSimilarity(arr1, arr2) {
 }
 
 function knnLabelDistribution(data, active, k = 30) {
-  // Calculate cosine similarity between active and each data point
-  const similarities = data.map((item) =>
-    cosineSimilarity(item["vector"], active["vector"]),
-  );
+  // data is vector => label
+  const similarities = Object.keys(data).map((key) => {
+    const vector = JSON.parse(key);
+    return cosineSimilarity(vector, active["vector"]);
+  });
 
   const sortedNeighbors = similarities
     .map((similarity, index) => ({ index, similarity }))
     .sort((a, b) => b.similarity - a.similarity) // desc
     .slice(0, k)
-    .map((item) => data[item.index]);
+    .map((item) => data[item.index]); // label
 
-  const labelCounts = sortedNeighbors.reduce((acc, neighbor) => {
-    const label = neighbor.label; // TODO: fix this
+  const labelCounts = sortedNeighbors.reduce((acc, label) => {
     acc[label] = acc[label] ? acc[label] + 1 : 1;
     return acc;
   }, {});
 
-  return labelCounts;
+  const totalNeighbors = sortedNeighbors.length;
+  const confidences = Object.keys(labelCounts).reduce((acc, label) => {
+    acc[label] = labelCounts[label] / totalNeighbors;
+    return acc;
+  }, {});
+
+  let maxConfidenceLabel = null;
+  let maxConfidence = -1;
+  Object.entries(confidences).forEach(([label, confidence]) => {
+    if (confidence > maxConfidence) {
+      maxConfidence = confidence;
+      maxConfidenceLabel = label;
+    }
+  });
+
+  return { label: maxConfidenceLabel, confidences };
 }
 
 export default function CreditClassifier() {
-  const { transactions, setTransactions, manualCategories, setTab } =
-    useContext(CreditContext);
+  const {
+    transactions,
+    setTransactions,
+    manualCategories,
+    setManualCategories,
+    setTab,
+  } = useContext(CreditContext);
   const [classifier, setClassifier] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [minConfidence, setMinConfidence] = useState(0.8);
+  const [minConfidence, setMinConfidence] = useState(0.6);
 
   // [classifierState, setClassifierState] = usePersistedState({}, "classifier");
 
@@ -120,14 +140,24 @@ export default function CreditClassifier() {
       neighborhoodSize,
     );
 
+    // TODO: stick with the regular classifier for now
+    // console.log("Regular classifier", { label, confidences });
+    // console.log(
+    //   "KNN classifier",
+    //   knnLabelDistribution(manualCategories, transaction),
+    // );
+
     // category is predicted label to replace the existing one, if over minConfidence
     const maxConfidence = confidences[label];
     const category =
       maxConfidence >= minConfidence ? label : transaction.category;
 
+    const manual =
+      manualCategories[JSON.stringify(transaction["vector"])] ?? null;
+
     return {
       ...transaction,
-      category,
+      category: manual ?? category,
       confidences,
       maxConfidence,
     };
@@ -158,6 +188,7 @@ export default function CreditClassifier() {
 
   const resetState = () => {
     classifier.clearAllClasses();
+    setManualCategories({});
   };
 
   if (!isLoaded) {

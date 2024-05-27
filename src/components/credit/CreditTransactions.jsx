@@ -2,20 +2,19 @@ import React, { useState, useMemo } from "react";
 import CreditTransaction from "./CreditTransaction";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 
-// TODO: add column sort toggle
 export default function CreditTransactions({
   title,
   transactions,
   onCategorize,
 }) {
-  const columns = [
-    "name",
-    "location",
-    "date",
-    "amount",
-    "category",
-    "confidence",
-  ];
+  const columnsWidths = {
+    name: "",
+    location: "w-80",
+    date: "w-24",
+    amount: "w-12",
+    category: "w-40",
+    confidence: "w-12",
+  };
 
   const [sortConfig, setSortConfig] = useState({
     key: "date",
@@ -61,10 +60,10 @@ export default function CreditTransactions({
           </th>
         </tr>
         <tr>
-          {columns.map((column) => (
+          {Object.entries(columnsWidths).map(([column, width]) => (
             <th
               key={column}
-              className="border border-slate-600 cursor-pointer"
+              className={`border border-slate-600 cursor-pointer ${width}`}
               onClick={() =>
                 setSortConfig({
                   key: column,

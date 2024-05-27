@@ -39,7 +39,11 @@ export default function Transaction({ onClick, ...t }) {
         <div>
           {t["category"]} ({formatConfidence(confidence)})
         </div>
-        <div>Actual {manualCategories[t["vector"]] ?? "unknown"}</div>
+        <div>
+          {manualCategories[JSON.stringify(t["vector"])]
+            ? "Actual"
+            : "Predicted"}
+        </div>
       </td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`}>
         {formatConfidence(confidence)}
