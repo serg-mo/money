@@ -22,10 +22,6 @@ export default function CreditTransactions({
     direction: "desc",
   });
 
-  if (!transactions.length) {
-    return;
-  }
-
   const sortByKey = (key, direction) => (a, b) => {
     if (a[key] < b[key]) {
       return direction === "asc" ? -1 : 1;
@@ -51,6 +47,10 @@ export default function CreditTransactions({
     ) : (
       <ChevronDownIcon className="inline w-4 h-4 ml-1" />
     );
+
+  if (!transactions.length) {
+    return;
+  }
 
   return (
     <table className="w-full mx-auto my-2 border-collapse border border-slate-600">

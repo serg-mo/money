@@ -16,12 +16,7 @@ import {
 export default function CategoryPicker({ transaction, onClick }) {
   return (
     <div className="flex flex-row flex-wrap justify-between">
-      {Object.entries(COLORS).map(([category, color]) => {
-        if (category === CATEGORIES.UNCLASSIFIED) {
-          return;
-        }
-
-        // TODO: decide on opacity based on
+      {Object.entries(COLORS).map(([category]) => {
         const isCurrent = transaction["category"] === category;
         const confidence = transaction["confidences"][category];
         const className = `my-1 rounded-md bg-gray-200 hover:bg-gray-400 cursor-pointer p-1 ${isCurrent ? "opacity-100" : "opacity-70"} hover:opacity-100 ${confidence && getOpacity(confidence)}`;

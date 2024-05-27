@@ -5,6 +5,37 @@ import { tensor } from "@tensorflow/tfjs";
 import usePersistedState from "../../utils/usePersistedState";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 
+function cosineSimilarity(arr1, arr2) {
+  const dotProduct = arr1.reduce(
+    (acc, val, index) => acc + val * arr2[index],
+    0,
+  );
+  const magnitude1 = Math.sqrt(arr1.reduce((acc, val) => acc + val ** 2, 0));
+  const magnitude2 = Math.sqrt(arr2.reduce((acc, val) => acc + val ** 2, 0));
+  return dotProduct / (magnitude1 * magnitude2);
+}
+
+function knnLabelDistribution(data, active, k = 30) {
+  // Calculate cosine similarity between active and each data point
+  const similarities = data.map((item) =>
+    cosineSimilarity(item["vector"], active["vector"]),
+  );
+
+  const sortedNeighbors = similarities
+    .map((similarity, index) => ({ index, similarity }))
+    .sort((a, b) => b.similarity - a.similarity) // desc
+    .slice(0, k)
+    .map((item) => data[item.index]);
+
+  const labelCounts = sortedNeighbors.reduce((acc, neighbor) => {
+    const label = neighbor.label; // TODO: fix this
+    acc[label] = acc[label] ? acc[label] + 1 : 1;
+    return acc;
+  }, {});
+
+  return labelCounts;
+}
+
 export default function CreditClassifier() {
   const { transactions, setTransactions, manualCategories, setTab } =
     useContext(CreditContext);
@@ -98,7 +129,7 @@ export default function CreditClassifier() {
       ...transaction,
       category,
       confidences,
-      maxConfidence, // TODO: sort by this
+      maxConfidence,
     };
   };
 
@@ -147,21 +178,6 @@ export default function CreditClassifier() {
         </button>
         <button
           className={buttonClass}
-          onClick={() => console.log("tabTransactions = transactions")}
-        >
-          Actuals (TODO)
-        </button>
-        <button
-          className={buttonClass}
-          onClick={() => console.log("tabTransactions = transactions")}
-        >
-          Guesses (TODO)
-        </button>
-        <button className={buttonClass} onClick={predictAll}>
-          Categorize
-        </button>
-        <button
-          className={buttonClass}
           onClick={() => confirm("Are you sure?") && resetState()}
         >
           Reset
@@ -169,8 +185,8 @@ export default function CreditClassifier() {
       </div>
       <div className="text-center">
         <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
-        <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
-        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} min manual`}</div>
+        <div>{`${examples} examples (${MIN_EXAMPLES} min)`}</div>
+        <div>{`${Object.values(manualCategories).length} manual`}</div>
         <div>{`neighborhood size ${neighborhoodSize}`}</div>
       </div>
     </>

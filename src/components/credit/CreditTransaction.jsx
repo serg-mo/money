@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   CATEGORIES,
   COLORS,
@@ -8,10 +8,12 @@ import {
 } from "../../utils/credit";
 import moment from "moment";
 import CategoryPicker from "./CategoryPicker";
+import { CreditContext } from "../../utils/credit";
 
 // TODO: maybe show categories vertically + animate their appearance disappearance
 export default function Transaction({ onClick, ...t }) {
   const confidence = t["confidences"][t["category"]] ?? 0;
+  const { manualCategories } = useContext(CreditContext);
 
   const title = Object.entries(t["confidences"])
     .map(([key, value]) => `${key}: ${formatConfidence(value)}`)
@@ -34,7 +36,10 @@ export default function Transaction({ onClick, ...t }) {
       </td>
       <td className="px-2 py-4 text-center">${formatAmount(t["amount"])}</td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`} title={title}>
-        {t["category"]} ({formatConfidence(confidence)})
+        <div>
+          {t["category"]} ({formatConfidence(confidence)})
+        </div>
+        <div>Actual {manualCategories[t["vector"]] ?? "unknown"}</div>
       </td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`}>
         {formatConfidence(confidence)}
