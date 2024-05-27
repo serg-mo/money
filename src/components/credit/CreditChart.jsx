@@ -76,20 +76,19 @@ export default function CreditChart({ transactions }) {
       // there needs to be a value for every year-month, even if it's 0
       const data = allMonths.map((month) => ({
         x: month, // year-month
-        y: months[month] ? -1 * sumBy(months[month], "amount") : 0,
+        y: months[month] ? -1 * sumBy(months[month], "amount") : null,
       }));
 
       return {
         label: category,
         data,
         fill: "start",
+        pointStyle: "rect",
         borderColor: COLORS[category],
         backgroundColor: COLORS[category],
       };
     },
   );
-
-  console.log(datasets);
 
   const data = {
     datasets,
