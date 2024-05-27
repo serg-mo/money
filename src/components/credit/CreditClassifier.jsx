@@ -6,7 +6,7 @@ import usePersistedState from "../../utils/usePersistedState";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 
 export default function CreditClassifier() {
-  const { transactions, setTransactions, manualCategories } =
+  const { transactions, setTransactions, manualCategories, setTab } =
     useContext(CreditContext);
   const [classifier, setClassifier] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -145,10 +145,7 @@ export default function CreditClassifier() {
   return (
     <>
       <div className="flex flex-row justify-center">
-        <button
-          className={buttonClass}
-          onClick={() => console.log("tabTransactions = transactions")}
-        >
+        <button className={buttonClass} onClick={() => setTab(undefined)}>
           ALL
         </button>
         <button

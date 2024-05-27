@@ -11,6 +11,7 @@ import usePersisedState from "../utils/usePersistedState";
 function Credit({ files }) {
   const [context, setContext] = useState({});
 
+  const [tab, setTab] = useState(undefined); // TODO: type CATEGORIES,
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
     {},
@@ -44,9 +45,11 @@ function Credit({ files }) {
         setTransactions,
         manualCategories,
         onCategorize,
+        tab,
+        setTab,
       });
     }
-  }, [transactions, manualCategories]);
+  }, [transactions, manualCategories, tab]);
 
   if (!Object.values(context).length) {
     return;

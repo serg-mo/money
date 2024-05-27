@@ -1,26 +1,25 @@
-import React, { useState, useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import CreditTransactions from "./CreditTransactions";
 import { CATEGORIES, CreditContext } from "../../utils/credit";
 import CreditChart from "./CreditChart";
 
 export default function CreditTransactionsTab() {
-  const { transactions, onCategorize } = useContext(CreditContext);
-
-  const [tab, setTab] = useState(CATEGORIES.UNCLASSIFIED); // TODO: type CATEGORIES,
-  const tabTransactions = transactions.filter((t) => t["category"] === tab);
+  const { transactions, onCategorize, tab, setTab } = useContext(CreditContext);
 
   const counts = Object.values(CATEGORIES).map(
-    (tab) => [...transactions].filter((t) => t["category"] === tab).length,
+    (category) => transactions.filter((t) => t["category"] === category).length,
   );
+
+  const filteredTransactions = tab
+    ? transactions.filter((t) => t["category"] === tab)
+    : transactions;
 
   const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
   const activeTabClass = "bg-gray-400";
 
-  // TODO: add counts to tab names
   return (
-    <div className="font-mono text-xs">
-      <CreditChart transactions={transactions} />
-
+    <div className="">
+      <CreditChart transactions={filteredTransactions} />
       <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
         {Object.values(CATEGORIES).map((category, index) => (
           <button
@@ -35,7 +34,7 @@ export default function CreditTransactionsTab() {
 
       <CreditTransactions
         title={tab}
-        transactions={tabTransactions}
+        transactions={filteredTransactions}
         onCategorize={onCategorize}
       />
     </div>
