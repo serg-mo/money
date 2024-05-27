@@ -74,29 +74,27 @@ export default function CreditChart({ transactions }) {
   );
   categoryTotals.sort((a, b) => b.totalAmount - a.totalAmount); // desc
 
-  const datasets = categoryTotals.map(
-    ({ category, totalAmount, categoryTransactions }) => {
-      // "2022-08-30" -> "2022-08"
-      const months = groupBy(categoryTransactions, (row) =>
-        row["date"].substring(0, 7),
-      );
+  const datasets = categoryTotals.map(({ category, categoryTransactions }) => {
+    // "2022-08-30" -> "2022-08"
+    const months = groupBy(categoryTransactions, (row) =>
+      row["date"].substring(0, 7),
+    );
 
-      // there needs to be a value for every year-month, even if it's 0
-      const data = allMonths.map((month) => ({
-        x: month, // year-month
-        y: months[month] ? -1 * sumBy(months[month], "amount") : null,
-      }));
+    // there needs to be a value for every year-month, even if it's 0
+    const data = allMonths.map((month) => ({
+      x: month, // year-month
+      y: months[month] ? -1 * sumBy(months[month], "amount") : null,
+    }));
 
-      return {
-        label: category,
-        data,
-        fill: "start",
-        pointStyle: "rect",
-        borderColor: COLORS[category],
-        backgroundColor: COLORS[category],
-      };
-    },
-  );
+    return {
+      label: category,
+      data,
+      fill: "start",
+      pointStyle: "rect",
+      borderColor: COLORS[category],
+      backgroundColor: COLORS[category],
+    };
+  });
 
   const data = {
     datasets,

@@ -28,9 +28,10 @@ function Credit({ files }) {
   useEffect(() => {
     let reader = new FileReader();
     reader.onload = (e) => {
-      // TODO: maybe I should figure out todays date and only show 12 months worth
+      const cutoff = moment().subtract(12, "months").format("YYYY-MM-DD");
+
       const rows = parseCreditFile(e.target.result).filter(
-        (row) => row["transaction"] === "DEBIT",
+        (row) => row["transaction"] === "DEBIT" && row["date"] >= cutoff,
       );
 
       setTransactions(rows);
