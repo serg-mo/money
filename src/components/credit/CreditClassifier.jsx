@@ -6,8 +6,10 @@ import usePersistedState from "../../utils/usePersistedState";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 
 export default function CreditClassifier() {
-  const { transactions, manualCategories } = useContext(CreditContext);
+  const { transactions, setTransactions, manualCategories } =
+    useContext(CreditContext);
   const [classifier, setClassifier] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // [classifierState, setClassifierState] = usePersistedState({}, "classifier");
 
@@ -34,12 +36,23 @@ export default function CreditClassifier() {
   // TODO: consider saving the classifier state manually
   // load existing classifier from local storage, which persists across sessions
   useEffect(() => {
-    const total = Object.values(manualCategories).length;
+    if (!classifier) {
+      return;
+    }
+
+    if (!Object.values(manualCategories).length) {
+      return;
+    }
+
+    classifier.clearAllClasses();
+
     // TODO: loop through manualCategories, reconstruct the dataset, pick a neighborhood size
     Object.entries(manualCategories).map(([serialized, category]) => {
       const parsed = JSON.parse(serialized);
       classifier.addExample(tensor(parsed), category); // must be a tensor + string label
     });
+
+    setIsLoaded(true);
 
     // if (classifierState && classifierState.length) {
     //   const dataset = Object.fromEntries(
@@ -55,7 +68,7 @@ export default function CreditClassifier() {
     //   );
     //   localStorage.setItem("classifierDataset", JSON.stringify(serialized));
     // }
-  }, [manualCategories]);
+  }, [classifier, manualCategories]);
 
   // TODO: consider making a chart for this
   const getClassifierStats = () => {
@@ -69,24 +82,23 @@ export default function CreditClassifier() {
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
-    const tensor = tensor(transaction["vector"]);
     const { label: category, confidences } = await classifier.predictClass(
-      tensor,
+      tensor(transaction["vector"]),
       neighborhoodSize,
     );
 
-    // label predicted, t.category original
-    const maxConfidence = confidences[label];
+    // category is predicted label to replace the existing one
+    const maxConfidence = confidences[category];
 
     // TODO: do not replace anything unless it's above a minimum confidence
-    for (const [cat, confidence] of Object.entries(confidences)) {
-      if (confidence >= MIN_CONFIDENCE) {
-        category = cat;
-      }
-    }
+    // for (const [cat, confidence] of Object.entries(confidences)) {
+    //   if (confidence >= MIN_CONFIDENCE) {
+    //     category = cat;
+    //   }
+    // }
 
     return {
-      ...t,
+      ...transaction,
       category,
       confidences,
       maxConfidence, // TODO: sort by this
@@ -120,8 +132,12 @@ export default function CreditClassifier() {
     classifier.clearAllClasses();
   };
 
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
   // TODO: it would be nice to see a progress icon for this
-  const { classes, examples } = getClassifierStats;
+  const { classes, examples } = getClassifierStats();
 
   const buttonClass =
     "m-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl";
@@ -160,7 +176,7 @@ export default function CreditClassifier() {
       <div className="text-center">
         <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
         <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
-        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div>
+        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} min manual`}</div>
         <div>{`neighborhood size ${neighborhoodSize}`}</div>
         {/* <select
           value={neighborhoodSize}

@@ -39,16 +39,15 @@ function Credit({ files }) {
   }, []);
 
   useEffect(() => {
-    if (classifier && transactions.length) {
+    if (transactions.length) {
       setContext({
         transactions,
         setTransactions,
-        classifier,
         manualCategories,
         onCategorize,
       });
     }
-  }, [classifier, transactions, manualCategories]);
+  }, [transactions, manualCategories]);
 
   if (!Object.values(context).length) {
     return;
@@ -57,7 +56,6 @@ function Credit({ files }) {
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: add an undo button for the wrong classification
-  // TODO: use context to access transactions and classifier
   // TODO: drag and drop a transaction on top of a tab to reclassify
   return (
     <CreditContext.Provider value={context}>
