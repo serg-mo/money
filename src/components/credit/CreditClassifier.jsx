@@ -1,12 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { CreditContext } from "../../utils/credit";
 import { CATEGORIES } from "../../utils/credit";
 import { tensor } from "@tensorflow/tfjs";
 import usePersistedState from "../../utils/usePersistedState";
+import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 
 export default function CreditClassifier() {
-  const { classifier, transactions, manualCategories } =
-    useContext(CreditContext);
+  const { transactions, manualCategories } = useContext(CreditContext);
+  const [classifier, setClassifier] = useState(null);
+
+  // [classifierState, setClassifierState] = usePersistedState({}, "classifier");
 
   // TODO: do not classify until a minimum number of examples
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
@@ -20,22 +23,48 @@ export default function CreditClassifier() {
 
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);
 
+  useEffect(() => {
+    if (classifier) {
+      return;
+    }
+    // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
+    setClassifier(KNNClassifier.create());
+  }, [classifier]);
+
   // TODO: consider saving the classifier state manually
-  // // load existing classifier from local storage, which persists across sessions
-  // const data = JSON.parse(localStorage.getItem("classifierDataset"));
-  // if (data && data.length) {
-  //   const unserialized = Object.fromEntries(
-  //     data.map(([label, data, shape]) => [label, tf.tensor(data, shape)]),
-  //   );
-  //   console.log("Restoring classifierDataset");
-  //   classifier.setClassifierDataset(unserialized);
-  //   setIsUpdated(true);
-  // }
-  // // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
-  // let serialized = Object.entries(classifier.getClassifierDataset()).map(
-  //   ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
-  // );
-  // localStorage.setItem("classifierDataset", JSON.stringify(serialized));
+  // load existing classifier from local storage, which persists across sessions
+  useEffect(() => {
+    const total = Object.values(manualCategories).length;
+    // TODO: loop through manualCategories, reconstruct the dataset, pick a neighborhood size
+    Object.entries(manualCategories).map(([serialized, category]) => {
+      const parsed = JSON.parse(serialized);
+      classifier.addExample(tensor(parsed), category); // must be a tensor + string label
+    });
+
+    // if (classifierState && classifierState.length) {
+    //   const dataset = Object.fromEntries(
+    //     classifierState.map(([label, data, shape]) => [label, tensor(data, shape)]),
+    //   );
+    //   console.log("Restoring classifierDataset");
+    //   classifier.setClassifierDataset(dataset);
+    // }
+    // else {
+    //   // console.log(`Add ${key} ${category}`, classifier.getClassExampleCount());
+    //   let serialized = Object.entries(classifier.getClassifierDataset()).map(
+    //     ([label, data]) => [label, Array.from(data.dataSync()), data.shape],
+    //   );
+    //   localStorage.setItem("classifierDataset", JSON.stringify(serialized));
+    // }
+  }, [manualCategories]);
+
+  // TODO: consider making a chart for this
+  const getClassifierStats = () => {
+    const counts = classifier.getClassExampleCount();
+    const examples = Object.values(counts).reduce((a, c) => a + c, 0);
+    const classes = Object.values(counts).length;
+
+    return { classes, examples };
+  };
 
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
@@ -75,7 +104,7 @@ export default function CreditClassifier() {
       return;
     }
     // TODO: it would be nice to see a progress icon for this
-    const [classes, examples] = getClassifierStats();
+    const { classes, examples } = getClassifierStats();
     if (examples < MIN_EXAMPLES) {
       console.log(`Not enough examples, ${examples} < ${MIN_EXAMPLES}`);
       return;
@@ -88,30 +117,11 @@ export default function CreditClassifier() {
   };
 
   const resetState = () => {
-    // classifier.clearAllClasses();
-    // localStorage.removeItem("manualCategories");
-    // setManualCategories({});
-    // setIsUpdated(true);
-  };
-
-  const getErrorRate = () => {
-    // const total = Object.values(manualCategories).length;
-    // // TODO: loop through manualCategories, reconstruct the dataset, pick a neighborhood size
-    // Object.entries(manualCategories).map(([key, category]) => {
-    //   // NOTE: must be a tensor + string label
-    //   const tensor = tf.tensor(transactions[key]["vector"]);
-    //   classifier.addExample(tensor, category);
-    //   console.log(`Learning that transaction ${key} is ${category}`);
-    // });
-    // const [classes, examples] = getClassifierStats();
-    // console.log(`${classes} classes and ${examples} examples`);
-    // TODO: loop through manualCategories, predictOne, compare to actual
+    classifier.clearAllClasses();
   };
 
   // TODO: it would be nice to see a progress icon for this
-  const counts = classifier.getClassExampleCount();
-  const examples = Object.values(counts).reduce((a, c) => a + c, 0);
-  const classes = Object.values(counts).length;
+  const { classes, examples } = getClassifierStats;
 
   const buttonClass =
     "m-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl";
@@ -145,9 +155,6 @@ export default function CreditClassifier() {
           onClick={() => confirm("Are you sure?") && resetState()}
         >
           Reset
-        </button>
-        <button className={buttonClass} onClick={getErrorRate}>
-          Errors
         </button>
       </div>
       <div className="text-center">

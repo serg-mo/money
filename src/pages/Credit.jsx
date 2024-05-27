@@ -6,14 +6,12 @@ import DragAndDrop from "../components/DragAndDrop";
 import CreditClassifier from "../components/credit/CreditClassifier";
 import { CreditContext } from "../utils/credit";
 
-import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
 import usePersisedState from "../utils/usePersistedState";
 
 function Credit({ files }) {
   const [context, setContext] = useState({});
 
-  const [classifier, setClassifier] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
     {},
@@ -22,7 +20,7 @@ function Credit({ files }) {
 
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
-    const key = transaction["normalizedName"];
+    const key = JSON.stringify(transaction["vector"]); // must be unique, for unserialized vector access
     // console.log({ key, category });
 
     setManualCategories({ ...manualCategories, [key]: category });
@@ -38,14 +36,17 @@ function Credit({ files }) {
       setTransactions(rows);
     };
     reader.readAsText(files[0]); // just the first file
-
-    // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
-    setClassifier(KNNClassifier.create());
   }, []);
 
   useEffect(() => {
     if (classifier && transactions.length) {
-      setContext({ transactions, classifier, manualCategories, onCategorize });
+      setContext({
+        transactions,
+        setTransactions,
+        classifier,
+        manualCategories,
+        onCategorize,
+      });
     }
   }, [classifier, transactions, manualCategories]);
 
