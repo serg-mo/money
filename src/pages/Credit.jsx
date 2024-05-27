@@ -8,13 +8,25 @@ import { CreditContext } from "../utils/credit";
 
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
+import usePersisedState from "../utils/usePersistedState";
 
 function Credit({ files }) {
   const [context, setContext] = useState({});
 
   const [classifier, setClassifier] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [manualCategories, setManualCategories] = useState({});
+  const [manualCategories, setManualCategories] = usePersisedState(
+    {},
+    "manualCategories",
+  );
+
+  // TODO: remember which transactions are classified manually and assert model guesses the same
+  const onCategorize = (transaction, category) => {
+    const key = transaction["normalizedName"];
+    // console.log({ key, category });
+
+    setManualCategories({ ...manualCategories, [key]: category });
+  };
 
   useEffect(() => {
     let reader = new FileReader();
@@ -25,7 +37,7 @@ function Credit({ files }) {
 
       setTransactions(rows);
     };
-    reader.readAsText(files[0]);
+    reader.readAsText(files[0]); // just the first file
 
     // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
     setClassifier(KNNClassifier.create());
@@ -33,7 +45,7 @@ function Credit({ files }) {
 
   useEffect(() => {
     if (classifier && transactions.length) {
-      setContext({ transactions, manualCategories });
+      setContext({ transactions, manualCategories, onCategorize });
     }
   }, [classifier, transactions]);
 
@@ -45,28 +57,11 @@ function Credit({ files }) {
   };
   useEffect(initializeManualCategories, []);
 
-  const persistManualCategories = () => {
-    if (manualCategories && Object.values(manualCategories).length) {
-      localStorage.setItem(
-        "manualCategories",
-        JSON.stringify(manualCategories),
-      );
-    }
-  };
-
-  // TODO: remember which transactions are classified manually and assert model guesses the same
-  const onCategorize = (transaction, category) => {
-    setManualCategories({
-      ...manualCategories,
-      [transaction["key"]]: category,
-    });
-
-    persistManualCategories();
-  };
-
   if (!Object.values(context).length) {
     return;
   }
+
+  console.log({ manualCategories });
 
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
