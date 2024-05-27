@@ -55,33 +55,6 @@ function make_bar(destination, summary, label) {
   return draw(destination, "bar", data, options);
 }
 
-function make_pie(destination, summary, label) {
-  let options = {
-    cutoutPercentage: 45,
-    rotation: 10,
-    animation: {
-      duration: 1000, // miliseconds
-      animateRotate: false,
-      animateScale: false,
-    },
-    title: {
-      text: "",
-      display: true,
-    },
-    legend: {
-      position: "left",
-    },
-  };
-  //console.log("make_pie()", summary, datasets, labels)
-
-  let data = null;
-  if (summary && label) {
-    data = make_data_single(summary, label);
-  }
-
-  return draw(destination, "pie", data, options);
-}
-
 function make_line(destination, summary, label) {
   // stacked axes can not be changed later
   let options = {
@@ -109,45 +82,6 @@ function make_line(destination, summary, label) {
   //console.log("make_line()", summary, datasets, labels)
 
   return draw(destination, "line", make_data_single(summary, label), options);
-}
-
-function make_stack(destination, summary, labels) {
-  // stacked axes can not be changed later
-  let options = {
-    scales: {
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            callback: ticks_callback,
-          },
-        },
-      ],
-    },
-    animation: {
-      duration: 0, // milliseconds
-    },
-    title: {
-      text: "",
-      display: true,
-    },
-    legend: {
-      position: "bottom",
-    },
-    elements: {
-      line: {
-        tension: 0.2, // bezier curve
-        borderWidth: 0,
-        borderColor: "rgba(0, 0, 0, 0)",
-      },
-    },
-  };
-  //console.log("make_stack()", summary, datasets, labels)
-
-  let data = make_data_multiple(summary, labels); // TODO: pass primary color
-  // TODO: consider adding average datasets here
-
-  return draw(destination, "line", data, options);
 }
 
 function draw(canvas, type, data, options) {

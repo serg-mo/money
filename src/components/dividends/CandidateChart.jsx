@@ -67,6 +67,24 @@ export default function CandidateChart({ current, split }) {
     animation: false,
   };
 
+  // old options
+  // let options = {
+  //   cutoutPercentage: 45,
+  //   rotation: 10,
+  //   animation: {
+  //     duration: 1000, // miliseconds
+  //     animateRotate: false,
+  //     animateScale: false,
+  //   },
+  //   title: {
+  //     text: "",
+  //     display: true,
+  //   },
+  //   legend: {
+  //     position: "left",
+  //   },
+  // };
+
   const data = {
     labels: names,
     datasets: [

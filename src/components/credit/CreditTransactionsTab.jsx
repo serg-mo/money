@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import CreditTransactions from "./CreditTransactions";
 import { CATEGORIES, CreditContext } from "../../utils/credit";
 import CreditChart from "./CreditChart";
