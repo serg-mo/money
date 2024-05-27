@@ -9,6 +9,8 @@ import { createContext } from "react";
 
 export const CreditContext = createContext();
 
+// TODO: ideally there would be at least one transaction per category per month
+// TODO: otherwise the stacked area chart will look weird
 export const CATEGORIES = {
   CAR: "CAR",
   FUN: "FUN",
