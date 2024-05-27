@@ -66,8 +66,16 @@ export default function CreditChart({ transactions }) {
   );
   const categories = groupBy(transactions, (row) => row["category"]);
 
-  const datasets = Object.entries(categories).map(
+  const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
+      const totalAmount = -1 * sumBy(categoryTransactions, "amount");
+      return { category, totalAmount, categoryTransactions };
+    },
+  );
+  categoryTotals.sort((a, b) => b.totalAmount - a.totalAmount); // desc
+
+  const datasets = categoryTotals.map(
+    ({ category, totalAmount, categoryTransactions }) => {
       // "2022-08-30" -> "2022-08"
       const months = groupBy(categoryTransactions, (row) =>
         row["date"].substring(0, 7),

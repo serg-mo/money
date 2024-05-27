@@ -4,8 +4,7 @@ import { parseCreditFile } from "../utils/credit";
 import DragAndDrop from "../components/DragAndDrop";
 import CreditClassifier from "../components/credit/CreditClassifier";
 import { CreditContext } from "../utils/credit";
-
-import "@tensorflow/tfjs-backend-webgl"; // this is important
+import moment from "moment";
 import usePersisedState from "../utils/usePersistedState";
 
 function Credit({ files }) {
@@ -29,6 +28,7 @@ function Credit({ files }) {
   useEffect(() => {
     let reader = new FileReader();
     reader.onload = (e) => {
+      // TODO: maybe I should figure out todays date and only show 12 months worth
       const rows = parseCreditFile(e.target.result).filter(
         (row) => row["transaction"] === "DEBIT",
       );

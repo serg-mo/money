@@ -4,6 +4,7 @@ import { CATEGORIES } from "../../utils/credit";
 import { tensor } from "@tensorflow/tfjs";
 import usePersistedState from "../../utils/usePersistedState";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
+import "@tensorflow/tfjs-backend-webgl"; // this is important
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(

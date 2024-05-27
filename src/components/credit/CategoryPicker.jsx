@@ -17,13 +17,13 @@ export default function CategoryPicker({ transaction, onClick }) {
   return (
     <div className="flex flex-row flex-wrap justify-between">
       {Object.entries(COLORS).map(([category]) => {
-        // const isCurrent = transaction["category"] === category;
+        const isCurrent = transaction["category"] === category;
         const confidence = transaction["confidences"][category];
-        // isCurrent ? "opacity-100" : "opacity-70",
         // confidence ? "bg-gray-400" : "",
 
         const className = [
           "my-1 rounded-md bg-gray-200 cursor-pointer p-1 hover:opacity-100",
+          isCurrent ? "border-2 border-gray-500" : "",
         ].join(" ");
 
         return (
