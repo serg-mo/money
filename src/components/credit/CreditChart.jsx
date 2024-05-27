@@ -33,6 +33,8 @@ ChartJS.register(
 const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
 
 export default function CreditChart({ transactions }) {
+  const GOAL_TOTAL = 2000;
+
   const options = {
     responsive: true,
     spanGaps: 3,
@@ -54,6 +56,18 @@ export default function CreditChart({ transactions }) {
             return `TOTAL: ${total.toFixed(2)}`;
           },
         },
+      },
+      annotation: {
+        annotations: [
+          {
+            type: "line",
+            mode: "horizontal",
+            scaleID: "y",
+            value: GOAL_TOTAL,
+            borderColor: "red",
+            borderWidth: 1,
+          },
+        ],
       },
     },
     elements: {
@@ -95,6 +109,7 @@ export default function CreditChart({ transactions }) {
       };
     },
   );
+  // TODO: sort by most recent's month
   categoryTotals.sort((a, b) => b.total - a.total); // desc
 
   const datasets = categoryTotals.map(
@@ -116,7 +131,7 @@ export default function CreditChart({ transactions }) {
         data,
         fill: "start",
         pointStyle: "rect",
-        hidden: true,
+        hidden: false,
         borderColor: COLORS[category],
         backgroundColor: COLORS[category],
       };

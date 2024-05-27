@@ -25,9 +25,13 @@ function Credit({ files }) {
     setManualCategories({ ...manualCategories, [key]: category });
   };
 
+  // TODO: it would be nice to see the chart at month/week level
+  // TODO: I bet you my weekly spending is more predictable
   useEffect(() => {
     let reader = new FileReader();
     reader.onload = (e) => {
+      // TODO: bring back the arrow key navigation and derive which transactions to show
+      // TODO: see src/components/Frame.jsx
       const cutoff = moment().subtract(12, "months").format("YYYY-MM-DD");
 
       const rows = parseCreditFile(e.target.result).filter(

@@ -1,4 +1,3 @@
-import { set } from "lodash";
 import React, { useState, useEffect } from "react";
 
 export default function Frame({ transactions, render }) {
