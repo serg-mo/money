@@ -10,18 +10,19 @@ export default function CreditClassifier() {
     useContext(CreditContext);
   const [classifier, setClassifier] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [minConfidence, setMinConfidence] = useState(0.8);
 
   // [classifierState, setClassifierState] = usePersistedState({}, "classifier");
 
+  // TODO: add an undo button for the wrong classification
   // TODO: do not classify until a minimum number of examples
+  // TODO: drag and drop a transaction on top of a tab to reclassify
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
-  // TODO: add an undo button for the wrong classification
   // TODO: use context to access transactions and classifier
-  // TODO: drag and drop a transaction on top of a tab to reclassify
+
   const MAX_NEIGHBORHOOD_SIZE = 3;
   const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
-  const MIN_CONFIDENCE = 0.8;
 
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);
 
@@ -83,20 +84,15 @@ export default function CreditClassifier() {
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
-    const { label: category, confidences } = await classifier.predictClass(
+    const { label, confidences } = await classifier.predictClass(
       tensor(transaction["vector"]),
       neighborhoodSize,
     );
 
-    // category is predicted label to replace the existing one
-    const maxConfidence = confidences[category];
-
-    // TODO: do not replace anything unless it's above a minimum confidence
-    // for (const [cat, confidence] of Object.entries(confidences)) {
-    //   if (confidence >= MIN_CONFIDENCE) {
-    //     category = cat;
-    //   }
-    // }
+    // category is predicted label to replace the existing one, if over minConfidence
+    const maxConfidence = confidences[label];
+    const category =
+      maxConfidence >= minConfidence ? label : transaction.category;
 
     return {
       ...transaction,
@@ -176,16 +172,6 @@ export default function CreditClassifier() {
         <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
         <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} min manual`}</div>
         <div>{`neighborhood size ${neighborhoodSize}`}</div>
-        {/* <select
-          value={neighborhoodSize}
-          onChange={(e) => setNeighborhoodSize(e.target.value)}
-        >
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-        <div>neighborhood</div> */}
       </div>
     </>
   );

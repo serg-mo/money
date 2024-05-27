@@ -55,10 +55,6 @@ function Credit({ files }) {
     return;
   }
 
-  // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
-  // TODO: sort by max confidence
-  // TODO: add an undo button for the wrong classification
-  // TODO: drag and drop a transaction on top of a tab to reclassify
   return (
     <CreditContext.Provider value={context}>
       <div className="font-mono text-xs">

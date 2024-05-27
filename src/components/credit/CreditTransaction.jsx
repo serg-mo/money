@@ -36,6 +36,9 @@ export default function Transaction({ onClick, ...t }) {
       <td className={`p-2 text-center ${getOpacity(confidence)}`} title={title}>
         {t["category"]} ({formatConfidence(confidence)})
       </td>
+      <td className={`p-2 text-center ${getOpacity(confidence)}`}>
+        {formatConfidence(confidence)}
+      </td>
     </tr>
   );
 }

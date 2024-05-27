@@ -8,7 +8,14 @@ export default function CreditTransactions({
   transactions,
   onCategorize,
 }) {
-  const columns = ["name", "location", "date", "amount", "category"];
+  const columns = [
+    "name",
+    "location",
+    "date",
+    "amount",
+    "category",
+    "confidence",
+  ];
 
   const [sortConfig, setSortConfig] = useState({
     key: "date",

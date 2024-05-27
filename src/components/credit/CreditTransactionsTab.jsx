@@ -17,6 +17,7 @@ export default function CreditTransactionsTab() {
   const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
   const activeTabClass = "bg-gray-400";
 
+  // TODO: it would be nice to sync dataset visibility with tab content
   return (
     <div className="">
       <CreditChart transactions={filteredTransactions} />

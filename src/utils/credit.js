@@ -21,6 +21,9 @@ export const CATEGORIES = {
   SUBSCRIPTIONS: "SUBSCRIPTIONS",
   TRAVEL: "TRAVEL",
   UNCLASSIFIED: "UNCLASSIFIED",
+  UTILITIES: "UTILITIES",
+  GYM: "GYM",
+  GIFTS: "GIFTS",
 };
 
 // TODO: prune tailwind color names down to 10
