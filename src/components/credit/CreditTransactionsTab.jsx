@@ -2,8 +2,8 @@ import React, { useState, useContext } from "react";
 import CreditTransactions from "./CreditTransactions";
 import { CATEGORIES, CreditContext } from "../../utils/credit";
 
-export default function CreditTransactionsTab({ onCategorize }) {
-  const { transactions } = useContext(CreditContext);
+export default function CreditTransactionsTab() {
+  const { transactions, onCategorize } = useContext(CreditContext);
 
   const [tab, setTab] = useState(CATEGORIES.UNCLASSIFIED); // TODO: type CATEGORIES,
   const tabTransactions = transactions.filter((t) => t["category"] === tab);

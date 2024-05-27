@@ -7,9 +7,8 @@ const persist = (values, itemKey) => {
 };
 
 export default function (defaultValue, key) {
-  // Retrieve the initial state from local storage if it exists, otherwise use the default value
-  const value = localStorage.getItem(key);
-  const initial = value ? JSON.parse(value) : defaultValue;
+  const storedValue = localStorage.getItem(key);
+  const initial = storedValue ? JSON.parse(storedValue) : defaultValue;
 
   const [state, setState] = useState(initial);
 

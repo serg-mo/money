@@ -45,23 +45,13 @@ function Credit({ files }) {
 
   useEffect(() => {
     if (classifier && transactions.length) {
-      setContext({ transactions, manualCategories, onCategorize });
+      setContext({ transactions, classifier, manualCategories, onCategorize });
     }
-  }, [classifier, transactions]);
-
-  const initializeManualCategories = () => {
-    const manuals = JSON.parse(localStorage.getItem("manualCategories"));
-    if (manuals && Object.values(manuals).length) {
-      setManualCategories(manuals);
-    }
-  };
-  useEffect(initializeManualCategories, []);
+  }, [classifier, transactions, manualCategories]);
 
   if (!Object.values(context).length) {
     return;
   }
-
-  console.log({ manualCategories });
 
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
@@ -71,9 +61,9 @@ function Credit({ files }) {
   return (
     <CreditContext.Provider value={context}>
       <div className="font-mono text-xs">
-        <CreditClassifier classifier={classifier} />
-        <CreditChart transactions={transactions} />
-        <CreditTransactionsTab onCategorize={onCategorize} />
+        <CreditClassifier />
+        <CreditChart />
+        <CreditTransactionsTab />
       </div>
     </CreditContext.Provider>
   );

@@ -29,11 +29,11 @@ export default function CreditTransactions({
         </tr>
       </thead>
       <tbody>
-        {transactions.map((t, key) => (
+        {transactions.map((transaction, key) => (
           <CreditTransaction
             key={key}
-            {...t}
-            onClick={(category) => onCategorize(t, category)}
+            {...transaction}
+            onClick={(category) => onCategorize(transaction, category)}
           />
         ))}
       </tbody>

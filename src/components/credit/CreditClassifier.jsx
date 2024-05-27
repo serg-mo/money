@@ -1,9 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { CreditContext } from "../../utils/credit";
 import { CATEGORIES } from "../../utils/credit";
 import { tensor } from "@tensorflow/tfjs";
+import usePersistedState from "../../utils/usePersistedState";
 
-export default function CreditClassifier({ classifier }) {
+export default function CreditClassifier() {
+  const { classifier, transactions, manualCategories } =
+    useContext(CreditContext);
+
   // TODO: do not classify until a minimum number of examples
+  // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
+  // TODO: sort by max confidence
+  // TODO: add an undo button for the wrong classification
+  // TODO: use context to access transactions and classifier
+  // TODO: drag and drop a transaction on top of a tab to reclassify
   const MAX_NEIGHBORHOOD_SIZE = 3;
   const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
   const MIN_CONFIDENCE = 0.8;
@@ -31,12 +41,12 @@ export default function CreditClassifier({ classifier }) {
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
     const tensor = tensor(transaction["vector"]);
-    const { label, confidences } = await classifier.predictClass(
+    const { label: category, confidences } = await classifier.predictClass(
       tensor,
       neighborhoodSize,
     );
 
-    let category = label; // label predicted, t.category original
+    // label predicted, t.category original
     const maxConfidence = confidences[label];
 
     // TODO: do not replace anything unless it's above a minimum confidence
@@ -55,26 +65,26 @@ export default function CreditClassifier({ classifier }) {
   };
 
   const predictAll = async () => {
-    // // re-categorize when classifier and transactions are loaded, but not categorized
-    // if (!transactions.length) {
-    //   console.log(`No categorize, because no transactions`);
-    //   return;
-    // }
-    // if (!classifier.getNumClasses()) {
-    //   console.log(`No categorize because no classes`);
-    //   return;
-    // }
-    // // TODO: it would be nice to see a progress icon for this
-    // const [classes, examples] = getClassifierStats();
-    // if (examples < MIN_EXAMPLES) {
-    //   console.log(`No categorize because not enough examples`);
-    //   return;
-    // }
-    // console.log(
-    //   `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`,
-    // );
-    // const newTransactions = await Promise.all(transactions.map(predictOne));
-    // setTransactions(newTransactions);
+    // re-categorize when classifier and transactions are loaded, but not categorized
+    if (!transactions.length) {
+      console.log(`No categorize, because no transactions`);
+      return;
+    }
+    if (!classifier.getNumClasses()) {
+      console.log(`No categorize because no classes`);
+      return;
+    }
+    // TODO: it would be nice to see a progress icon for this
+    const [classes, examples] = getClassifierStats();
+    if (examples < MIN_EXAMPLES) {
+      console.log(`Not enough examples, ${examples} < ${MIN_EXAMPLES}`);
+      return;
+    }
+    console.log(
+      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`,
+    );
+
+    await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
 
   const resetState = () => {
@@ -141,10 +151,11 @@ export default function CreditClassifier({ classifier }) {
         </button>
       </div>
       <div className="text-center">
-        {/* <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
+        <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
         <div>{`${examples}/${MIN_EXAMPLES} examples`}</div>
-        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div> */}
-        <select
+        <div>{`${Object.values(manualCategories).length}/${MIN_EXAMPLES} manual`}</div>
+        <div>{`neighborhood size ${neighborhoodSize}`}</div>
+        {/* <select
           value={neighborhoodSize}
           onChange={(e) => setNeighborhoodSize(e.target.value)}
         >
@@ -153,7 +164,7 @@ export default function CreditClassifier({ classifier }) {
           <option value="4">4</option>
           <option value="5">5</option>
         </select>
-        <div>neighborhood</div>
+        <div>neighborhood</div> */}
       </div>
     </>
   );

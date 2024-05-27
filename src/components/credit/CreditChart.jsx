@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { groupBy, sumBy } from "lodash";
 import { COLORS, CATEGORIES } from "../../utils/credit";
 
@@ -11,6 +11,7 @@ import {
   defaults,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { CreditContext } from "../../utils/credit";
 
 defaults.font.family = "Monaco";
 
@@ -18,7 +19,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
 
-export default function CreditChart({ transactions }) {
+export default function CreditChart() {
+  const { transactions } = useContext(CreditContext);
+
   const options = {
     responsive: true,
     plugins: {
