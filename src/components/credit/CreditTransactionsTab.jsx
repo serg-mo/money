@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import CreditTransactions from "./CreditTransactions";
 import { CATEGORIES, CreditContext } from "../../utils/credit";
+import CreditChart from "./CreditChart";
 
 export default function CreditTransactionsTab() {
   const { transactions, onCategorize } = useContext(CreditContext);
@@ -18,6 +19,8 @@ export default function CreditTransactionsTab() {
   // TODO: add counts to tab names
   return (
     <div className="font-mono text-xs">
+      <CreditChart transactions={transactions} />
+
       <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
         {Object.values(CATEGORIES).map((category, index) => (
           <button

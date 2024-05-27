@@ -30,21 +30,21 @@ export const CATEGORIES = {
 // TODO: first classify everything, then sort categories by size, then pick the colors
 // category buttons will appear in this order
 export const COLORS = {
-  [CATEGORIES.FOOD]: "yellow",
-  [CATEGORIES.SHOPPING]: "sky",
-  [CATEGORIES.CAR]: "red",
-  [CATEGORIES.PET]: "cyan",
-  [CATEGORIES.SUBSCRIPTIONS]: "blue",
-  [CATEGORIES.TRAVEL]: "indigo",
+  [CATEGORIES.FOOD]: "#1782ab",
+  [CATEGORIES.SHOPPING]: "#136486",
+  [CATEGORIES.CAR]: "#0f4865",
+  [CATEGORIES.PET]: "#0d2d43",
+  [CATEGORIES.SUBSCRIPTIONS]: "#eb5519",
+  [CATEGORIES.TRAVEL]: "#ce3818",
 
-  [CATEGORIES.HEALTH]: "emerald",
-  [CATEGORIES.FUN]: "orange",
-  [CATEGORIES.GIFTS]: "lime",
-  [CATEGORIES.UTILITIES]: "violet",
-  [CATEGORIES.GYM]: "green",
-  [CATEGORIES.INSURANCE]: "teal",
-  [CATEGORIES.OTHER]: "amber",
-  [CATEGORIES.UNCLASSIFIED]: "slate",
+  [CATEGORIES.HEALTH]: "#e69a2b",
+  [CATEGORIES.FUN]: "#e97822",
+  [CATEGORIES.GIFTS]: "#e5bf35",
+  [CATEGORIES.UTILITIES]: "#4d9880",
+  [CATEGORIES.GYM]: "#91ac59",
+  [CATEGORIES.INSURANCE]: "#b01b16",
+  [CATEGORIES.OTHER]: "#c8c8c8",
+  [CATEGORIES.UNCLASSIFIED]: "#c8c8c8",
 };
 
 // TODO: make a constants file

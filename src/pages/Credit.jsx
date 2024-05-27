@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import CreditChart from "../components/credit/CreditChart";
 import CreditTransactionsTab from "../components/credit/CreditTransactionsTab";
 import { parseCreditFile } from "../utils/credit";
 import DragAndDrop from "../components/DragAndDrop";
@@ -61,7 +60,6 @@ function Credit({ files }) {
     <CreditContext.Provider value={context}>
       <div className="font-mono text-xs">
         <CreditClassifier />
-        <CreditChart />
         <CreditTransactionsTab />
       </div>
     </CreditContext.Provider>
