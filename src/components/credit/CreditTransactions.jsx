@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import CreditTransaction from "./CreditTransaction";
-import { CATEGORIES } from "../../utils/credit";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 
 // TODO: add column sort toggle
 export default function CreditTransactions({
@@ -8,9 +8,42 @@ export default function CreditTransactions({
   transactions,
   onCategorize,
 }) {
+  const columns = ["name", "location", "date", "amount", "category"];
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "desc",
+  });
+
   if (!transactions.length) {
     return;
   }
+
+  const sortByKey = (key, direction) => (a, b) => {
+    if (a[key] < b[key]) {
+      return direction === "asc" ? -1 : 1;
+    }
+    if (a[key] > b[key]) {
+      return direction === "asc" ? 1 : -1;
+    }
+    return 0;
+  };
+
+  const sortedTransactions = useMemo(() => {
+    // if (sortConfig.key) {
+    //   return [...transactions].sort(
+    //     sortByKey(sortConfig.key, sortConfig.direction),
+    //   );
+    // }
+    return transactions;
+  }, [transactions, sortConfig]);
+
+  const getChevron = (direction) =>
+    direction === "asc" ? (
+      <ChevronUpIcon className="inline w-4 h-4 ml-1" />
+    ) : (
+      <ChevronDownIcon className="inline w-4 h-4 ml-1" />
+    );
 
   return (
     <table className="w-full mx-auto my-2 border-collapse border border-slate-600">
@@ -21,15 +54,20 @@ export default function CreditTransactions({
           </th>
         </tr>
         <tr>
-          <th className="border border-slate-600">Name</th>
-          <th className="border border-slate-600 w-80">Location</th>
-          <th className="border border-slate-600 w-24">Date</th>
-          <th className="border border-slate-600 w-12">Amount</th>
-          <th className="border border-slate-600 w-40">Category</th>
+          {columns.map((column) => (
+            <th
+              key={column}
+              className="border border-slate-600"
+              // onClick={() => setSortConfig({ key: column, direction: "asc" })}
+            >
+              {column.toUpperCase()}
+              {sortConfig.key === column && getChevron()}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {transactions.map((transaction, key) => (
+        {sortedTransactions.map((transaction, key) => (
           <CreditTransaction
             key={key}
             {...transaction}
