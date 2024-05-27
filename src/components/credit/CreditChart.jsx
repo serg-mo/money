@@ -43,48 +43,23 @@ export default function CreditChart({ transactions }) {
         tension: 0.3, // smooth lines
       },
     },
-    // TODO: stacking does not seem right
     scales: {
-      x: { stacked: true },
+      x: { stacked: false }, // must be false
       y: { stacked: true },
     },
+    animation: {
+      duration: 0, // milliseconds
+    },
+    elements: {
+      line: {
+        tension: 0.2, // bezier curve
+        borderWidth: 0,
+      },
+    },
+    legend: {
+      position: "bottom",
+    },
   };
-
-  // old stacked chart
-  // // stacked axes can not be changed later
-  // let options = {
-  //   scales: {
-  //     yAxes: [
-  //       {
-  //         stacked: true,
-  //         ticks: {
-  //           callback: ticks_callback,
-  //         },
-  //       },
-  //     ],
-  //   },
-  //   animation: {
-  //     duration: 0, // milliseconds
-  //   },
-  //   title: {
-  //     text: "",
-  //     display: true,
-  //   },
-  //   legend: {
-  //     position: "bottom",
-  //   },
-  //   elements: {
-  //     line: {
-  //       tension: 0.2, // bezier curve
-  //       borderWidth: 0,
-  //       borderColor: "rgba(0, 0, 0, 0)",
-  //     },
-  //   },
-  // };
-  // //console.log("make_stack()", summary, datasets, labels)
-
-  // let data = make_data_multiple(summary, labels); // TODO: pass primary color
-  // // TODO: consider adding average datasets here
 
   const allMonths = Object.keys(
     groupBy(transactions, (row) => row["date"].substring(0, 7)), // year-month
