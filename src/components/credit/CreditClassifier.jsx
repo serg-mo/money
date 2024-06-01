@@ -72,8 +72,6 @@ export default function CreditClassifier() {
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: use context to access transactions and classifier
-
-  const MAX_NEIGHBORHOOD_SIZE = 3;
   const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
 
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);

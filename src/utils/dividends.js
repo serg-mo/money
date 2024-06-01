@@ -43,6 +43,7 @@ export function parseDividendFile(txt) {
 
   return {
     names,
+    prices,
     current,
     goalTotal,
     goalMonthly,
@@ -151,7 +152,7 @@ function isCloseStats(a, b, totalMargin = 0, monthlyMargin = 0) {
   );
 }
 
-function isBetterStats(a, b) {
+export function isBetterStats(a, b) {
   // both less total AND more monthly
   return (
     getUnitDistanceOnStat(a, b, "total") < 0 &&
@@ -179,6 +180,32 @@ console.log(
   ),
 );
 */
+
+export function dfs(current, best, isBetterThan, prices) {
+  const dfsInner = (c, b, index) => {
+    console.log({ c, b, index });
+    // if we have considered all funds, check if the c solution is better
+    if (index >= prices.length) {
+      if (isBetterThan(c, b)) {
+        b = [...c];
+      }
+      return;
+    }
+
+    const original = c[index];
+
+    // consider increments of 10 shares for the c fund
+    for (let shares = 0; shares <= 30; shares += 10) {
+      c[index] = shares;
+
+      // recurse to the next fund
+      dfsInner(c, b, index + 1);
+    }
+
+    c[index] = original;
+  };
+  return dfsInner(current, best, 0);
+}
 
 // should be 261
 /*

@@ -6,6 +6,8 @@ import {
   makeCandidates,
   isCloseToCard,
   isBetterThanCard,
+  isBetterStats,
+  dfs,
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
@@ -21,7 +23,7 @@ export default function DividendDash() {
   const INIT_SIZE = 1000;
   const CLICK_SIZE = 100;
 
-  const { current, goalTotal, goalMonthly, getStats } =
+  const { current, prices, goalTotal, goalMonthly, getStats } =
     useContext(DividendContext);
 
   const candidateToCard = (candidate) => ({
@@ -106,6 +108,22 @@ export default function DividendDash() {
 
     setTopCards(cards);
   }, [current]);
+
+  // TODO: this does not work
+  // useEffect(() => {
+  //   const c = Array(current.length).fill(0);
+  //   let b = Array(current.length).fill(0);
+
+  //   // TODO: some kind of memoization should happen here
+  //   const isBetterThan = (a, b) =>
+  //     isBetterStats(candidateToCard(a), candidateToCard(b));
+
+  //   dfs(c, b, isBetterThan, prices);
+  //   console.log("best:", b);
+
+  //   // let cards = [];
+  //   // setTopCards(cards);
+  // }, [current]);
 
   // explore by clicking on a data point, which generates new mutations
   const onClick = (card) => {
