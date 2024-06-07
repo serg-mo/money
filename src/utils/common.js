@@ -31,3 +31,14 @@ export function rowToObjectWithKeys(keys) {
     return Object.fromEntries(keys.map((key, index) => [key, row[index]]));
   };
 }
+
+function get_palette(base_color, length) {
+  let rgba = base_color.match(/\d+/g);
+  let palette = [];
+
+  for (let i = 0; i < length; i++) {
+    rgba[rgba.length - 1] = Math.round((100 * (length - i)) / length) / 100; // alpha 1 .. 0
+    palette.push(`rgba(${rgba.join(",")})`);
+  }
+  return palette;
+}

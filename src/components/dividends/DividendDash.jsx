@@ -11,7 +11,7 @@ import {
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
-import { lookupDividends, summarizeDividends } from "../../utils/dividends";
+import { lookupDividends } from "../../utils/dividends";
 
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere
@@ -158,6 +158,8 @@ export default function DividendDash() {
       {key}: {JSON.stringify(stats).replace(/\"/g, "")}
     </div>
   ));
+
+  // lookupDividends("XYLD").then(console.log);
 
   // TODO: rename to current, goal, and active (split) cards
   // TODO: show a pie chart of the split card

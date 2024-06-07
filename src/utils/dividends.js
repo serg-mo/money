@@ -4,6 +4,8 @@ export const DividendContext = createContext();
 import moment from "moment";
 import regression from "regression";
 
+export const REQUIRED_COLS = ["NAME", "COST", "NOW"];
+
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
   maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
@@ -12,9 +14,7 @@ export const CARD_SORTS = {
   maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
 };
 
-export const REQUIRED_COLS = ["EXP", "NEXT", "COST", "PRICE", "NOW"];
-
-export function parseDividendFile(txt) {
+export async function parseDividendFile(txt) {
   // only look at the first few columns, because headers repeat, e.g., weight
   const cells = splitCells(txt).map((row) => row.slice(0, 9));
 
@@ -23,7 +23,7 @@ export function parseDividendFile(txt) {
   //console.log({ cells, headers, footers });
 
   if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
-    throw new Error("Empty clipboard");
+    throw new Error("Missing required columns: " + REQUIRED_COLS.join(", "));
   }
 
   const objectify = rowToObjectWithKeys(headers);
@@ -31,16 +31,26 @@ export function parseDividendFile(txt) {
   const totals = objectify(footers);
   // console.log({ values, totals });
 
-  const goalTotal = parseFloat(totals["COST"]); // does not matter, that's the column goalTotal
-  const goalMonthly = parseFloat(totals["PRICE"]);
+  const goalTotal = parseFloat(totals["COST"]); // name of the column where goalTotal lives
+  const goalMonthly = parseFloat(totals["PRICE"]); // name of the column where goalMonthly lives
   // console.log({ goalTotal, goalMonthly });
 
+  // TODO: these come from CSV
   const names = values.map((v) => v["NAME"]);
   const current = values.map((v) => parseInt(v["NOW"]));
-  const expenses = values.map((v) => parseFloat(v["EXP"]) / 100); // expense ratio, percent to float
-  const dividends = values.map((v) => parseFloat(v["NEXT"])); // next month's dividend estimate
-  const prices = values.map((v) => parseFloat(v["PRICE"]));
 
+  const stats = await Promise.all(
+    values.map((v) => lookupDividends(v["NAME"])),
+  );
+
+  const expenses = stats.map((v) => v.expenseRatio);
+  const dividends = stats.map((v) => v.next); // next dividend estimate
+  const prices = stats.map((v) => v.price);
+
+  console.log({ expenses, dividends, prices });
+  return;
+
+  // TODO: all of this comes from json files
   const getStats = (c) => evaluateCandidate(c, expenses, dividends, prices);
 
   return {
@@ -211,25 +221,35 @@ export function dfs(current, best, isBetterThan, prices) {
 
 export async function lookupDividends(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
-  const data = await response.json();
+  const { dividends, expenseRatio, price } = await response.json();
 
   // exercise date, dividend in dollars
   const oneYearAgo = moment().subtract(1, "years").unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
 
-  const dividends = data.dividends.filter(filterFN).reverse();
-  const indexed = dividends.map(([date, amount], index) => [index + 1, amount]);
+  const indexed = dividends
+    .filter(filterFN)
+    .reverse()
+    .map(([date, amount], index) => [index + 1, amount]);
 
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
   const options = { order: 1, precision: 4 };
   const result = regression.linear(indexed, options);
 
-  const mean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
+  const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
+  const mean = (arr) => sum(arr) / arr.length;
+
+  const total = sum(indexed.map(([x, y]) => y));
   const avg = mean(indexed.map(([x, y]) => y));
   const next = result.predict(indexed.length + 1)[1]; // [x, y]
 
-  // TODO: compute yeild and add expense ratio
-  return { avg, next, expenseRatio: data.expenseRatio };
+  return {
+    avg,
+    next,
+    price,
+    expenseRatio,
+    yield: total / price,
+  };
 }
 
 // should be 261
