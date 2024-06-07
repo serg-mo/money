@@ -1,6 +1,8 @@
 import { createContext } from "react";
 import { splitCells, rowToObjectWithKeys } from "./common";
 export const DividendContext = createContext();
+import moment from "moment";
+import regression from "regression";
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
@@ -205,6 +207,31 @@ export function dfs(current, best, isBetterThan, prices) {
     c[index] = original;
   };
   return dfsInner(current, best, 0);
+}
+
+export async function lookupDividends(symbol) {
+  const response = await fetch(`/dividends/${symbol}.json`);
+  const data = await response.json();
+
+  // exercise date, dividend in dollars
+  const oneYearAgo = moment().subtract(1, "years").unix();
+  const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
+
+  return data.chart_data[0][0].raw_data.filter(filterFN).reverse();
+}
+
+export function summarizeDividends(original) {
+  const data = original.map(([date, amount], index) => [index + 1, amount]);
+
+  //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
+  const options = { order: 1, precision: 4 };
+  const result = regression.linear(data, options);
+
+  const mean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
+  const avg = mean(data.map(([x, y]) => y));
+  const next = result.predict(data.length + 1)[1]; // [x, y]
+
+  return { avg, next };
 }
 
 // should be 261

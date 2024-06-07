@@ -1,5 +1,5 @@
 .DS_Store
-transactions.json
+public/dividends/*
 node_modules
 yarn.lock
 *.log

@@ -11,6 +11,7 @@ import {
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
+import { lookupDividends, summarizeDividends } from "../../utils/dividends";
 
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere

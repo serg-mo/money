@@ -22,12 +22,14 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.22.3",
+    "regression": "^2.0.1"
   },
   "scripts": {
     "start": "webpack serve --mode development --open --hot",
     "lint": "prettier . --write",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "fetch_dividends": "scripts/fetch_dividends.sh"
   },
   "eslintConfig": {
     "extends": [
