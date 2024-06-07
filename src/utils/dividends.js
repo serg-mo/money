@@ -217,21 +217,19 @@ export async function lookupDividends(symbol) {
   const oneYearAgo = moment().subtract(1, "years").unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
 
-  return data.chart_data[0][0].raw_data.filter(filterFN).reverse();
-}
-
-export function summarizeDividends(original) {
-  const data = original.map(([date, amount], index) => [index + 1, amount]);
+  const dividends = data.dividends.filter(filterFN).reverse();
+  const indexed = dividends.map(([date, amount], index) => [index + 1, amount]);
 
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
   const options = { order: 1, precision: 4 };
-  const result = regression.linear(data, options);
+  const result = regression.linear(indexed, options);
 
   const mean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
-  const avg = mean(data.map(([x, y]) => y));
-  const next = result.predict(data.length + 1)[1]; // [x, y]
+  const avg = mean(indexed.map(([x, y]) => y));
+  const next = result.predict(indexed.length + 1)[1]; // [x, y]
 
-  return { avg, next };
+  // TODO: compute yeild and add expense ratio
+  return { avg, next, expenseRatio: data.expenseRatio };
 }
 
 // should be 261
