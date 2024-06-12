@@ -163,6 +163,7 @@ export default function DividendDash() {
 
   // TODO: rename to current, goal, and active (split) cards
   // TODO: show a pie chart of the split card
+  // TODO: inside the doughnut, show the total and monthly
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
       <header className="text-center rounded p-2 select-none">

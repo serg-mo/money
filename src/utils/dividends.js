@@ -32,7 +32,7 @@ export async function parseDividendFile(txt) {
   // console.log({ values, totals });
 
   const goalTotal = parseFloat(totals["COST"]); // name of the column where goalTotal lives
-  const goalMonthly = parseFloat(totals["PRICE"]); // name of the column where goalMonthly lives
+  const goalMonthly = parseFloat(totals["NOW"]); // name of the column where goalMonthly lives
   // console.log({ goalTotal, goalMonthly });
 
   // TODO: these come from CSV
@@ -42,15 +42,14 @@ export async function parseDividendFile(txt) {
   const stats = await Promise.all(
     values.map((v) => lookupDividends(v["NAME"])),
   );
-
+  console.log({ stats });
+  
   const expenses = stats.map((v) => v.expenseRatio);
   const dividends = stats.map((v) => v.next); // next dividend estimate
   const prices = stats.map((v) => v.price);
-
-  console.log({ expenses, dividends, prices });
-  return;
-
-  // TODO: all of this comes from json files
+  // console.log({ expenses, dividends, prices });
+ 
+  // TODO: parse the OK column and consider it when making my mutations
   const getStats = (c) => evaluateCandidate(c, expenses, dividends, prices);
 
   return {
@@ -221,7 +220,7 @@ export function dfs(current, best, isBetterThan, prices) {
 
 export async function lookupDividends(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
-  const { dividends, expenseRatio, price } = await response.json();
+  const { dividends, expense_ratio, price } = await response.json();
 
   // exercise date, dividend in dollars
   const oneYearAgo = moment().subtract(1, "years").unix();
@@ -239,15 +238,17 @@ export async function lookupDividends(symbol) {
   const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
   const mean = (arr) => sum(arr) / arr.length;
 
+  const last = indexed[0][1]; // first y is the most recent dividend
   const total = sum(indexed.map(([x, y]) => y));
   const avg = mean(indexed.map(([x, y]) => y));
   const next = result.predict(indexed.length + 1)[1]; // [x, y]
 
   return {
+    last,
     avg,
     next,
     price,
-    expenseRatio,
+    expenseRatio: expense_ratio, // I know, right?
     yield: total / price,
   };
 }
