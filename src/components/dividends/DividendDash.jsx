@@ -11,7 +11,7 @@ import {
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
-import { lookupDividends } from "../../utils/dividends";
+import CardStats from "./CardStats";
 
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere
@@ -77,9 +77,7 @@ export default function DividendDash() {
 
       // TODO: splitCard needs to point to one of these, find which one
       setIsThinking(false);
-      return deDupeCardsByStat([...prev, ...bests], "monthly").filter(
-        getFocus(),
-      );
+      return deDupeCardsByStat([...prev, ...bests], "monthly").filter(getFocus());
     });
   };
 
@@ -149,16 +147,6 @@ export default function DividendDash() {
     setSplitCard(card);
   };
 
-  const cardStats = Object.entries({
-    current: currentCard,
-    split: splitCard,
-    goal: goalCard,
-  }).map(([key, { stats }]) => (
-    <div key={key}>
-      {key}: {JSON.stringify(stats).replace(/\"/g, "")}
-    </div>
-  ));
-
   // lookupDividends("XYLD").then(console.log);
 
   // TODO: rename to current, goal, and active (split) cards
@@ -167,7 +155,7 @@ export default function DividendDash() {
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
       <header className="text-center rounded p-2 select-none">
-        <div className="text-sm text-blue-500">{cardStats}</div>
+        <CardStats cards={{ current: currentCard, split: splitCard, goal: goalCard }} />
 
         <div className="h-[20em] flex flex-col items-center">
           <CandidateChart current={currentCard} split={splitCard} />

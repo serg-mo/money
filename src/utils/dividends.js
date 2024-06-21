@@ -8,10 +8,11 @@ export const REQUIRED_COLS = ["NAME", "COST", "NOW"];
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
-  maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
-  minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
-  maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
-  maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
+  // maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
+  // minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
+  minCost: (a, b) => a.stats.cost - b.stats.cost, // ASC, lowest first
+  // maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
+  // maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
 };
 
 export async function parseDividendFile(txt) {
@@ -38,27 +39,27 @@ export async function parseDividendFile(txt) {
   // TODO: these come from CSV
   const names = values.map((v) => v["NAME"]);
   const current = values.map((v) => parseInt(v["NOW"]));
+  const oks = values.map((v) => v["OK"] === "TRUE" ? 1 : 0);
+  // console.log(oks)
 
   const stats = await Promise.all(
     values.map((v) => lookupDividends(v["NAME"])),
   );
-  console.log({ stats });
+  // console.log({ stats });
   
   const expenses = stats.map((v) => v.expenseRatio);
   const dividends = stats.map((v) => v.next); // next dividend estimate
   const prices = stats.map((v) => v.price);
   // console.log({ expenses, dividends, prices });
  
-  // TODO: parse the OK column and consider it when making my mutations
-  const getStats = (c) => evaluateCandidate(c, expenses, dividends, prices);
-
   return {
     names,
     prices,
+    oks,
     current,
     goalTotal,
     goalMonthly,
-    getStats,
+    getStats: (c) => evaluateCandidate(c, { expenses, dividends, prices, current, oks })
   };
 }
 
@@ -107,16 +108,21 @@ export function mutateValue(value, jitter, multiple) {
   //return Math.round(value + direction * magnitude);
 }
 
-export function evaluateCandidate(candidate, expenses, dividends, prices) {
+export function evaluateCandidate(candidate, { expenses, dividends, prices, current, oks }) {
+  
   const total = sumProduct(candidate, prices);
   const monthly = sumProduct(candidate, dividends);
   const exp = sumProduct(candidate, prices, expenses) / total;
   const roi = (monthly * 12) / total;
   const ratio = roi / exp; // NOTE: this is what we're trying to maximize
 
+  const delta = candidate.map((value, index) => value - current[index]);
+  const cost = sumProduct(delta, oks, prices); // only some orders are executable
+
   return {
     total: Math.round(total),
     monthly: Math.round(monthly),
+    cost: Math.round(cost), // cost of executable transactions that move current to candidate
     exp: parseFloat((100 * exp).toFixed(2)),
     roi: parseFloat((100 * roi).toFixed(2)),
     ratio: parseFloat(ratio.toFixed(2)),
