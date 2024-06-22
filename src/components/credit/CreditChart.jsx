@@ -63,9 +63,11 @@ export default function CreditChart({ transactions }) {
             type: "line",
             mode: "horizontal",
             scaleID: "y",
+            // TODO: when the tab is set, this should be monthly avg
+            // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
             value: GOAL_TOTAL,
             borderColor: "red",
-            borderWidth: 1,
+            borderWidth: 2,
           },
         ],
       },
@@ -122,12 +124,13 @@ export default function CreditChart({ transactions }) {
       // there needs to be a value for every year-month, even if it's 0
       const data = allMonths.map((month) => ({
         x: month, // year-month
-        y: months[month] ? -1 * sumBy(months[month], "amount") : null,
+        y: months[month] ? -1 * sumBy(months[month], "amount") : 0,
       }));
 
       // TODO: what I want is the sum of averages of visible datasets
       return {
-        label: `${category} \$${avg.toFixed(2)}/mo`,
+        // label: `${category.padEnd(15, ' ')} \$${avg.toFixed(2)}/mo`.padEnd(27, ' '),
+        label: category.padEnd(15, ' '),
         data,
         fill: "start",
         pointStyle: "rect",

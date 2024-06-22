@@ -44,7 +44,7 @@ function Brokerage({ files }) {
     );
   };
 
-  return <Frame transactions={transactions} render={render} />;
+  return <Frame transactions={transactions} render={render} initialSize={12} />;
 }
 
 export default () => (

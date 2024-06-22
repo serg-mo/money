@@ -1,12 +1,14 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext } from "react";
+import Frame from "../Frame";
 import CreditTransactions from "./CreditTransactions";
-import { CATEGORIES, CreditContext } from "../../utils/credit";
+import { CreditContext } from "../../utils/credit";
 import CreditChart from "./CreditChart";
 import { groupBy, sumBy } from "lodash";
+import CategoryTabs from "./CategoryTabs";
 
 // TODO: two pies, total and average spending per category
 export default function CreditTransactionsTab() {
-  const { transactions, onCategorize, tab, setTab } = useContext(CreditContext);
+  const { transactions, onCategorize, tab } = useContext(CreditContext);
 
   const categories = groupBy(transactions, (row) => row["category"]);
   const categoryTotals = Object.entries(categories).map(
@@ -17,38 +19,22 @@ export default function CreditTransactionsTab() {
   );
   categoryTotals.sort((a, b) => b.total - a.total); // desc
 
-  const filteredTransactions = tab
+  const filteredTransactions = tab && tab !== "ALL"
     ? transactions.filter((t) => t["category"] === tab)
     : transactions;
 
-  const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
-  const activeTabClass = "bg-gray-400";
+  return (
+    <div className="">
+      <CreditChart transactions={filteredTransactions} />
+      <CategoryTabs />
+      <CreditTransactions title={tab} transactions={filteredTransactions} onCategorize={onCategorize} />
+    </div>
+  );
+
 
   // console.log(
   //   categoryTotals.map(({ category, total }) => ({ category, total })),
   // );
 
   // TODO: it would be nice to sync dataset visibility with tab content
-  return (
-    <div className="">
-      <CreditChart transactions={filteredTransactions} />
-      <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
-        {categoryTotals.map(({ category }) => (
-          <button
-            key={category}
-            className={`${tabClass} ${category === tab ? activeTabClass : ""}`}
-            onClick={() => setTab(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      <CreditTransactions
-        title={tab}
-        transactions={filteredTransactions}
-        onCategorize={onCategorize}
-      />
-    </div>
-  );
 }

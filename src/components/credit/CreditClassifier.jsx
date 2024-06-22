@@ -203,9 +203,6 @@ export default function CreditClassifier() {
   return (
     <>
       <div className="flex flex-row justify-center">
-        <button className={buttonClass} onClick={() => setTab(undefined)}>
-          ALL
-        </button>
         <button
           className={buttonClass}
           onClick={() => confirm("Are you sure?") && resetState()}

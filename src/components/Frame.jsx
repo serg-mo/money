@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-export default function Frame({ transactions, render }) {
+export default function Frame({ transactions, render, initialSize, minSize = 3 }) {
   // don't sort, just start at the end
-  const [MIN_SIZE, MAX_SIZE] = [3, transactions.length];
-  const [size, setSize] = useState(12); // 1 year
-  const [left, setLeft] = useState(transactions.length - 12);
+  const [size, setSize] = useState(initialSize);
+  const [left, setLeft] = useState(transactions.length - initialSize);
 
   const handleKeyPress = (event) => {
     // NOTE: all of these must be closures
@@ -14,7 +13,7 @@ export default function Frame({ transactions, render }) {
       setLeft((prev) => Math.min(prev + 1, transactions.length - size));
     } else if (event.key === "ArrowUp") {
       setSize((prev) => {
-        const newSize = Math.min(prev + 1, MAX_SIZE);
+        const newSize = Math.min(prev + 1, transactions.length);
         // move left edge if we're expanding all the way on the right
         if (left + newSize > transactions.length) {
           setLeft(transactions.length - newSize);
@@ -22,7 +21,7 @@ export default function Frame({ transactions, render }) {
         return newSize;
       });
     } else if (event.key === "ArrowDown") {
-      setSize((prev) => Math.max(prev - 1, MIN_SIZE)); // min size 1
+      setSize((prev) => Math.max(prev - 1, minSize));
     }
     event.preventDefault();
   };
