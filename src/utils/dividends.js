@@ -63,6 +63,25 @@ export async function parseDividendFile(txt) {
   };
 }
 
+export function singleArrayProduct(arr) {
+  return arr.reduce((acc, val) => acc * val, 1);
+}
+
+export function arrayProduct(...arrays) {
+  const size = arrays[0].length;
+
+  if (!arrays.every((arr) => arr.length === size)) {
+    throw new Error("All arrays must be of the same length");
+  }
+
+  let result = [];
+  for (let i = 0; i < size; i++) {
+    result.push(singleArrayProduct(arrays.map((arr) => arr[i])));
+  }
+  return result;
+}
+
+
 export function sumProduct(...arrays) {
   const size = arrays[0].length;
 

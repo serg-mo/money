@@ -3,6 +3,7 @@ import { DividendContext } from "../../utils/dividends";
 import { Chart as ChartJS, ArcElement, Tooltip, defaults } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { arrayProduct } from "../../utils/dividends";
 
 // https://chartjs-plugin-datalabels.netlify.app/samples/charts/doughnut.html
 ChartJS.register(ArcElement, Tooltip /*ChartDataLabels*/);
@@ -53,7 +54,7 @@ const COLORS = [
 // TODO: come up with a color for each fund
 // TODO: these should be stacked, so I can see the relative difference
 export default function CandidateChart({ current, split }) {
-  const { names } = useContext(DividendContext);
+  const { names, prices } = useContext(DividendContext);
 
   const options = {
     responsive: true,
@@ -90,12 +91,12 @@ export default function CandidateChart({ current, split }) {
     datasets: [
       {
         label: "current",
-        data: current.candidate,
+        data: arrayProduct(current.candidate, prices),
         backgroundColor: COLORS,
       },
       {
         label: "split",
-        data: split.candidate,
+        data: arrayProduct(split.candidate, prices),
         backgroundColor: COLORS,
       },
     ],

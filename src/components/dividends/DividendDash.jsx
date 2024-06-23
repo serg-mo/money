@@ -155,7 +155,7 @@ export default function DividendDash() {
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
       <header className="text-center rounded p-2 select-none">
-        <CardStats cards={{ current: currentCard, split: splitCard, goal: goalCard }} />
+        <CardStats cards={{ current: currentCard, split: splitCard }} />
 
         <div className="h-[20em] flex flex-col items-center">
           <CandidateChart current={currentCard} split={splitCard} />
