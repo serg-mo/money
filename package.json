@@ -29,7 +29,7 @@
     "start": "webpack serve --mode development --open --hot",
     "lint": "prettier . --write",
     "build": "webpack --mode production",
-    "fetch_dividends": "scripts/fetch_dividends.sh"
+    "fetch": "scripts/fetch_dividends.sh"
   },
   "eslintConfig": {
     "extends": [

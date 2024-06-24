@@ -8,11 +8,11 @@ export const REQUIRED_COLS = ["NAME", "COST", "NOW"];
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
-  // maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
-  // minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
+  maxMonthly: (a, b) => b.stats.monthly - a.stats.monthly, // DESC, highest first
+  minTotal: (a, b) => a.stats.total - b.stats.total, // ASC, lowest first
   minCost: (a, b) => a.stats.cost - b.stats.cost, // ASC, lowest first
-  // maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
-  // maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
+  maxRatio: (a, b) => b.stats.ratio - a.stats.ratio, // DESC, highest first
+  maxRoi: (a, b) => b.stats.roi - a.stats.roi, // DESC, highest first
 };
 
 export async function parseDividendFile(txt) {
@@ -48,13 +48,14 @@ export async function parseDividendFile(txt) {
   // console.log({ stats });
   
   const expenses = stats.map((v) => v.expenseRatio);
-  const dividends = stats.map((v) => v.next); // next dividend estimate
+  const dividends = stats.map((v) => v.avg.toFixed(4)); // TODO: tune the predictor + chart the guess
   const prices = stats.map((v) => v.price);
   // console.log({ expenses, dividends, prices });
  
   return {
     names,
     prices,
+    dividends,
     oks,
     current,
     goalTotal,
@@ -79,6 +80,14 @@ export function arrayProduct(...arrays) {
     result.push(singleArrayProduct(arrays.map((arr) => arr[i])));
   }
   return result;
+}
+
+export function arrayDifference(a, b) {
+  if (a.length !== b.length) {
+    throw new Error("Arrays must be of the same length")
+  }
+
+  return a.map((value, index) => value - b[index]);
 }
 
 
@@ -118,6 +127,7 @@ export function mutateCandidate(candidate, jitter, multiple = 10) {
   return [...candidate.map(mutate)]; // new array instance
 }
 
+// TODO: figure out mutation strategy
 // console.assert(mutateValue(300) !== 300, "mutateValue");
 // TODO: positive values only, but somehow I get negatives
 export function mutateValue(value, jitter, multiple) {
@@ -152,12 +162,34 @@ export function makeCandidates(src, size, jitter) {
   // TODO: all candidates are mutations of the current one
   let candidates = [];
   for (let i = 0; i < size; i++) {
-    // TODO: figure out mutation strategy
     const candidate = mutateCandidate(src, jitter);
     candidates.push(candidate);
   }
   return candidates;
 }
+
+export function candidateCombinations(src) {
+  const variants = [-0.1, 0.1]; // +/- 10%
+  let results = [];
+
+  function helper(current, index) {
+    if (index === src.length) {
+      results.push(current.slice()); // copy the array
+      return;
+    }
+
+    for (let variant of variants) {
+      let newValue = src[index] + src[index] * variant;
+      newValue = Math.round(newValue / 10) * 10;  // multiple of 10
+      current[index] = newValue;
+      helper(current, index + 1);
+    }
+  }
+
+  helper(new Array(src.length), 0);
+  return results;
+}
+
 
 // TODO: check that prop is keyof typeof card.stats
 export function deDupeCardsByStat(cards, prop) {
@@ -257,7 +289,7 @@ export async function lookupDividends(symbol) {
     .map(([date, amount], index) => [index + 1, amount]);
 
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
-  const options = { order: 1, precision: 4 };
+  const options = { order: 3, precision: 3 };
   const result = regression.linear(indexed, options);
 
   const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);

@@ -1,26 +1,58 @@
-import React from "react";
+import React, { useContext } from "react";
+import {
+  DividendContext,
+  arrayDifference,
+  arrayProduct
+} from "../../utils/dividends";
 
 export default function CardStats({ cards }) {
+  const { names, dividends, prices } = useContext(DividendContext);
+
+  const orders = arrayDifference(cards.split.candidate, cards.current.candidate)
+  const costs = arrayProduct(orders, prices)
+
   return (
-    <table className="border-collapse border-gray-900 table-auto">
-      <thead>
-        <tr>
-          <th></th>
-          {Object.keys(cards.current.stats).map((key) => (
-            <th key={key} className="border">{key}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {Object.entries(cards).map(([name, card]) => (
-          <tr key={name}>
-            <td className="border">{name}</td>
-            {Object.values(card.stats).map((value) =>
-              <td key={value} className="border">{value > 0 ? value : ""}</td>
-            )}
+    <>
+      <table className="border-collapse border-gray-900 table-auto  m-auto">
+        <thead>
+          <tr>
+            <th></th>
+            {Object.keys(cards.current.stats).map((key) => (
+              <th key={key} className="border">{key}</th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {Object.entries(cards).map(([name, card]) => (
+            <tr key={name}>
+              <td className="border">{name}</td>
+              {Object.values(card.stats).map((value) =>
+                <td key={value} className="border">{value > 0 ? value : ""}</td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <table className="border-collapse border-gray-900 table-auto m-auto">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Next Dividend</th>
+            <th>Order</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {names.map((name, index) => (
+            <tr key={index}>
+              <td className="border">{name}</td>
+              <td className="border">${dividends[index]}</td>
+              <td className="border">{orders[index]}</td>
+              <td className="border">${costs[index].toFixed()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }

@@ -8,10 +8,15 @@ import {
   isBetterThanCard,
   isBetterStats,
   dfs,
+  candidateCombinations
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
 import CardStats from "./CardStats";
+
+// TODO: I can download dividends CSV from fidelity, instead of my own spreadsheet
+// it contains name, now, and cost, which is all I really need. There is no OK though.
+// but then I would not need to fetch prices. I still need to fetch expense ratios.
 
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere
@@ -20,8 +25,8 @@ import CardStats from "./CardStats";
 // TODO: consider making goal just a x/y coordinate on both charts, i.e., they maintain their own
 // TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
-  const TOP_SIZE = 30;
-  const INIT_SIZE = 1000;
+  const TOP_SIZE = 10;
+  const INIT_SIZE = 500;
   const CLICK_SIZE = 100;
 
   const { current, prices, goalTotal, goalMonthly, getStats } =
@@ -66,13 +71,13 @@ export default function DividendDash() {
   const makeCardsForCandidate = (src, size) => {
     setIsThinking(true);
 
+    // consider 3 values for each of the 10 funds, 3 ^ 10 = 59049
+    const candidates = candidateCombinations(src).map(candidateToCard);
+
     setTopCards((prev) => {
       // multiple sorts, multiple best candidates combined into one array
       const bests = Object.keys(CARD_SORTS).flatMap((sortKey) =>
-        makeCandidates(src, size, jitter)
-          .map(candidateToCard)
-          .sort(CARD_SORTS[sortKey])
-          .slice(0, TOP_SIZE),
+        candidates.sort(CARD_SORTS[sortKey]).slice(0, TOP_SIZE),
       );
 
       // TODO: splitCard needs to point to one of these, find which one

@@ -31,6 +31,7 @@ function NavLink({ path, label }) {
 }
 
 // TODO: consider combining this with Home. It's the only file that uses nav
+// TODO: make each NavLink a filt input trigger
 export default function Navigation() {
   return (
     <nav className="m-4 flex flex-col bg-gray-200 rounded-t-lg rounded-b-lg">

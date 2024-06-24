@@ -91,12 +91,12 @@ export default function CandidateChart({ current, split }) {
     datasets: [
       {
         label: "current",
-        data: arrayProduct(current.candidate, prices),
+        data: arrayProduct(current.candidate.slice(), prices), // copy the array
         backgroundColor: COLORS,
       },
       {
         label: "split",
-        data: arrayProduct(split.candidate, prices),
+        data: arrayProduct(split.candidate.slice(), prices), // copy the array
         backgroundColor: COLORS,
       },
     ],
