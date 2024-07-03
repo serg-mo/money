@@ -32,22 +32,23 @@ export async function parseDividendFile(txt) {
     .filter((v) => !!v["Quantity"] && v["Symbol"] !== "FZROX"); // ignore header/footer
   // console.log({ values });
 
-  // TODO: consider "Average Cost Basis",
   const names = values.map((v) => v["Symbol"]);
   const current = values.map((v) => parseInt(v["Quantity"]));
+  const basis = values.map((v) => parseFloat(v["Average Cost Basis"]));
   // console.log({ names, current });
 
   const stats = await Promise.all(names.map(lookupDividends));
   // console.log({ stats });
 
   const expenses = stats.map((v) => v.expenseRatio);
-  const dividends = stats.map((v) => v.avg.toFixed(4)); // TODO: tune the predictor + chart the guess
+  const dividends = stats.map((v) => v.dividends);
   const prices = stats.map((v) => v.price);
   // console.log({ expenses, dividends, prices });
 
   return {
     names,
     prices,
+    basis,
     dividends,
     current,
     goalTotal: 45_000, // see dividends model
@@ -267,36 +268,35 @@ export function dfs(current, best, isBetterThan, prices) {
 
 export async function lookupDividends(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
-  const { dividends, expense_ratio, price } = await response.json();
+  const { dividends, expense_ratio: expenseRatio, price } = await response.json();
 
-  // exercise date, dividend in dollars
   const oneYearAgo = moment().subtract(1, "years").unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
 
+  // exercise date, dividend in dollars
   const indexed = dividends
     .filter(filterFN)
     .reverse()
     .map(([date, amount], index) => [index + 1, amount]);
 
+  // TODO: tune the predictor + chart the guess
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
   const options = { order: 3, precision: 3 };
   const result = regression.linear(indexed, options);
+  const next = result.predict(indexed.length + 1)[1].toFixed(2); // [x, y]
 
   const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
   const mean = (arr) => sum(arr) / arr.length;
 
-  const last = indexed[0][1]; // first y is the most recent dividend
-  const total = sum(indexed.map(([x, y]) => y));
-  const avg = mean(indexed.map(([x, y]) => y));
-  const next = result.predict(indexed.length + 1)[1]; // [x, y]
+  const values = indexed.map(([x, y]) => y);
+  const last = values[0].toFixed(4); // first y is the most recent dividend
+  const avg = mean(values).toFixed(4);
 
   return {
-    last,
-    avg,
-    next,
+    dividends: {last, avg, next},
     price,
-    expenseRatio: expense_ratio, // I know, right?
-    yield: total / price,
+    expenseRatio,
+    yield: sum(values) / price,
   };
 }
 

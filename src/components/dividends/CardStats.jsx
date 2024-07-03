@@ -9,7 +9,12 @@ import {
 export default function CardStats({ cards }) {
   const { names, dividends, prices } = useContext(DividendContext);
 
-  const nextDividends = arrayProduct(cards.split.candidate, dividends);
+  const nextDividends = {
+    last: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.last))),
+    avg: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.avg))),
+    next: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.next))),
+  }
+
   const orders = arrayDifference(
     cards.split.candidate,
     cards.current.candidate,
@@ -33,8 +38,8 @@ export default function CardStats({ cards }) {
           {Object.entries(cards).map(([name, card]) => (
             <tr key={name}>
               <td className="border">{name}</td>
-              {Object.values(card.stats).map((value) => (
-                <td key={value} className="border">
+              {Object.values(card.stats).map((value, index) => (
+                <td key={index} className="border">
                   {value > 0 ? value : ""}
                 </td>
               ))}
@@ -42,11 +47,16 @@ export default function CardStats({ cards }) {
           ))}
         </tbody>
       </table>
+
+      <br />
+
       <table className="border-collapse border-gray-900 table-auto m-auto">
         <thead>
           <tr>
             <th>Name</th>
-            <th>Next Dividend</th>
+            <th>Last</th>
+            <th>Avg</th>
+            <th>Next</th>
             <th>Order</th>
             <th>Cost</th>
           </tr>
@@ -55,7 +65,9 @@ export default function CardStats({ cards }) {
           {names.map((name, index) => (
             <tr key={index}>
               <td className="border">{name}</td>
-              <td className="border">${dividends[index]}</td>
+              <td className="border">${dividends[index].last}</td>
+              <td className="border">${dividends[index].avg}</td>
+              <td className="border">${dividends[index].next}</td>
               <td className="border">{orders[index]}</td>
               <td className="border">${costs[index].toFixed()}</td>
             </tr>
@@ -64,7 +76,9 @@ export default function CardStats({ cards }) {
         <tfoot>
           <tr>
             <td className="border"></td>
-            <td className="border">${arraySum(nextDividends).toFixed()}</td>
+            <td className="border">${nextDividends.last.toFixed()}</td>
+            <td className="border">${nextDividends.avg.toFixed()}</td>
+            <td className="border">${nextDividends.next.toFixed()}</td>
             <td className="border"></td>
             <td className="border">${arraySum(costs).toFixed()}</td>
           </tr>
