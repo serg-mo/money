@@ -1,123 +1,30 @@
-import React, { useContext } from "react";
-import {
-  DividendContext,
-  arrayDifference,
-  arrayProduct,
-  arraySum,
-} from "../../utils/dividends";
+import React from "react";
 
 export default function CardStats({ cards }) {
-  const { names, dividends, prices, basis } = useContext(DividendContext);
-
-  const orders = arrayDifference(
-    cards.split.candidate,
-    cards.current.candidate,
-  );
-
-  const costs = arrayProduct(orders, prices).map((cost) => -1 * cost); // negative order means sell, so I get money
-  const pnl = arrayProduct(orders, arrayDifference(prices, basis));
-
-  const totals = {
-    last: arraySum(
-      arrayProduct(
-        cards.split.candidate,
-        dividends.map((d) => d.last),
-      ),
-    ),
-    avg: arraySum(
-      arrayProduct(
-        cards.split.candidate,
-        dividends.map((d) => d.avg),
-      ),
-    ),
-    next: arraySum(
-      arrayProduct(
-        cards.split.candidate,
-        dividends.map((d) => d.next),
-      ),
-    ),
-    costs: arraySum(costs),
-    pnl: arraySum(pnl),
-  };
-
   return (
-    <header className="text-center rounded p-2 select-none">
-      <table className="border-collapse border-gray-900 table-auto  m-auto">
-        <thead>
-          <tr>
-            <th></th>
-            {Object.keys(cards.current.stats).map((key) => (
-              <th key={key} className="border">
-                {key}
-              </th>
+    <table className="border-collapse border-gray-900 table-auto  m-auto">
+      <thead>
+        <tr>
+          <th></th>
+          {Object.keys(cards.current.stats).map((key) => (
+            <th key={key} className="border">
+              {key}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {Object.entries(cards).map(([name, card]) => (
+          <tr key={name}>
+            <td className="border">{name}</td>
+            {Object.values(card.stats).map((value, index) => (
+              <td key={index} className="border">
+                {value > 0 ? value : ""}
+              </td>
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {Object.entries(cards).map(([name, card]) => (
-            <tr key={name}>
-              <td className="border">{name}</td>
-              {Object.values(card.stats).map((value, index) => (
-                <td key={index} className="border">
-                  {value > 0 ? value : ""}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <br />
-
-      <table className="border-collapse border-gray-900 table-auto m-auto">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Last</th>
-            <th>Avg</th>
-            <th>Next</th>
-            <th>Current</th>
-            <th>Split</th>
-            <th>Order</th>
-            <th>Cost</th>
-            <th>Price</th>
-            <th>Basis</th>
-            <th>P&L</th>
-          </tr>
-        </thead>
-        <tbody>
-          {names.map((name, index) => (
-            <tr key={index}>
-              <td className="border">{name}</td>
-              <td className="border">${dividends[index].last}</td>
-              <td className="border">${dividends[index].avg}</td>
-              <td className="border">${dividends[index].next}</td>
-              <td className="border">{cards.current.candidate[index]}</td>
-              <td className="border">{cards.split.candidate[index]}</td>
-              <td className="border">{orders[index]}</td>
-              <td className="border">${costs[index].toFixed()}</td>
-              <td className="border">${prices[index].toFixed(2)}</td>
-              <td className="border">${basis[index].toFixed(2)}</td>
-              <td className="border">${pnl[index].toFixed()}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td className="border"></td>
-            <td className="border">${totals.last.toFixed()}</td>
-            <td className="border">${totals.avg.toFixed()}</td>
-            <td className="border">${totals.next.toFixed()}</td>
-            <td className="border"></td>
-            <td className="border"></td>
-            <td className="border"></td>
-            <td className="border">${totals.costs.toFixed()}</td>
-            <td className="border">${totals.pnl.toFixed()}</td>
-            <td className="border"></td>
-            <td className="border"></td>
-          </tr>
-        </tfoot>
-      </table>
-    </header>
+        ))}
+      </tbody>
+    </table>
   );
 }

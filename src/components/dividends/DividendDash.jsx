@@ -14,6 +14,7 @@ import {
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
 import CardStats from "./CardStats";
+import CardDetails from "./CardDetails";
 
 // TODO: I can download dividends CSV from fidelity, instead of my own spreadsheet
 // it contains name, now, and cost, which is all I really need. There is no OK though.
@@ -150,7 +151,10 @@ export default function DividendDash() {
   // TODO: rename to current, goal, and active (split) cards
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
-      <CardStats cards={{ current: currentCard, split: splitCard }} />
+      <header className="text-center rounded p-2 select-none">
+        <CardStats cards={{ current: currentCard, split: splitCard }} />
+        <CardDetails cards={{ current: currentCard, split: splitCard }} />
+      </header>
       <div className="w-full h-full">
         {isThinking && <div className="text-blue-400">Thinking...</div>}
 
