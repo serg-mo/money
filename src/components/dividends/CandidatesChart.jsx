@@ -28,6 +28,7 @@ export const colors = {
   split: "red",
 };
 
+// TODO: inside the doughnut, show the total and monthly
 export default function CandidatesChart({
   cards,
   highlight,

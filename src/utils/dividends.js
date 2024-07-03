@@ -106,35 +106,33 @@ export function sumProduct(...arrays) {
   return sum;
 }
 
-
-export function mutateCandidates(candidates) {
-  return candidates.map(mutateCandidate);
-}
-
+// assert all values are positive, not originals, and are multiples of 10
 // console.log(mutateCandidate([300, 50, 70, 80, 300, 220, 210, 90, 90, 70]));
 export function mutateCandidate(candidate, jitter, multiple = 10) {
-  const mutate = (value) => mutateValue(value, jitter, multiple);
-  return [...candidate.map(mutate)]; // new array instance
+  return [...candidate.map((value) => mutateValue(value, jitter, multiple))]; // new array instance
 }
 
-// TODO: figure out mutation strategy
-// console.assert(mutateValue(300) !== 300, "mutateValue");
-// TODO: positive values only, but somehow I get negatives
+console.assert(mutateValue(300) !== 300, "mutateValue");
 export function mutateValue(value, jitter, multiple) {
   const direction = Math.random() < 0.5 ? 1 : -1;
   const magnitude = Math.floor(Math.random() * jitter * value);
-  return Math.round((value + direction * magnitude) / multiple) * multiple;
-  //return Math.round(value + direction * magnitude);
+  const newValue = value + (direction * magnitude);
+
+  return multipleOfN(Math.max(0, newValue), multiple); // positive values only
+}
+
+export function multipleOfN(value, n) {
+  return Math.round(value / n) * n;
 }
 
 export function evaluateCandidate(
   candidate,
   { expenses, dividends, prices, current },
 ) {
-  const total = sumProduct(candidate, prices);
-  const monthly = sumProduct(candidate, dividends);
+  const total = sumProduct(candidate, prices); // total value of the portfolio
+  const monthly = sumProduct(candidate, dividends.map((d) => d.next)); // last, avg, next
   const exp = sumProduct(candidate, prices, expenses) / total;
-  const roi = (monthly * 12) / total;
+  const roi = (monthly * 12) / total; // a year worth of dividends over the total invested
   const ratio = roi / exp; // NOTE: this is what we're trying to maximize
 
   const delta = candidate.map((value, index) => value - current[index]);
@@ -144,14 +142,13 @@ export function evaluateCandidate(
     total: Math.round(total),
     monthly: Math.round(monthly),
     cost: Math.round(cost), // cost of executable transactions that move current to candidate
-    exp: parseFloat((100 * exp).toFixed(2)),
-    roi: parseFloat((100 * roi).toFixed(2)),
+    exp: parseFloat((100 * exp).toFixed(2)), // percent
+    roi: parseFloat((100 * roi).toFixed(2)), // percent
     ratio: parseFloat(ratio.toFixed(2)),
   };
 }
 
 export function makeCandidates(src, size, jitter) {
-  // TODO: all candidates are mutations of the current one
   let candidates = [];
   for (let i = 0; i < size; i++) {
     const candidate = mutateCandidate(src, jitter);
@@ -160,26 +157,19 @@ export function makeCandidates(src, size, jitter) {
   return candidates;
 }
 
-// TODO: I need some tests on this
-export function candidateCombinations(src, variants) {
-  let results = [];
 
-  function helper(current, index) {
-    if (index === src.length) {
-      results.push(current.slice()); // copy the array
-      return;
-    }
 
-    for (let variant of variants) {
-      let newValue = src[index] + src[index] * variant;
-      newValue = Math.round(newValue / 10) * 10; // multiple of 10
-      current[index] = newValue;
-      helper(current, index + 1);
-    }
-  }
-
-  helper(new Array(src.length), 0);
-  return results;
+// console.log(candidateCombinations([100, 200], [10])); // [[110, 200], [100, 210]]
+// console.log(candidateCombinations([100, 200], [-10, 10])); // [[90, 200], [110, 200], [100, 190], [100, 210]]
+export function singleCandidateCombinations(candidate, variants) {
+  // modify one fund at a time for each variant
+  return candidate.flatMap((_num, index) =>
+    variants.map((variant) => {
+      const newCandidate = candidate.slice(); // copy
+      newCandidate[index] += variant;
+      return newCandidate;
+    }),
+  );
 }
 
 // TODO: check that prop is keyof typeof card.stats
@@ -266,9 +256,21 @@ export function dfs(current, best, isBetterThan, prices) {
   return dfsInner(current, best, 0);
 }
 
+export function sum(arr) {
+  return arr.reduce((acc, val) => acc + val, 0);
+}
+
+export function mean(arr) {
+  return sum(arr) / arr.length;
+}
+
 export async function lookupDividends(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
-  const { dividends, expense_ratio: expenseRatio, price } = await response.json();
+  const {
+    dividends,
+    expense_ratio: expenseRatio,
+    price,
+  } = await response.json();
 
   const oneYearAgo = moment().subtract(1, "years").unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
@@ -283,17 +285,14 @@ export async function lookupDividends(symbol) {
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
   const options = { order: 3, precision: 3 };
   const result = regression.linear(indexed, options);
-  const next = result.predict(indexed.length + 1)[1].toFixed(2); // [x, y]
-
-  const sum = (arr) => arr.reduce((acc, val) => acc + val, 0);
-  const mean = (arr) => sum(arr) / arr.length;
+  const next = result.predict(indexed.length + 1)[1].toFixed(4); // [x, y]
 
   const values = indexed.map(([x, y]) => y);
   const last = values[0].toFixed(4); // first y is the most recent dividend
   const avg = mean(values).toFixed(4);
 
   return {
-    dividends: {last, avg, next},
+    dividends: { last, avg, next },
     price,
     expenseRatio,
     yield: sum(values) / price,

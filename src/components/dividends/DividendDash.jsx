@@ -9,6 +9,7 @@ import {
   isBetterStats,
   dfs,
   candidateCombinations,
+  mutateCandidate,
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
@@ -25,7 +26,8 @@ import CardStats from "./CardStats";
 // TODO: consider making goal just a x/y coordinate on both charts, i.e., they maintain their own
 // TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
-  const TOP_SIZE = 10;
+  const INIT_SIZE = 10_000;
+  const CLICK_SIZE = 1_000;
 
   const { current, prices, goalTotal, goalMonthly, getStats } =
     useContext(DividendContext);
@@ -38,10 +40,9 @@ export default function DividendDash() {
   const currentCard = candidateToCard(current);
   const [isThinking, setIsThinking] = useState(false);
   const [topCards, setTopCards] = useState([]);
-  const [jitter, setJitter] = useState(0.3);
+  const [jitter, setJitter] = useState(0.5); // fraction of the number of shares
 
   const [splitCard, setSplitCard] = useState(currentCard);
-  const [highlights, setHighlights] = useState([]);
   const [goalCard] = useState({
     ...currentCard,
     stats: { ...currentCard.stats, total: goalTotal, monthly: goalMonthly },
@@ -59,11 +60,18 @@ export default function DividendDash() {
       : isCloseToSplit; // split to the middle
   };
 
+  const mutateCards = (cards) => {
+    return cards.map(({ candidate }) => candidateToCard(mutateCandidate(candidate)));
+  }
+
   const makeCardsForCandidate = (src) => {
     setIsThinking(true);
 
-    // more than 2 variants is too slow per click for 10 funds
-    const candidates = candidateCombinations(src, [-0.1, 0.1]).map(candidateToCard);
+    const candidates = makeCandidates(current, CLICK_SIZE, jitter).map(
+      candidateToCard,
+    );
+
+    setJitter((prev) => prev * 0.9); // decrease jitter
 
     setTopCards((prev) => {
       // multiple sorts, multiple best candidates combined into one array
@@ -88,9 +96,10 @@ export default function DividendDash() {
     // do not use makeCardsForCandidate here, because we need to see the cards
     let cards = [];
 
-    // more and bigger variants here makes sense, because it's a one-time cost
-    const candidates = candidateCombinations(current, [-0.3, 0, 0.3]).map(candidateToCard)
-    cards = deDupeCardsByStat([...cards, ...candidates,], "monthly",);
+    const candidates = makeCandidates(current, INIT_SIZE, 0.3).map(
+      candidateToCard,
+    );
+    cards = deDupeCardsByStat([...cards, ...candidates], "monthly");
 
     if (cards.some(isBetterThanGoal)) {
       console.log(`Found a card that's better than goal`);
@@ -99,7 +108,7 @@ export default function DividendDash() {
     }
 
     setTopCards(cards);
-  }
+  };
   useEffect(initializeTopCards, [current]);
 
   // TODO: this does not work
@@ -124,8 +133,6 @@ export default function DividendDash() {
     const load = async (text) => await navigator.clipboard.writeText(text);
     load(candidate.join("\n")); // newlines for the spreadsheet
 
-    setHighlights((prev) => [...prev, card]);
-
     setSplitCard(card);
     makeCardsForCandidate(candidate);
   };
@@ -140,22 +147,10 @@ export default function DividendDash() {
     setSplitCard(card);
   };
 
-  // lookupDividends("XYLD").then(console.log);
-
   // TODO: rename to current, goal, and active (split) cards
-  // TODO: show a pie chart of the split card
-  // TODO: inside the doughnut, show the total and monthly
   return (
     <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
-      <header className="text-center rounded p-2 select-none">
-        <CardStats cards={{ current: currentCard, split: splitCard }} />
-
-        {/* <div className="h-[20em] flex flex-col items-center">
-          <CandidateChart current={currentCard} split={splitCard} />
-        </div> */}
-
-        {/* <div>{ JSON.stringify(highlights)}</div> */}
-      </header>
+      <CardStats cards={{ current: currentCard, split: splitCard }} />
       <div className="w-full h-full">
         {isThinking && <div className="text-blue-400">Thinking...</div>}
 

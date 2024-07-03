@@ -7,22 +7,41 @@ import {
 } from "../../utils/dividends";
 
 export default function CardStats({ cards }) {
-  const { names, dividends, prices } = useContext(DividendContext);
-
-  const nextDividends = {
-    last: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.last))),
-    avg: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.avg))),
-    next: arraySum(arrayProduct(cards.split.candidate, dividends.map((d) => d.next))),
-  }
+  const { names, dividends, prices, basis } = useContext(DividendContext);
 
   const orders = arrayDifference(
     cards.split.candidate,
     cards.current.candidate,
   );
-  const costs = arrayProduct(orders, prices);
+
+  const costs = arrayProduct(orders, prices).map((cost) => -1 * cost); // negative order means sell, so I get money
+  const pnl = arrayProduct(orders, arrayDifference(prices, basis));
+
+  const totals = {
+    last: arraySum(
+      arrayProduct(
+        cards.split.candidate,
+        dividends.map((d) => d.last),
+      ),
+    ),
+    avg: arraySum(
+      arrayProduct(
+        cards.split.candidate,
+        dividends.map((d) => d.avg),
+      ),
+    ),
+    next: arraySum(
+      arrayProduct(
+        cards.split.candidate,
+        dividends.map((d) => d.next),
+      ),
+    ),
+    costs: arraySum(costs),
+    pnl: arraySum(pnl),
+  };
 
   return (
-    <>
+    <header className="text-center rounded p-2 select-none">
       <table className="border-collapse border-gray-900 table-auto  m-auto">
         <thead>
           <tr>
@@ -57,8 +76,13 @@ export default function CardStats({ cards }) {
             <th>Last</th>
             <th>Avg</th>
             <th>Next</th>
+            <th>Current</th>
+            <th>Split</th>
             <th>Order</th>
             <th>Cost</th>
+            <th>Price</th>
+            <th>Basis</th>
+            <th>P&L</th>
           </tr>
         </thead>
         <tbody>
@@ -68,22 +92,32 @@ export default function CardStats({ cards }) {
               <td className="border">${dividends[index].last}</td>
               <td className="border">${dividends[index].avg}</td>
               <td className="border">${dividends[index].next}</td>
+              <td className="border">{cards.current.candidate[index]}</td>
+              <td className="border">{cards.split.candidate[index]}</td>
               <td className="border">{orders[index]}</td>
               <td className="border">${costs[index].toFixed()}</td>
+              <td className="border">${prices[index].toFixed(2)}</td>
+              <td className="border">${basis[index].toFixed(2)}</td>
+              <td className="border">${pnl[index].toFixed()}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr>
             <td className="border"></td>
-            <td className="border">${nextDividends.last.toFixed()}</td>
-            <td className="border">${nextDividends.avg.toFixed()}</td>
-            <td className="border">${nextDividends.next.toFixed()}</td>
+            <td className="border">${totals.last.toFixed()}</td>
+            <td className="border">${totals.avg.toFixed()}</td>
+            <td className="border">${totals.next.toFixed()}</td>
             <td className="border"></td>
-            <td className="border">${arraySum(costs).toFixed()}</td>
+            <td className="border"></td>
+            <td className="border"></td>
+            <td className="border">${totals.costs.toFixed()}</td>
+            <td className="border">${totals.pnl.toFixed()}</td>
+            <td className="border"></td>
+            <td className="border"></td>
           </tr>
         </tfoot>
       </table>
-    </>
+    </header>
   );
 }
