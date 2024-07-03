@@ -1,10 +1,11 @@
 import { createContext } from "react";
-import { splitCells, rowToObjectWithKeys } from "./common";
+import { parseCSV, rowToObjectWithKeys } from "./common";
 export const DividendContext = createContext();
 import moment from "moment";
 import regression from "regression";
 
-export const REQUIRED_COLS = ["Symbol", "Quantity"];
+export const HEADER_ROW_INDEX = 0;
+export const REQUIRED_COLS = ["symbol", "quantity", "average cost basis"];
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
@@ -16,25 +17,21 @@ export const CARD_SORTS = {
 };
 
 export async function parseDividendFile(txt) {
-  const cells = splitCells(txt);
+  const cells = parseCSV(txt);
   const headers = cells[0];
   // console.log({ cells, headers });
-
-  if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
-    throw new Error("Missing required columns: " + REQUIRED_COLS.join(", "));
-  }
 
   const objectify = rowToObjectWithKeys(headers);
   // TODO: this should be synchronized with "scripts/fetch_dividends"
   const values = cells
     .slice(1, 13)
     .map(objectify)
-    .filter((v) => !!v["Quantity"] && v["Symbol"] !== "FZROX"); // ignore header/footer
+    .filter((v) => !!v["quantity"] && v["symbol"] !== "FZROX"); // ignore header/footer
   // console.log({ values });
 
-  const names = values.map((v) => v["Symbol"]);
-  const current = values.map((v) => parseInt(v["Quantity"]));
-  const basis = values.map((v) => parseFloat(v["Average Cost Basis"]));
+  const names = values.map((v) => v["symbol"]);
+  const current = values.map((v) => parseInt(v["quantity"]));
+  const basis = values.map((v) => parseFloat(v["average cost basis"]));
   // console.log({ names, current });
 
   const stats = await Promise.all(names.map(lookupDividends));

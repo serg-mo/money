@@ -1,14 +1,20 @@
-export function parseCSV(str) {
-  return str
-    .split('","')
-    .map((v) => v.replace(/^"|"$/g, ""))
-    .map((v) => v.replace(/[\$,%]/g, ""));
-}
+import { parseCSV } from "./common";
+
+export const HEADER_ROW_INDEX = 3;
+export const REQUIRED_COLS = [
+  "month",
+  "beginning balance",
+  "market change minus fees",
+  "dividends & interest",
+  "deposits",
+  "withdrawals",
+  "ending balance",
+];
 
 export function parseBrokerageFile(txt) {
   const lines = txt.split(/\r?\n/);
   const middle = lines.slice(4, lines.length - 8);
-  const headers = parseCSV(lines[3]).map((s) => s.toLowerCase()); // title, account, date range, headers;
+  const headers = parseCSV(lines[3]).map((s) => s.toLowerCase());
   // const tail = lines.slice(lines.length - 8); // blank, report date, 6 lines of junk
 
   return parseTransactions(middle, headers);

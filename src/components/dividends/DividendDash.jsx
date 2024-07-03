@@ -20,6 +20,7 @@ import CardDetails from "./CardDetails";
 // it contains name, now, and cost, which is all I really need. There is no OK though.
 // but then I would not need to fetch prices. I still need to fetch expense ratios.
 
+// TODO: compute delta/buy/sell/total for a given candidate
 // TODO: this is where backtracking algo would work well
 // TODO: hovering over a point should highlight the same candidate elsewhere
 // TODO: color code a third dimension, like ROI to transparency

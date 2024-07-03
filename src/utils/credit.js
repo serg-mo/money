@@ -6,7 +6,7 @@
 // TODO: add typescript
 // TODO: write unit tests for all of these
 import { createContext } from "react";
-
+import { parseCSV, rowToObjectWithKeys } from "./common";
 export const CreditContext = createContext();
 
 // TODO: ideally there would be at least one transaction per category per month
@@ -43,6 +43,9 @@ export const COLORS = {
 const MIN_NAME_LENGTH = 23;
 const MAX_NAME_LENGTH = 40;
 
+export const HEADER_ROW_INDEX = 0;
+export const REQUIRED_COLS = ["date", "transaction", "name", "memo", "amount"];
+
 export function getCategory(name, rules) {
   // NOTE: name has a structure: description, city/phone/domain, state
   name = name.toUpperCase();
@@ -60,10 +63,6 @@ export function getCategory(name, rules) {
   return CATEGORIES.UNCLASSIFIED;
 }
 
-export function parseCSV(str) {
-  return str.split('","').map((one) => one.replace(/^"|"$/g, ""));
-}
-
 export function formatAmount(amount) {
   return (Math.round(Math.abs(amount) * 100) / 100).toFixed(2);
 }
@@ -74,16 +73,13 @@ export function parseName(name) {
 }
 
 export function parseCreditFile(txt) {
-  const lines = txt.split(/\r?\n/);
-  const headers = parseCSV(lines[0]).map((v) => v.toLowerCase()); // "date","transaction","name","memo","amount"
+  const lines = parseCSV(txt);
+  const headers = lines[0].map((v) => v.toLowerCase());
   const tail = lines.slice(1, lines.length - 1);
 
-  return parseCreditTransactions(tail, headers);
-}
-
-function parseCreditTransactions(lines, headers) {
+  // TODO: const objectify = rowToObjectWithKeys(headers);
   // convert each line from an array of strings into an object, where keys are headers
-  return lines.map(parseCSV).map((values) => {
+  return tail.map((values) => {
     const obj = Object.fromEntries(
       headers.map((header, index) => [header, values[index]]),
     );
