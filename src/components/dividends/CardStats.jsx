@@ -2,12 +2,14 @@ import React, { useContext } from "react";
 import {
   DividendContext,
   arrayDifference,
-  arrayProduct
+  arrayProduct,
+  arraySum
 } from "../../utils/dividends";
 
 export default function CardStats({ cards }) {
   const { names, dividends, prices } = useContext(DividendContext);
 
+  const nextDividends = arrayProduct(cards.split.candidate, dividends)
   const orders = arrayDifference(cards.split.candidate, cards.current.candidate)
   const costs = arrayProduct(orders, prices)
 
@@ -52,6 +54,14 @@ export default function CardStats({ cards }) {
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <td className="border"></td>
+            <td className="border">${arraySum(nextDividends).toFixed()}</td>
+            <td className="border"></td>
+            <td className="border">${arraySum(costs).toFixed()}</td>
+          </tr>
+        </tfoot>
       </table>
     </>
   );

@@ -90,6 +90,9 @@ export function arrayDifference(a, b) {
   return a.map((value, index) => value - b[index]);
 }
 
+export function arraySum(arr) {
+  return arr.reduce((accumulator, current) => accumulator + current, 0);
+}
 
 export function sumProduct(...arrays) {
   const size = arrays[0].length;

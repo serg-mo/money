@@ -60,7 +60,7 @@ for symbol in "${symbols[@]}"; do
   
   echo "$symbol"
 
-  # sleep for a random amount of time between 1 and 3 seconds
-  timeout=$(( (RANDOM % 3) + 1 ))
+  # sleep for a random amount of time
+  timeout=$(( (RANDOM % 5) + 1 ))
   sleep $timeout
 done
