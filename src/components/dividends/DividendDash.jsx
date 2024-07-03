@@ -8,7 +8,7 @@ import {
   isBetterThanCard,
   isBetterStats,
   dfs,
-  candidateCombinations
+  candidateCombinations,
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
 import CandidateChart from "./CandidateChart";
@@ -26,8 +26,6 @@ import CardStats from "./CardStats";
 // TODO: each chart should know to zoom in to the appropriate quadrant of the xy coordinate
 export default function DividendDash() {
   const TOP_SIZE = 10;
-  const INIT_SIZE = 500;
-  const CLICK_SIZE = 100;
 
   const { current, prices, goalTotal, goalMonthly, getStats } =
     useContext(DividendContext);
@@ -61,57 +59,48 @@ export default function DividendDash() {
       : isCloseToSplit; // split to the middle
   };
 
-  // TODO: decide on the best candidate, but mutate the whole thing
-  // TODO: fix the sort, best candidate is not always the first
-  // TODO: flatMap is how I can inject more candidates into existing array
-  // TODO: somehow the actual best candidate does not get picked
-  // TODO: the logic for current/split needs to be animatable differently
-  // TODO: jitter is really a measure of how much to mutate the current candidate
-  // TODO: csv has "since" column + I only do one transaction at a time, so mutate one fund at a time
-  const makeCardsForCandidate = (src, size) => {
+  const makeCardsForCandidate = (src) => {
     setIsThinking(true);
 
-    // consider 3 values for each of the 10 funds, 3 ^ 10 = 59049
-    const candidates = candidateCombinations(src).map(candidateToCard);
+    // more than 2 variants is too slow per click for 10 funds
+    const candidates = candidateCombinations(src, [-0.1, 0.1]).map(candidateToCard);
 
     setTopCards((prev) => {
       // multiple sorts, multiple best candidates combined into one array
-      const bests = Object.keys(CARD_SORTS).flatMap((sortKey) =>
-        candidates.sort(CARD_SORTS[sortKey]).slice(0, TOP_SIZE),
-      );
+      // const bests = Object.keys(CARD_SORTS).flatMap((sortKey) =>
+      //   candidates.sort(CARD_SORTS[sortKey]).slice(0, TOP_SIZE),
+      // );
 
       // TODO: splitCard needs to point to one of these, find which one
       setIsThinking(false);
-      return deDupeCardsByStat([...prev, ...bests], "monthly").filter(getFocus());
+      return deDupeCardsByStat([...prev, ...candidates], "monthly").filter(
+        getFocus(),
+      );
     });
   };
 
-  // initialize the top cards
-  useEffect(() => {
+  // TODO: the de-duping logic becomes relevant once I meet the goal
+  // TODO: if I can consider N closest changes in multiples of 10, there is no need for click
+  // TODO: I kind of like exploring by clicking, but it's not the most efficient
+  const initializeTopCards = () => {
     const isBetterThanGoal = isBetterThanCard(goalCard);
+
+    // do not use makeCardsForCandidate here, because we need to see the cards
     let cards = [];
-    for (let i = 0; i < 10; i++) {
-      // do not use makeCardsForCandidate here, because we need to see the cards
-      // multiple sorts, multiple best candidates combined into one array
-      cards = deDupeCardsByStat(
-        [
-          ...cards,
-          ...makeCandidates(current, INIT_SIZE, jitter).map(candidateToCard),
-        ],
-        "monthly",
-      );
 
-      if (cards.some(isBetterThanGoal)) {
-        console.log(`Found a card that's better than goal on ${i} iteration`);
-        cards = cards.filter(isBetterThanGoal);
+    // more and bigger variants here makes sense, because it's a one-time cost
+    const candidates = candidateCombinations(current, [-0.3, 0, 0.3]).map(candidateToCard)
+    cards = deDupeCardsByStat([...cards, ...candidates,], "monthly",);
 
-        setSplitCard(cards[0]); // otherwise it stays at current, initial value
-        break;
-      }
+    if (cards.some(isBetterThanGoal)) {
+      console.log(`Found a card that's better than goal`);
+      cards = cards.filter(isBetterThanGoal);
+      setSplitCard(cards[0]); // otherwise it stays at current, initial value
     }
 
     setTopCards(cards);
-  }, [current]);
+  }
+  useEffect(initializeTopCards, [current]);
 
   // TODO: this does not work
   // useEffect(() => {
@@ -136,10 +125,9 @@ export default function DividendDash() {
     load(candidate.join("\n")); // newlines for the spreadsheet
 
     setHighlights((prev) => [...prev, card]);
-    setJitter((prev) => prev * 0.92); // less jitter with each click
 
     setSplitCard(card);
-    makeCardsForCandidate(candidate, CLICK_SIZE);
+    makeCardsForCandidate(candidate);
   };
 
   const onHover = (card) => {
@@ -162,9 +150,9 @@ export default function DividendDash() {
       <header className="text-center rounded p-2 select-none">
         <CardStats cards={{ current: currentCard, split: splitCard }} />
 
-        <div className="h-[20em] flex flex-col items-center">
+        {/* <div className="h-[20em] flex flex-col items-center">
           <CandidateChart current={currentCard} split={splitCard} />
-        </div>
+        </div> */}
 
         {/* <div>{ JSON.stringify(highlights)}</div> */}
       </header>

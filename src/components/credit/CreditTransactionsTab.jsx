@@ -19,18 +19,22 @@ export default function CreditTransactionsTab() {
   );
   categoryTotals.sort((a, b) => b.total - a.total); // desc
 
-  const filteredTransactions = tab && tab !== "ALL"
-    ? transactions.filter((t) => t["category"] === tab)
-    : transactions;
+  const filteredTransactions =
+    tab && tab !== "ALL"
+      ? transactions.filter((t) => t["category"] === tab)
+      : transactions;
 
   return (
     <div className="">
       <CreditChart transactions={filteredTransactions} />
       <CategoryTabs />
-      <CreditTransactions title={tab} transactions={filteredTransactions} onCategorize={onCategorize} />
+      <CreditTransactions
+        title={tab}
+        transactions={filteredTransactions}
+        onCategorize={onCategorize}
+      />
     </div>
   );
-
 
   // console.log(
   //   categoryTotals.map(({ category, total }) => ({ category, total })),

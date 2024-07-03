@@ -39,7 +39,6 @@ export const COLORS = {
   [CATEGORIES.UTILITIES]: "rgba(77, 152, 128, 0.8)",
 };
 
-
 // TODO: make a constants file
 const MIN_NAME_LENGTH = 23;
 const MAX_NAME_LENGTH = 40;

@@ -4,7 +4,7 @@ export const DividendContext = createContext();
 import moment from "moment";
 import regression from "regression";
 
-export const REQUIRED_COLS = ["NAME", "COST", "NOW"];
+export const REQUIRED_COLS = ["Symbol", "Quantity"];
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
@@ -16,51 +16,44 @@ export const CARD_SORTS = {
 };
 
 export async function parseDividendFile(txt) {
-  // only look at the first few columns, because headers repeat, e.g., weight
-  const cells = splitCells(txt).map((row) => row.slice(0, 9));
-
-  // 0 - header, 1-10 funds, 11 - footer
-  const [headers, footers] = [cells[0], cells[11]];
-  //console.log({ cells, headers, footers });
+  const cells = splitCells(txt);
+  const headers = cells[0];
+  // console.log({ cells, headers });
 
   if (!REQUIRED_COLS.every((col) => headers.includes(col))) {
     throw new Error("Missing required columns: " + REQUIRED_COLS.join(", "));
   }
 
   const objectify = rowToObjectWithKeys(headers);
-  const values = cells.slice(1, 11).map(objectify); // ignore header/footer
-  const totals = objectify(footers);
-  // console.log({ values, totals });
+  // TODO: this should be synchronized with "scripts/fetch_dividends"
+  const values = cells
+    .slice(1, 13)
+    .map(objectify)
+    .filter((v) => !!v["Quantity"] && v["Symbol"] !== "FZROX"); // ignore header/footer
+  // console.log({ values });
 
-  const goalTotal = parseFloat(totals["COST"]); // name of the column where goalTotal lives
-  const goalMonthly = parseFloat(totals["NOW"]); // name of the column where goalMonthly lives
-  // console.log({ goalTotal, goalMonthly });
+  // TODO: consider "Average Cost Basis",
+  const names = values.map((v) => v["Symbol"]);
+  const current = values.map((v) => parseInt(v["Quantity"]));
+  // console.log({ names, current });
 
-  // TODO: these come from CSV
-  const names = values.map((v) => v["NAME"]);
-  const current = values.map((v) => parseInt(v["NOW"]));
-  const oks = values.map((v) => v["OK"] === "TRUE" ? 1 : 0);
-  // console.log(oks)
-
-  const stats = await Promise.all(
-    values.map((v) => lookupDividends(v["NAME"])),
-  );
+  const stats = await Promise.all(names.map(lookupDividends));
   // console.log({ stats });
-  
+
   const expenses = stats.map((v) => v.expenseRatio);
   const dividends = stats.map((v) => v.avg.toFixed(4)); // TODO: tune the predictor + chart the guess
   const prices = stats.map((v) => v.price);
   // console.log({ expenses, dividends, prices });
- 
+
   return {
     names,
     prices,
     dividends,
-    oks,
     current,
-    goalTotal,
-    goalMonthly,
-    getStats: (c) => evaluateCandidate(c, { expenses, dividends, prices, current, oks })
+    goalTotal: 45_000, // see dividends model
+    goalMonthly: 355, // see dividends model
+    getStats: (c) =>
+      evaluateCandidate(c, { expenses, dividends, prices, current }),
   };
 }
 
@@ -84,7 +77,7 @@ export function arrayProduct(...arrays) {
 
 export function arrayDifference(a, b) {
   if (a.length !== b.length) {
-    throw new Error("Arrays must be of the same length")
+    throw new Error("Arrays must be of the same length");
   }
 
   return a.map((value, index) => value - b[index]);
@@ -112,13 +105,6 @@ export function sumProduct(...arrays) {
   return sum;
 }
 
-console.assert(mutateValueRange(300) !== 300, "mutateValueRange");
-export function mutateValueRange(value, jitter = 0.1, multiple = 10) {
-  const [min, max] = [value - jitter * value, value + jitter * value];
-  const range = max - min + 1;
-  const next = Math.floor(Math.random() * range) + min;
-  return Math.round(next / multiple) * multiple;
-}
 
 export function mutateCandidates(candidates) {
   return candidates.map(mutateCandidate);
@@ -140,8 +126,10 @@ export function mutateValue(value, jitter, multiple) {
   //return Math.round(value + direction * magnitude);
 }
 
-export function evaluateCandidate(candidate, { expenses, dividends, prices, current, oks }) {
-  
+export function evaluateCandidate(
+  candidate,
+  { expenses, dividends, prices, current },
+) {
   const total = sumProduct(candidate, prices);
   const monthly = sumProduct(candidate, dividends);
   const exp = sumProduct(candidate, prices, expenses) / total;
@@ -149,7 +137,7 @@ export function evaluateCandidate(candidate, { expenses, dividends, prices, curr
   const ratio = roi / exp; // NOTE: this is what we're trying to maximize
 
   const delta = candidate.map((value, index) => value - current[index]);
-  const cost = sumProduct(delta, oks, prices); // only some orders are executable
+  const cost = sumProduct(delta, prices); // only some orders are executable
 
   return {
     total: Math.round(total),
@@ -171,8 +159,8 @@ export function makeCandidates(src, size, jitter) {
   return candidates;
 }
 
-export function candidateCombinations(src) {
-  const variants = [-0.1, 0.1]; // +/- 10%
+// TODO: I need some tests on this
+export function candidateCombinations(src, variants) {
   let results = [];
 
   function helper(current, index) {
@@ -183,7 +171,7 @@ export function candidateCombinations(src) {
 
     for (let variant of variants) {
       let newValue = src[index] + src[index] * variant;
-      newValue = Math.round(newValue / 10) * 10;  // multiple of 10
+      newValue = Math.round(newValue / 10) * 10; // multiple of 10
       current[index] = newValue;
       helper(current, index + 1);
     }
@@ -192,7 +180,6 @@ export function candidateCombinations(src) {
   helper(new Array(src.length), 0);
   return results;
 }
-
 
 // TODO: check that prop is keyof typeof card.stats
 export function deDupeCardsByStat(cards, prop) {

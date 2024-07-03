@@ -8,7 +8,7 @@ export default function CategoryTabs() {
   const tabClass = "p-1 font-medium bg-gray-200 hover:bg-gray-400";
   const activeTabClass = "bg-gray-400";
 
-  const categories = ["ALL", ...Object.values(CATEGORIES)]
+  const categories = ["ALL", ...Object.values(CATEGORIES)];
 
   return (
     <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
@@ -22,5 +22,5 @@ export default function CategoryTabs() {
         </button>
       ))}
     </div>
-  )
+  );
 }

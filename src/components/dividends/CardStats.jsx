@@ -3,15 +3,18 @@ import {
   DividendContext,
   arrayDifference,
   arrayProduct,
-  arraySum
+  arraySum,
 } from "../../utils/dividends";
 
 export default function CardStats({ cards }) {
   const { names, dividends, prices } = useContext(DividendContext);
 
-  const nextDividends = arrayProduct(cards.split.candidate, dividends)
-  const orders = arrayDifference(cards.split.candidate, cards.current.candidate)
-  const costs = arrayProduct(orders, prices)
+  const nextDividends = arrayProduct(cards.split.candidate, dividends);
+  const orders = arrayDifference(
+    cards.split.candidate,
+    cards.current.candidate,
+  );
+  const costs = arrayProduct(orders, prices);
 
   return (
     <>
@@ -20,7 +23,9 @@ export default function CardStats({ cards }) {
           <tr>
             <th></th>
             {Object.keys(cards.current.stats).map((key) => (
-              <th key={key} className="border">{key}</th>
+              <th key={key} className="border">
+                {key}
+              </th>
             ))}
           </tr>
         </thead>
@@ -28,9 +33,11 @@ export default function CardStats({ cards }) {
           {Object.entries(cards).map(([name, card]) => (
             <tr key={name}>
               <td className="border">{name}</td>
-              {Object.values(card.stats).map((value) =>
-                <td key={value} className="border">{value > 0 ? value : ""}</td>
-              )}
+              {Object.values(card.stats).map((value) => (
+                <td key={value} className="border">
+                  {value > 0 ? value : ""}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>

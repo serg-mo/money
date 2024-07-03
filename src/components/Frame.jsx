@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-export default function Frame({ transactions, render, initialSize, minSize = 3 }) {
+export default function Frame({
+  transactions,
+  render,
+  initialSize,
+  minSize = 3,
+}) {
   // don't sort, just start at the end
   const [size, setSize] = useState(initialSize);
   const [left, setLeft] = useState(transactions.length - initialSize);

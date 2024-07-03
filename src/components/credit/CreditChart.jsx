@@ -130,7 +130,7 @@ export default function CreditChart({ transactions }) {
       // TODO: what I want is the sum of averages of visible datasets
       return {
         // label: `${category.padEnd(15, ' ')} \$${avg.toFixed(2)}/mo`.padEnd(27, ' '),
-        label: category.padEnd(15, ' '),
+        label: category.padEnd(15, " "),
         data,
         fill: "start",
         pointStyle: "rect",
