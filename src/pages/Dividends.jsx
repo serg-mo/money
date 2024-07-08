@@ -1,17 +1,21 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { parseDividendFile, DividendContext } from "../utils/dividends";
 import { FilesContext } from "../utils/common";
 import DividendDash from "../components/dividends/DividendDash";
 
 export default function Dividends() {
-  const [context, setContext] = useState({});
-
   const files = useContext(FilesContext);
-  const { txt } = files.find(({ type }) => type === "dividend")
+  const { txt } = files.find(({ type }) => type === "dividend") || {};
 
-  parseDividendFile(txt).then(setContext);
+  const [context, setContext] = useState(null);
 
-  if (!Object.keys(context).length) {
+  useEffect(() => {
+    if (txt && !context) {
+      setContext(parseDividendFile(txt));
+    }
+  }, [context, txt]);
+
+  if (!context) {
     return;
   }
 

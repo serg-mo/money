@@ -18,7 +18,7 @@ export default function Credit() {
   );
 
   const files = useContext(FilesContext);
-  const { txt } = files.find(({ type }) => type === "credit")
+  const { txt } = files.find(({ type }) => type === "credit") || {};
 
   // TODO: it would be nice to see the chart at month/week level
   // TODO: I bet you my weekly spending is more predictable

@@ -1,36 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import BalanceChart from "../components/brokerage/BalanceChart";
 import CashFlowChart from "../components/brokerage/CashFlowChart";
-import DragAndDrop from "../components/DragAndDrop";
 import { parseBrokerageFile } from "../utils/brokerage";
 import Frame from "../components/Frame";
 import { loadFileContent } from "../utils/common";
+import { FilesContext } from "../utils/common";
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
-function Brokerage({ files }) {
+export default function Brokerage() {
+  const files = useContext(FilesContext);
+  const { txt } = files.find(({ type }) => type === "brokerage") // first match
+
   const [transactions, setTransactions] = useState([]);
-  const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+    if (txt && !transactions.length) {
+      setTransactions(parseBrokerageFile(txt));
+    }
+  }, [transactions, txt]);
 
   if (!transactions.length) {
-    // first file only
-    loadFileContent(files[0]).then(parseBrokerageFile).then(setTransactions);
-
-    return <div className="h-dvh w-3/4">Loading...</div>;
+    return
   }
 
   // same columns for brokerage and checking
-  const titles = [
-    // "month",
-    "beginning balance",
-    "market change minus fees",
-    "dividends & interest",
-    "deposits",
-    "withdrawals",
-    "ending balance",
-  ];
+  // TODO: brokerage and checking download the same file, chart them both
 
   // TODO: BalanceChart can stack both start and ending balances
-  // charts use canvas, the size of which can't be easily set with tailwind
+  // TODO: charts use canvas, the size of which can't be easily set with tailwind
   const render = (slice) => {
     return (
       <div className="w-full flex flex-col justify-center items-center">
@@ -46,7 +44,3 @@ function Brokerage({ files }) {
 
   return <Frame transactions={transactions} render={render} initialSize={12} />;
 }
-
-export default () => (
-  <DragAndDrop render={(files) => <Brokerage files={files} />} />
-);

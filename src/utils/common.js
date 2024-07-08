@@ -1,6 +1,11 @@
 import { createContext } from "react";
 
 export const FilesContext = createContext();
+export const FILE_TYPES = {
+  brokerage: "brokerage",
+  credit: "credit",
+  dividend: "dividend",
+};
 
 export function loadFileContent(file) {
   return new Promise((resolve, reject) => {
