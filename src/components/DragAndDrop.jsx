@@ -1,16 +1,11 @@
 import React, { useState } from "react";
+import { HEADER_ROW_INDEX as BROKERAGE_HEADER_ROW_INDEX, REQUIRED_COLS as BROKERAGE_REQUIRED_COLS, getFileName } from "../utils/brokerage";
+import { FILE_TYPES, FilesContext, isMatchingFile, loadFileContent } from "../utils/common";
+import { HEADER_ROW_INDEX as CREDIT_HEADER_ROW_INDEX, REQUIRED_COLS as CREDIT_REQUIRED_COLS } from "../utils/credit";
+import { HEADER_ROW_INDEX as DIVIDEND_HEADER_ROW_INDEX, REQUIRED_COLS as DIVIDEND_REQUIRED_COLS } from "../utils/dividends";
 import Target from "./Target";
-import { isMatchingFile } from "../utils/common";
-import { REQUIRED_COLS as CREDIT_REQUIRED_COLS, HEADER_ROW_INDEX as CREDIT_HEADER_ROW_INDEX } from "../utils/credit";
-import { REQUIRED_COLS as DIVIDEND_REQUIRED_COLS, HEADER_ROW_INDEX as DIVIDEND_HEADER_ROW_INDEX } from "../utils/dividends";
-import { REQUIRED_COLS as BROKERAGE_REQUIRED_COLS, HEADER_ROW_INDEX as BROKERAGE_HEADER_ROW_INDEX } from "../utils/brokerage";
-import { loadFileContent } from "../utils/common";
-import Dividends from "../pages/Dividends";
-import Credit from "../pages/Credit";
-import Brokerage from "../pages/Brokerage";
-import { FilesContext, FILE_TYPES } from "../utils/common";
 
-export default function DragAndDrop() {
+export default function DragAndDrop({ children }) {
   const [context, setContext] = useState([]);
 
   async function handleChange(event) {
@@ -23,29 +18,29 @@ export default function DragAndDrop() {
     // TODO: dedicated function in utils/common.js
     const promises = list.map((file) => loadFileContent(file).then((txt) => {
       let type = null;
+      let name = null
+
       if (isMatchingFile(txt, BROKERAGE_REQUIRED_COLS, BROKERAGE_HEADER_ROW_INDEX)) {
         type = FILE_TYPES.brokerage;
+        name = getFileName(txt);
       } else if (isMatchingFile(txt, CREDIT_REQUIRED_COLS, CREDIT_HEADER_ROW_INDEX)) {
         type = FILE_TYPES.credit;
+        name = "Credit";
       } else if (isMatchingFile(txt, DIVIDEND_REQUIRED_COLS, DIVIDEND_HEADER_ROW_INDEX)) {
         type = FILE_TYPES.dividend;
+        name = "Dividends";
       }
 
-      return { txt, type, }
+      return { txt, type, name }
     }))
 
     Promise.all(promises).then(setContext);
   }
 
   if (Object.keys(context).length) {
-    // TODO: set multiples contexts? one for each file or just put this in a single big context?
-    // TODO: set the context on layout and navigate through it
-    // TODO: include them all and have each only render itself after matching against a type
     return (
       <FilesContext.Provider value={context}>
-        <Dividends />
-        <Credit />
-        <Brokerage />
+        {children}
       </FilesContext.Provider>
     );
   }

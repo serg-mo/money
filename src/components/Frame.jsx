@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Frame({
   transactions,
@@ -15,7 +15,7 @@ export default function Frame({
     if (event.key === "ArrowLeft") {
       setLeft((prev) => Math.max(prev - 1, 0));
     } else if (event.key === "ArrowRight") {
-      setLeft((prev) => Math.min(prev + 1, transactions.length - size));
+      setLeft((prev) => Math.min(prev + 1, transactions.length - Math.min(size, 2))); // 2..size
     } else if (event.key === "ArrowUp") {
       setSize((prev) => {
         const newSize = Math.min(prev + 1, transactions.length);

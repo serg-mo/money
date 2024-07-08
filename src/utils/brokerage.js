@@ -11,6 +11,13 @@ export const REQUIRED_COLS = [
   "ending balance",
 ];
 
+export function getFileName(txt) {
+  const lines = parseCSV(txt);
+  const header = lines[1].map((s) => s.toLowerCase());
+
+  return `Brokerage: *${header[0].slice(-4)}`; // last digits
+}
+
 export function parseBrokerageFile(txt) {
   const lines = parseCSV(txt);
   const headers = lines[HEADER_ROW_INDEX].map((s) => s.toLowerCase());

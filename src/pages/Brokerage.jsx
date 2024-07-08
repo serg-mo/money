@@ -1,18 +1,12 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import BalanceChart from "../components/brokerage/BalanceChart";
 import CashFlowChart from "../components/brokerage/CashFlowChart";
-import { parseBrokerageFile } from "../utils/brokerage";
 import Frame from "../components/Frame";
-import { loadFileContent } from "../utils/common";
-import { FilesContext } from "../utils/common";
+import { parseBrokerageFile } from "../utils/brokerage";
 
 // TODO: add arrow key handlers to zoom in/out and shift left/right
-export default function Brokerage() {
-  const files = useContext(FilesContext);
-  const { txt } = files.find(({ type }) => type === "brokerage") // first match
-
+export default function Brokerage({ txt }) {
   const [transactions, setTransactions] = useState([]);
-
 
   useEffect(() => {
     if (txt && !transactions.length) {
@@ -21,7 +15,7 @@ export default function Brokerage() {
   }, [transactions, txt]);
 
   if (!transactions.length) {
-    return
+    return;
   }
 
   // same columns for brokerage and checking

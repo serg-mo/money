@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
-import CreditTransactionsTab from "../components/credit/CreditTransactionsTab";
-import CreditClassifier from "../components/credit/CreditClassifier";
-import { CreditContext, parseCreditFile } from "../utils/credit";
-import { FilesContext } from "../utils/common";
 import moment from "moment";
+import React, { useEffect, useState } from "react";
+import CreditClassifier from "../components/credit/CreditClassifier";
+import CreditTransactionsTab from "../components/credit/CreditTransactionsTab";
+import { CreditContext, parseCreditFile } from "../utils/credit";
 import usePersisedState from "../utils/usePersistedState";
 
 
-export default function Credit() {
+export default function Credit({ txt }) {
   const [context, setContext] = useState({});
 
   const [tab, setTab] = useState(undefined); // TODO: type CATEGORIES,
@@ -16,9 +15,6 @@ export default function Credit() {
     {},
     "manualCategories",
   );
-
-  const files = useContext(FilesContext);
-  const { txt } = files.find(({ type }) => type === "credit") || {};
 
   // TODO: it would be nice to see the chart at month/week level
   // TODO: I bet you my weekly spending is more predictable
