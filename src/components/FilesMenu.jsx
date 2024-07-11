@@ -4,9 +4,10 @@ import Credit from "../pages/Credit";
 import Dividends from "../pages/Dividends";
 import { FILE_TYPES, FilesContext } from "../utils/common";
 
+// TODO: this belongs in the layout
 export default function FilesMenu() {
   const files = useContext(FilesContext);
-  const [fileIndex, setFileIndex] = useState(files.length === 1 ? 1 : undefined);
+  const [fileIndex, setFileIndex] = useState(files.length === 1 ? 0 : undefined);
 
   // one button per file, so I can upload multiple brokerage files
   const pages = files.map(({ type, txt }, index) => {
@@ -19,7 +20,6 @@ export default function FilesMenu() {
       return () => <Brokerage txt={txt} key={index} />
     }
   });
-
 
   return (
     <>
@@ -34,7 +34,7 @@ export default function FilesMenu() {
           </button>
         ))}
       </div >
-      {files.length > 0 && fileIndex !== undefined && pages[fileIndex]()}
+      {pages.length > 0 && fileIndex !== undefined && pages[fileIndex]()}
     </>
   );
 }

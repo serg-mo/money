@@ -1,20 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  CARD_SORTS,
   DividendContext,
   deDupeCardsByStat,
-  makeCandidates,
-  isCloseToCard,
   isBetterThanCard,
-  isBetterStats,
-  dfs,
-  candidateCombinations,
-  mutateCandidate,
+  isCloseToCard,
+  makeCandidates,
+  mutateCandidate
 } from "../../utils/dividends";
 import CandidatesChart from "./CandidatesChart";
-import CandidateChart from "./CandidateChart";
-import CardStats from "./CardStats";
 import CardDetails from "./CardDetails";
+import CardStats from "./CardStats";
 
 // TODO: I can download dividends CSV from fidelity, instead of my own spreadsheet
 // it contains name, now, and cost, which is all I really need. There is no OK though.
@@ -146,12 +141,12 @@ export default function DividendDash() {
     //   ...prev,
     //   makeCandidates(card.candidate, HOVER_SIZE),
     // ]);
-    setSplitCard(card);
+    // setSplitCard(card);
   };
 
   // TODO: rename to current, goal, and active (split) cards
   return (
-    <div className="h-screen w-3/4 md:w-1/2 p-4 space-y-5 flex flex-col items-center bg-gray-100 rounded-lg shadow-lg">
+    <div className="h-screen p-4 space-y-5 flex flex-col items-center content-start bg-gray-100 rounded-lg shadow-lg">
       <header className="text-center rounded p-2 select-none">
         <CardStats cards={{ current: currentCard, split: splitCard }} />
         <CardDetails cards={{ current: currentCard, split: splitCard }} />

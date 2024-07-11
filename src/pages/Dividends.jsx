@@ -7,7 +7,7 @@ export default function Dividends({ txt }) {
 
   useEffect(() => {
     if (txt && !context) {
-      setContext(parseDividendFile(txt));
+      parseDividendFile(txt).then(setContext); // this one is async
     }
   }, [context, txt]);
 

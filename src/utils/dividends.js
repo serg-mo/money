@@ -1,8 +1,8 @@
+import moment from "moment";
 import { createContext } from "react";
+import regression from "regression";
 import { parseCSV, rowToObjectWithKeys } from "./common";
 export const DividendContext = createContext();
-import moment from "moment";
-import regression from "regression";
 
 export const HEADER_ROW_INDEX = 0;
 export const REQUIRED_COLS = ["symbol", "quantity", "average cost basis"];
@@ -18,7 +18,7 @@ export const CARD_SORTS = {
 
 export async function parseDividendFile(txt) {
   const cells = parseCSV(txt);
-  const headers = cells[0];
+  const headers = cells[0].map((v) => v.toLowerCase()); // must be lowercase
   // console.log({ cells, headers });
 
   const objectify = rowToObjectWithKeys(headers);
