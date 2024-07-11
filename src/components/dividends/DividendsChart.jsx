@@ -11,7 +11,8 @@ import {
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import { fetchFundDividends, mean } from "../../utils/dividends";
+import { mean } from "../../utils/common";
+import { fetchFundDividends } from "../../utils/dividends";
 
 ChartJS.register(
   CategoryScale,
@@ -25,7 +26,7 @@ ChartJS.register(
 defaults.font.family = "Monaco";
 
 // TODO: add avg and next lines
-export default function DividendsChart({ name }) {
+export default function DividendsChart({ name, next }) {
   const [dividends, setDividends] = useState([]);
 
   useEffect(() => {
@@ -56,8 +57,16 @@ export default function DividendsChart({ name }) {
             mode: "horizontal",
             scaleID: "y",
             value: avg,
-            borderColor: "rgb(75, 192, 192)",
-            borderWidth: 2,
+            borderColor: "red",
+            borderWidth: 1,
+          },
+          {
+            type: "line",
+            mode: "horizontal",
+            scaleID: "y",
+            value: next,
+            borderColor: "green",
+            borderWidth: 1,
           },
         ],
       },
@@ -69,8 +78,8 @@ export default function DividendsChart({ name }) {
   const datasets = [{
     label: name, // this dataset is for a specifc symbol
     data: dividends.map(([timestamp, value]) => ({ x: moment(timestamp).format("YYYY-MM-DD"), y: value.toFixed(4) })),
-    borderColor: "#003f5c",
-    backgroundColor: "#58508d",
+    borderColor: "gray",
+    backgroundColor: "gray",
   }];
 
   const data = {

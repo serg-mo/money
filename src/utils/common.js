@@ -57,3 +57,54 @@ export function get_palette(base_color, length) {
   return palette;
 }
 
+export function sum(arr) {
+  return arr.reduce((acc, val) => acc + val, 0);
+}
+
+export function mean(arr) {
+  return sum(arr) / arr.length;
+}
+
+export function singleArrayProduct(arr) {
+  return arr.reduce((acc, val) => acc * val, 1);
+}
+
+export function arrayProduct(...arrays) {
+  const size = arrays[0].length;
+
+  if (!arrays.every((arr) => arr.length === size)) {
+    throw new Error("All arrays must be of the same length");
+  }
+
+  let result = [];
+  for (let i = 0; i < size; i++) {
+    result.push(singleArrayProduct(arrays.map((arr) => arr[i])));
+  }
+  return result;
+}
+
+export function arrayDifference(a, b) {
+  if (a.length !== b.length) {
+    throw new Error("Arrays must be of the same length");
+  }
+
+  return a.map((value, index) => value - b[index]);
+}
+
+export function sumProduct(...arrays) {
+  const size = arrays[0].length;
+
+  if (!arrays.every((arr) => arr.length === size)) {
+    throw new Error("All arrays must be of the same length");
+  }
+
+  let sum = 0;
+  for (let i = 0; i < size; i++) {
+    let product = 1;
+    for (let j = 0; j < arrays.length; j++) {
+      product *= parseFloat(arrays[j][i]);
+    }
+    sum += parseFloat(product.toFixed(32));
+  }
+  return sum;
+}

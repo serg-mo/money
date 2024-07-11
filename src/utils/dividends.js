@@ -1,7 +1,7 @@
 import moment from "moment";
 import { createContext } from "react";
 import regression from "regression";
-import { parseCSV, rowToObjectWithKeys } from "./common";
+import { mean, parseCSV, rowToObjectWithKeys, sum, sumProduct } from "./common";
 export const DividendContext = createContext();
 
 export const HEADER_ROW_INDEX = 0;
@@ -53,54 +53,6 @@ export async function parseDividendFile(txt) {
     getStats: (c) =>
       evaluateCandidate(c, { expenses, dividends, prices, current }),
   };
-}
-
-export function singleArrayProduct(arr) {
-  return arr.reduce((acc, val) => acc * val, 1);
-}
-
-export function arrayProduct(...arrays) {
-  const size = arrays[0].length;
-
-  if (!arrays.every((arr) => arr.length === size)) {
-    throw new Error("All arrays must be of the same length");
-  }
-
-  let result = [];
-  for (let i = 0; i < size; i++) {
-    result.push(singleArrayProduct(arrays.map((arr) => arr[i])));
-  }
-  return result;
-}
-
-export function arrayDifference(a, b) {
-  if (a.length !== b.length) {
-    throw new Error("Arrays must be of the same length");
-  }
-
-  return a.map((value, index) => value - b[index]);
-}
-
-export function arraySum(arr) {
-  return arr.reduce((accumulator, current) => accumulator + current, 0);
-}
-
-export function sumProduct(...arrays) {
-  const size = arrays[0].length;
-
-  if (!arrays.every((arr) => arr.length === size)) {
-    throw new Error("All arrays must be of the same length");
-  }
-
-  let sum = 0;
-  for (let i = 0; i < size; i++) {
-    let product = 1;
-    for (let j = 0; j < arrays.length; j++) {
-      product *= parseFloat(arrays[j][i]);
-    }
-    sum += parseFloat(product.toFixed(32));
-  }
-  return sum;
 }
 
 // assert all values are positive, not originals, and are multiples of 10
@@ -253,14 +205,6 @@ export function dfs(current, best, isBetterThan, prices) {
   return dfsInner(current, best, 0);
 }
 
-export function sum(arr) {
-  return arr.reduce((acc, val) => acc + val, 0);
-}
-
-export function mean(arr) {
-  return sum(arr) / arr.length;
-}
-
 export async function fetchFundStats(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
   const {
@@ -269,11 +213,7 @@ export async function fetchFundStats(symbol) {
     price,
   } = await response.json();
 
-  const oneYearAgo = moment().subtract(1, "years").unix();
-  const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
-
-  const recent = dividends.filter(filterFN)
-
+  const recent = getRecentDividends(dividends)
   const next = getNext(recent).toFixed(4)
   const values = recent.map(([date, amount]) => amount);
 
@@ -302,15 +242,19 @@ export function getNext(values) {
   return y;
 }
 
-export async function fetchFundDividends(symbol, n = 1, unit = "years") {
+export async function fetchFundDividends(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
   const { dividends } = await response.json();
 
-  // exercise date, dividend in dollars
+  return getRecentDividends(dividends);
+}
+
+export function getRecentDividends(values, n = 1, unit = "years") {
   const oneYearAgo = moment().subtract(n, unit).unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
+  // exercise date, dividend in dollars
 
-  return dividends.filter(filterFN).reverse() // most recent first
+  return values.filter(filterFN).reverse() // most recent first
 }
 
 

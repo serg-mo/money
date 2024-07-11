@@ -2,7 +2,8 @@ import { ArcElement, Chart as ChartJS, Tooltip, defaults } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import React, { useContext } from "react";
 import { Doughnut } from "react-chartjs-2";
-import { DividendContext, arrayProduct } from "../../utils/dividends";
+import { arrayProduct } from "../../utils/common";
+import { DividendContext } from "../../utils/dividends";
 
 // https://chartjs-plugin-datalabels.netlify.app/samples/charts/doughnut.html
 ChartJS.register(ArcElement, Tooltip /*ChartDataLabels*/);
