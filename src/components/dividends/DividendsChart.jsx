@@ -1,65 +1,81 @@
 import {
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip,
-    defaults
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+  defaults
 } from "chart.js";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import { fetchFundDividends } from "../../utils/dividends";
+import { fetchFundDividends, mean } from "../../utils/dividends";
 
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
 );
 
 defaults.font.family = "Monaco";
 
 // TODO: add avg and next lines
 export default function DividendsChart({ name }) {
-    const [dividends, setDividends] = useState([]);
+  const [dividends, setDividends] = useState([]);
 
-    useEffect(() => {
-        fetchFundDividends(name).then(setDividends);
-    }, [name]);
+  useEffect(() => {
+    fetchFundDividends(name).then(setDividends);
+  }, [name]);
 
-    if (!dividends.length) {
-        return;
-    }
+  if (!dividends.length) {
+    return;
+  }
 
-    const options = {
-        responsive: true,
-        plugins: {
-            title: {
-                display: true,
-                text: name,
-            },
-            legend: {
-                display: false,
-            },
-        },
-        animation: false,
-    };
+  const values = dividends.map(([timestamp, value]) => value)
+  const avg = mean(values).toFixed(4);
 
-    const datasets = [{
-        label: name, // this dataset is for a specifc symbol
-        data: dividends.map(([timestamp, value]) => ({ x: moment(timestamp).format("YYYY-MM-DD"), y: value.toFixed(4) })),
-        borderColor: "#003f5c",
-        backgroundColor: "#58508d",
-    }];
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: name,
+      },
+      legend: {
+        display: false,
+      },
+      annotation: {
+        annotations: [
+          {
+            type: "line",
+            mode: "horizontal",
+            scaleID: "y",
+            value: avg,
+            borderColor: "rgb(75, 192, 192)",
+            borderWidth: 2,
+          },
+        ],
+      },
 
-    const data = {
-        datasets,
-    };
+    },
+    animation: false,
+  };
 
-    return <Bar options={options} data={data} />;
+  const datasets = [{
+    label: name, // this dataset is for a specifc symbol
+    data: dividends.map(([timestamp, value]) => ({ x: moment(timestamp).format("YYYY-MM-DD"), y: value.toFixed(4) })),
+    borderColor: "#003f5c",
+    backgroundColor: "#58508d",
+  }];
+
+  const data = {
+    datasets
+  };
+
+  return <Bar options={options} data={data} />;
 }

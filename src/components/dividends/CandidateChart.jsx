@@ -1,9 +1,8 @@
-import React, { useContext } from "react";
-import { DividendContext } from "../../utils/dividends";
-import { Chart as ChartJS, ArcElement, Tooltip, defaults } from "chart.js";
-import { Doughnut } from "react-chartjs-2";
+import { ArcElement, Chart as ChartJS, Tooltip, defaults } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { arrayProduct } from "../../utils/dividends";
+import React, { useContext } from "react";
+import { Doughnut } from "react-chartjs-2";
+import { DividendContext, arrayProduct } from "../../utils/dividends";
 
 // https://chartjs-plugin-datalabels.netlify.app/samples/charts/doughnut.html
 ChartJS.register(ArcElement, Tooltip /*ChartDataLabels*/);
@@ -91,12 +90,12 @@ export default function CandidateChart({ current, split }) {
     datasets: [
       {
         label: "current",
-        data: arrayProduct(current.candidate.slice(), prices), // copy the array
+        data: arrayProduct(current.candidate, prices),
         backgroundColor: COLORS,
       },
       {
         label: "split",
-        data: arrayProduct(split.candidate.slice(), prices), // copy the array
+        data: arrayProduct(split.candidate, prices),
         backgroundColor: COLORS,
       },
     ],

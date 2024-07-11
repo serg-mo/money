@@ -272,20 +272,12 @@ export async function fetchFundStats(symbol) {
   const oneYearAgo = moment().subtract(1, "years").unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
 
-  // exercise date, dividend in dollars
-  const indexed = dividends
-    .filter(filterFN)
-    .reverse()
-    .map(([date, amount], index) => [index + 1, amount]);
+  const recent = dividends.filter(filterFN)
 
-  // TODO: tune the predictor + chart the guess
-  //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
-  const options = { order: 3, precision: 3 };
-  const result = regression.linear(indexed, options);
-  const next = result.predict(indexed.length + 1)[1].toFixed(4); // [x, y]
+  const next = getNext(recent).toFixed(4)
+  const values = recent.map(([date, amount]) => amount);
 
-  const values = indexed.map(([x, y]) => y);
-  const last = values[0].toFixed(4); // first y is the most recent dividend
+  const last = values[0].toFixed(4); // most recent first
   const avg = mean(values).toFixed(4);
 
   return {
@@ -294,6 +286,20 @@ export async function fetchFundStats(symbol) {
     expenseRatio,
     yield: sum(values) / price,
   };
+}
+
+export function getNext(values) {
+  // exercise date, dividend in dollars
+  const indexed = values.reverse().map(([date, amount], index) => [index + 1, amount]);
+
+  // TODO: tune the predictor + chart the guess
+  //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
+  const options = { order: 3, precision: 3 };
+  const result = regression.linear(indexed, options);
+
+  const [x, y] = result.predict(indexed.length);
+
+  return y;
 }
 
 export async function fetchFundDividends(symbol, n = 1, unit = "years") {
