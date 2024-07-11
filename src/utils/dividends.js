@@ -34,7 +34,7 @@ export async function parseDividendFile(txt) {
   const basis = values.map((v) => parseFloat(v["average cost basis"]));
   // console.log({ names, current });
 
-  const stats = await Promise.all(names.map(lookupDividends));
+  const stats = await Promise.all(names.map(fetchFundStats));
   // console.log({ stats });
 
   const expenses = stats.map((v) => v.expenseRatio);
@@ -261,7 +261,7 @@ export function mean(arr) {
   return sum(arr) / arr.length;
 }
 
-export async function lookupDividends(symbol) {
+export async function fetchFundStats(symbol) {
   const response = await fetch(`/dividends/${symbol}.json`);
   const {
     dividends,
@@ -295,6 +295,18 @@ export async function lookupDividends(symbol) {
     yield: sum(values) / price,
   };
 }
+
+export async function fetchFundDividends(symbol, n = 1, unit = "years") {
+  const response = await fetch(`/dividends/${symbol}.json`);
+  const { dividends } = await response.json();
+
+  // exercise date, dividend in dollars
+  const oneYearAgo = moment().subtract(n, unit).unix();
+  const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
+
+  return dividends.filter(filterFN).reverse() // most recent first
+}
+
 
 // should be 261
 /*

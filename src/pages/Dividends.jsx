@@ -17,9 +17,7 @@ export default function Dividends({ txt }) {
 
   return (
     <DividendContext.Provider value={context}>
-      <div className="flex flex-col justify-center items-center">
-        <DividendDash />
-      </div>
+      <DividendDash />
     </DividendContext.Provider>
   );
 }

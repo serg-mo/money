@@ -3,7 +3,7 @@ import {
   DividendContext,
   arrayDifference,
   arrayProduct,
-  arraySum,
+  arraySum
 } from "../../utils/dividends";
 import DividendsChart from "./DividendsChart";
 
