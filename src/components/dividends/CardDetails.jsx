@@ -19,7 +19,7 @@ export default function CardDetails({ cards }) {
     cards.current.candidate,
   );
 
-  const costs = arrayProduct(orders, prices).map((cost) => -1 * cost); // negative order means sell, so I get money
+  const net = arrayProduct(orders, prices).map((cost) => -1 * cost); // negative order means sell, so I get money
   const pnl = arrayProduct(orders.map(v => v < 0 ? -v : 0), arrayDifference(prices, basis)); // only count "sell"
 
   return (
@@ -31,7 +31,7 @@ export default function CardDetails({ cards }) {
             <th>Current</th>
             <th>Split</th>
             <th>Order</th>
-            <th>Cost</th>
+            <th>Net</th>
             <th>Price</th>
             <th>Basis</th>
             <th>P&L</th>
@@ -44,7 +44,7 @@ export default function CardDetails({ cards }) {
               <td className="border">{cards.current.candidate[index]}</td>
               <td className="border border-r border-r-8">{cards.split.candidate[index]}</td>
               <td className="border">{orders[index]}</td>
-              <td className="border border-r border-r-8">${costs[index].toFixed()}</td>
+              <td className="border border-r border-r-8">${net[index].toFixed()}</td>
               <td className="border">${prices[index].toFixed(2)}</td>
               <td className="border">${basis[index].toFixed(2)}</td>
               <td className="border">${pnl[index].toFixed()}</td>
@@ -57,7 +57,7 @@ export default function CardDetails({ cards }) {
             <td className="border">${cards.current.stats.monthly}</td>
             <td className="border">${cards.split.stats.monthly}</td>
             <td className="border"></td>
-            <td className="border">${sum(costs).toFixed()}</td>
+            <td className="border">${sum(net).toFixed()}</td>
             <td className="border"></td>
             <td className="border"></td>
             <td className="border">${sum(pnl).toFixed()}</td>

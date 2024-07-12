@@ -10,6 +10,7 @@ import {
 } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
 import { Scatter } from "react-chartjs-2";
+// import { getColorTransparencies } from "../../utils/common";
 
 defaults.font.family = "Monaco";
 
@@ -38,7 +39,7 @@ export default function CandidatesChart({
   onHover,
 }) {
   const getOptions = (x, y) => {
-    const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}`;
+    const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}: ${stats.costAbs}`;
     const getAnnotations = ({ stats }, color) => [
       {
         type: "line",
@@ -64,6 +65,11 @@ export default function CandidatesChart({
 
     return {
       responsive: true,
+      animation: {
+        // https://www.chartjs.org/docs/latest/configuration/animations.html#easing
+        easing: "easeInOutQuad",
+        duration: 500, // milliseconds
+      },
       plugins: {
         title: {
           display: true,
@@ -102,10 +108,8 @@ export default function CandidatesChart({
     // console.log(options);
   };
   // TODO: make the dots look pretty
-  // TODO: maintain a history of bestNew candidates to highlight by filling them in
-  // TODO: consider filtering data here, based on the split
-  // TODO: maybe dedupe here by label
 
+  // TODO: change the color based on cost, getColorTransparencies
   const pointBackgroundColor = ({ dataIndex }) =>
     highlight === dataIndex ? colors.highlight : colors.candidate;
 

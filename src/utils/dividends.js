@@ -64,14 +64,18 @@ export function evaluateCandidate(
   const roi = (monthly * 12) / total; // a year worth of dividends over the total invested
   const ratio = roi / exp; // NOTE: this is what we're trying to maximize
 
+  // TODO: only some orders are executable
   const orders = candidate.map((value, index) => value - current[index]);
-  const cost = sumProduct(orders, prices); // only some orders are executable
+  const cost = -1 * sumProduct(orders, prices);
+  const costAbs = sumProduct(orders.map(Math.abs), prices);
+
   // const pnl = sumProduct(orders.map((v) => (v < 0 ? -v : 0)), prices.map((v, i) => v - basis[i])); // only count "sell"
 
   return {
     total: Math.round(total),
     monthly: Math.round(monthly),
     cost: Math.round(cost), // cost to move current to this candidate
+    costAbs: `${Math.round(costAbs / 1000)}k`, // total of all buys and sells
     exp: parseFloat((100 * exp).toFixed(2)), // percent
     roi: parseFloat((100 * roi).toFixed(2)), // percent
     ratio: parseFloat(ratio.toFixed(2)),

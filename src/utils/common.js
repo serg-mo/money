@@ -47,8 +47,9 @@ export function isMatchingFile(txt, required, headerIndex = 0) {
   return required.every((col) => headers.includes(col))
 }
 
-export function get_palette(base_color, length) {
-  let rgba = base_color.match(/\d+/g);
+export function getColorTransparencies(color, length) {
+  let rgba = color.match(/\d+/g);
+
   let palette = [];
   for (let i = 0; i < length; i++) {
     rgba[rgba.length - 1] = Math.round((100 * (length - i)) / length) / 100; // alpha 1 .. 0
