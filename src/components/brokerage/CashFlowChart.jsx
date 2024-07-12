@@ -1,14 +1,14 @@
-import React from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
-  Title,
+  CategoryScale,
+  Chart as ChartJS,
   Legend,
+  LinearScale,
+  Title,
   Tooltip,
   defaults,
 } from "chart.js";
+import React from "react";
 import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
@@ -23,14 +23,13 @@ ChartJS.register(
 defaults.font.family = "Monaco";
 
 // https://colorkit.co/color-palette-generator
-export const COLORS = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
-
-const columns = [
-  "deposits",
-  "withdrawals",
-  "market change minus fees",
-  "dividends & interest",
-];
+// NOTE: this is a subset of REQUIRED_COLS from src/utils/brokerage.js
+const columnColors = {
+  "deposits": "#003f5c",
+  "withdrawals": "#58508d",
+  "market change minus fees": "#bc5090",
+  "dividends & interest": "#ff6361",
+};
 
 export default function CashFlowChart({ transactions, title }) {
   const options = {
@@ -51,12 +50,12 @@ export default function CashFlowChart({ transactions, title }) {
     animation: false,
   };
 
-  const datasets = columns.map((column, index) => {
+  const datasets = Object.entries(columnColors).map(([name, color]) => {
     return {
-      label: column,
-      data: transactions.map((fields) => fields[column]),
-      borderColor: COLORS[index],
-      backgroundColor: COLORS[index],
+      label: name,
+      data: transactions.map((fields) => fields[name]),
+      borderColor: color,
+      backgroundColor: color,
     };
   });
 
