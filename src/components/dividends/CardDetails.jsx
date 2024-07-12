@@ -24,13 +24,10 @@ export default function CardDetails({ cards }) {
 
   return (
     <>
-      <table className="border-collapse border-gray-900 table-auto m-auto">
+      <table className="border-collapse border-black-1000 table-auto m-auto">
         <thead>
           <tr>
             <th>Name</th>
-            <th>Last</th>
-            <th>Avg</th>
-            <th>Next</th>
             <th>Current</th>
             <th>Split</th>
             <th>Order</th>
@@ -43,14 +40,11 @@ export default function CardDetails({ cards }) {
         <tbody>
           {names.map((name, index) => (
             <tr key={index}>
-              <td className="border"><a href="#" onClick={() => setName(name)} className="hover:underline">{name}</a></td>
-              <td className="border">${dividends[index].last}</td>
-              <td className="border">${dividends[index].avg}</td>
-              <td className="border">${dividends[index].next}</td>
+              <td className="border border-r border-r-8"><a href="#" onClick={() => setName(name)} className="hover:underline">{name}</a></td>
               <td className="border">{cards.current.candidate[index]}</td>
-              <td className="border">{cards.split.candidate[index]}</td>
+              <td className="border border-r border-r-8">{cards.split.candidate[index]}</td>
               <td className="border">{orders[index]}</td>
-              <td className="border">${costs[index].toFixed()}</td>
+              <td className="border border-r border-r-8">${costs[index].toFixed()}</td>
               <td className="border">${prices[index].toFixed(2)}</td>
               <td className="border">${basis[index].toFixed(2)}</td>
               <td className="border">${pnl[index].toFixed()}</td>
@@ -59,9 +53,6 @@ export default function CardDetails({ cards }) {
         </tbody>
         <tfoot>
           <tr>
-            <td className="border"></td>
-            <td className="border"></td>
-            <td className="border"></td>
             <td className="border"></td>
             <td className="border">${cards.current.stats.monthly}</td>
             <td className="border">${cards.split.stats.monthly}</td>

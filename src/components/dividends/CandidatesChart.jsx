@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  LinearScale,
   Title,
   defaults,
 } from "chart.js";
-import { Scatter } from "react-chartjs-2";
 import annotationPlugin from "chartjs-plugin-annotation";
+import { Scatter } from "react-chartjs-2";
 
 defaults.font.family = "Monaco";
 
@@ -105,8 +105,6 @@ export default function CandidatesChart({
   // TODO: maintain a history of bestNew candidates to highlight by filling them in
   // TODO: consider filtering data here, based on the split
   // TODO: maybe dedupe here by label
-  const cashFlowOptions = getOptions("total", "monthly");
-  const ratioOptions = getOptions("exp", "roi");
 
   const pointBackgroundColor = ({ dataIndex }) =>
     highlight === dataIndex ? colors.highlight : colors.candidate;
@@ -127,8 +125,8 @@ export default function CandidatesChart({
   // TODO: color code each point on the scatter chart to show similarity to current
   return (
     <>
-      <Scatter options={cashFlowOptions} data={data} />
-      {/* <Scatter options={ratioOptions} data={data} /> */}
+      <Scatter options={getOptions("total", "monthly")} data={data} />
+      {/* <Scatter options={getOptions("exp", "roi")} data={data} /> */}
     </>
   );
 }
