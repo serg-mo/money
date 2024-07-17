@@ -1,21 +1,20 @@
-import React, { useContext } from "react";
 import { groupBy, sumBy } from "lodash";
+import React from "react";
 import { COLORS } from "../../utils/credit";
 
 import {
-  Chart as ChartJS,
   CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
+  Chart as ChartJS,
   Filler,
   Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
   defaults,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { CreditContext } from "../../utils/credit";
 
 defaults.font.family = "Monaco";
 

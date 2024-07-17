@@ -1,10 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
-import { CreditContext } from "../../utils/credit";
-import { CATEGORIES } from "../../utils/credit";
-import { tensor } from "@tensorflow/tfjs";
-import usePersistedState from "../../utils/usePersistedState";
 import * as KNNClassifier from "@tensorflow-models/knn-classifier";
+import { tensor } from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl"; // this is important
+import React, { useContext, useEffect, useState } from "react";
+import { CATEGORIES, CreditContext } from "../../utils/credit";
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(
@@ -58,7 +56,6 @@ export default function CreditClassifier() {
     setTransactions,
     manualCategories,
     setManualCategories,
-    setTab,
   } = useContext(CreditContext);
   const [classifier, setClassifier] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);

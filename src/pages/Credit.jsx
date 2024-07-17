@@ -2,6 +2,7 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 import CreditClassifier from "../components/credit/CreditClassifier";
 import CreditTransactionsTab from "../components/credit/CreditTransactionsTab";
+import Frame from "../components/Frame";
 import { CreditContext, parseCreditFile } from "../utils/credit";
 import usePersisedState from "../utils/usePersistedState";
 
@@ -55,13 +56,16 @@ export default function Credit({ txt }) {
     return;
   }
 
-  // TODO: maybe Frame goes here?
+
+  const render = (slice) => {
+    return (<CreditTransactionsTab transactions={slice} />);
+  };
+
+
   return (
     <CreditContext.Provider value={context}>
-      <div className="font-mono text-xs">
-        <CreditClassifier />
-        <CreditTransactionsTab />
-      </div>
+      <CreditClassifier />
+      <Frame transactions={transactions} render={render} initialSize={100} />
     </CreditContext.Provider>
   );
 }

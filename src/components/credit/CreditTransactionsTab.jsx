@@ -1,14 +1,13 @@
-import React, { useContext } from "react";
-import Frame from "../Frame";
-import CreditTransactions from "./CreditTransactions";
-import { CreditContext } from "../../utils/credit";
-import CreditChart from "./CreditChart";
 import { groupBy, sumBy } from "lodash";
+import React, { useContext } from "react";
+import { CreditContext } from "../../utils/credit";
 import CategoryTabs from "./CategoryTabs";
+import CreditChart from "./CreditChart";
+import CreditTransactions from "./CreditTransactions";
 
 // TODO: two pies, total and average spending per category
-export default function CreditTransactionsTab() {
-  const { transactions, onCategorize, tab } = useContext(CreditContext);
+export default function CreditTransactionsTab({ transactions }) {
+  const { onCategorize, tab } = useContext(CreditContext);
 
   const categories = groupBy(transactions, (row) => row["category"]);
   const categoryTotals = Object.entries(categories).map(
@@ -25,7 +24,7 @@ export default function CreditTransactionsTab() {
       : transactions;
 
   return (
-    <div className="">
+    <div className="font-mono text-xs">
       <CreditChart transactions={filteredTransactions} />
       <CategoryTabs />
       <CreditTransactions
