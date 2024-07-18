@@ -17,10 +17,9 @@ export default function Credit({ txt }) {
     "manualCategories",
   );
 
-  // TODO: it would be nice to see the chart at month/week level
+  // TODO: it would be nice to see the chart at month/week level + vendor level for groceries
   // TODO: I bet you my weekly spending is more predictable
   // TODO: bring back the arrow key navigation and derive which transactions to show
-  // TODO: see src/components/Frame.jsx
   useEffect(() => {
     if (txt && !transactions.length) {
       const cutoff = moment().subtract(12, "months").format("YYYY-MM-DD");
@@ -56,11 +55,7 @@ export default function Credit({ txt }) {
     return;
   }
 
-
-  const render = (slice) => {
-    return (<CreditTransactionsTab transactions={slice} />);
-  };
-
+  const render = (slice) => (<CreditTransactionsTab transactions={slice} />)
 
   return (
     <CreditContext.Provider value={context}>

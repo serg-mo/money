@@ -1,19 +1,18 @@
+import moment from "moment";
 import React, { useContext } from "react";
 import {
-  CATEGORIES,
-  COLORS,
+  CreditContext,
   formatAmount,
   formatConfidence,
-  getOpacity,
+  getOpacity
 } from "../../utils/credit";
-import moment from "moment";
 import CategoryPicker from "./CategoryPicker";
-import { CreditContext } from "../../utils/credit";
 
 // TODO: maybe show categories vertically + animate their appearance disappearance
 export default function Transaction({ onClick, ...t }) {
-  const confidence = t["confidences"][t["category"]] ?? 0;
   const { manualCategories } = useContext(CreditContext);
+  const isActual = JSON.stringify(t["vector"]) in manualCategories;
+  const confidence = isActual ? 1 : (t["confidences"][t["category"]] ?? 0); // actual overwrites predicted
 
   const title = Object.entries(t["confidences"])
     .map(([key, value]) => `${key}: ${formatConfidence(value)}`)
@@ -36,14 +35,7 @@ export default function Transaction({ onClick, ...t }) {
       </td>
       <td className="px-2 py-4 text-center">${formatAmount(t["amount"])}</td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`} title={title}>
-        <div>
-          {t["category"]} ({formatConfidence(confidence)})
-        </div>
-        <div>
-          {manualCategories[JSON.stringify(t["vector"])]
-            ? "Actual"
-            : "Predicted"}
-        </div>
+        {t["category"]}
       </td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`}>
         {formatConfidence(confidence)}

@@ -14,8 +14,9 @@ export const REQUIRED_COLS = [
 export function getFileName(txt) {
   const lines = parseCSV(txt);
   const header = lines[1].map((s) => s.toLowerCase());
+  const prefix = header[0].split(": ")[1].slice(0, 1)
 
-  return `Brokerage: *${header[0].slice(-4)}`; // last digits
+  return prefix == 'x' ? "Brokerage" : "Checking"; // z for checking
 }
 
 export function parseBrokerageFile(txt) {

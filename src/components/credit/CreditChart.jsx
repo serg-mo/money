@@ -111,7 +111,11 @@ export default function CreditChart({ transactions }) {
     },
   );
   // TODO: sort by most recent's month
-  categoryTotals.sort((a, b) => b.total - a.total); // desc
+  // categoryTotals.sort((a, b) => b.total - a.total); // desc
+
+  // show datasets in order of COLORS
+  const COLORS_ORDER = Object.keys(COLORS);
+  categoryTotals.sort((a, b) => COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category));
 
   const datasets = categoryTotals.map(
     ({ category, avg, categoryTransactions }) => {
@@ -140,9 +144,7 @@ export default function CreditChart({ transactions }) {
     },
   );
 
-  const data = {
-    datasets,
-  };
+  const data = { datasets };
   // console.log(data);
 
   return <Line options={options} data={data} />;
