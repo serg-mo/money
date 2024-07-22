@@ -1,10 +1,10 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 export const NAV_LINKS = [
-  { path: "/dividends", label: "Dividends" },
-  { path: "/brokerage", label: "Brokerage" },
-  { path: "/credit", label: "Credit" },
+  { path: '/dividends', label: 'Dividends' },
+  { path: '/brokerage', label: 'Brokerage' },
+  { path: '/credit', label: 'Credit' },
 ];
 
 function NavEdge({ children, className }) {
@@ -19,7 +19,7 @@ function NavEdge({ children, className }) {
 
 function NavLink({ path, label }) {
   const location = useLocation();
-  const style = `w-full leading-10 text-lg ${location.pathname === path ? "font-bold" : ""}`;
+  const style = `w-full leading-10 text-lg ${location.pathname === path ? 'font-bold' : ''}`;
 
   return (
     <li key={path} className="w-full px-3 hover:bg-white">

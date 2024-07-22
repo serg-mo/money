@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
-import CreditTransaction from "./CreditTransaction";
-import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import React, { useState, useMemo } from 'react';
+import CreditTransaction from './CreditTransaction';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 
 export default function CreditTransactions({
   title,
@@ -8,25 +8,25 @@ export default function CreditTransactions({
   onCategorize,
 }) {
   const columnsWidths = {
-    name: "",
-    location: "w-80",
-    date: "w-24",
-    amount: "w-12",
-    category: "w-40",
-    confidence: "w-12",
+    name: '',
+    location: 'w-80',
+    date: 'w-24',
+    amount: 'w-12',
+    category: 'w-40',
+    confidence: 'w-12',
   };
 
   const [sortConfig, setSortConfig] = useState({
-    key: "date",
-    direction: "desc",
+    key: 'date',
+    direction: 'desc',
   });
 
   const sortByKey = (key, direction) => (a, b) => {
     if (a[key] < b[key]) {
-      return direction === "asc" ? -1 : 1;
+      return direction === 'asc' ? -1 : 1;
     }
     if (a[key] > b[key]) {
-      return direction === "asc" ? 1 : -1;
+      return direction === 'asc' ? 1 : -1;
     }
     return 0;
   };
@@ -34,14 +34,14 @@ export default function CreditTransactions({
   const sortedTransactions = useMemo(() => {
     if (sortConfig.key) {
       return [...transactions].sort(
-        sortByKey(sortConfig.key, sortConfig.direction),
+        sortByKey(sortConfig.key, sortConfig.direction)
       );
     }
     return transactions;
   }, [transactions, sortConfig]);
 
   const getChevron = (direction) =>
-    direction === "asc" ? (
+    direction === 'asc' ? (
       <ChevronUpIcon className="inline w-4 h-4 ml-1" />
     ) : (
       <ChevronDownIcon className="inline w-4 h-4 ml-1" />
@@ -56,7 +56,7 @@ export default function CreditTransactions({
       <thead>
         <tr>
           <th colSpan={5} className="uppercase">
-            {title ?? "All"} ({transactions.length})
+            {title ?? 'All'} ({transactions.length})
           </th>
         </tr>
         <tr>
@@ -67,7 +67,7 @@ export default function CreditTransactions({
               onClick={() =>
                 setSortConfig({
                   key: column,
-                  direction: sortConfig.direction === "asc" ? "desc" : "asc", // toggle
+                  direction: sortConfig.direction === 'asc' ? 'desc' : 'asc', // toggle
                 })
               }
             >

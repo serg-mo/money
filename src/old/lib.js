@@ -2,31 +2,31 @@
 // https://colorhexa.com
 
 const colors = {
-  Financial: "rgba(23,130,171,1)",
-  Home: "rgba(19,100,134,1)",
-  "Food & Drink": "rgba(15,72,101,1)",
-  Transportation: "rgba(13,45,67,1)",
-  "Health & Medical": "rgba(235,85,25,1)",
-  Uncategorized: "rgba(206,56,24,1)",
-  Personal: "rgba(230,154,43,1)",
-  Culture: "rgba(233,120,34,1)",
-  "Gifts & Donations": "rgba(229,191,53,1)",
-  "Sports & Fitness": "rgba(77,152,128,1)",
-  Education: "rgba(145,172,89,1)",
-  Fees: "rgba(176,27,22,1)",
+  Financial: 'rgba(23,130,171,1)',
+  Home: 'rgba(19,100,134,1)',
+  'Food & Drink': 'rgba(15,72,101,1)',
+  Transportation: 'rgba(13,45,67,1)',
+  'Health & Medical': 'rgba(235,85,25,1)',
+  Uncategorized: 'rgba(206,56,24,1)',
+  Personal: 'rgba(230,154,43,1)',
+  Culture: 'rgba(233,120,34,1)',
+  'Gifts & Donations': 'rgba(229,191,53,1)',
+  'Sports & Fitness': 'rgba(77,152,128,1)',
+  Education: 'rgba(145,172,89,1)',
+  Fees: 'rgba(176,27,22,1)',
 
-  default: "rgba(200,200,200,1)",
+  default: 'rgba(200,200,200,1)',
 };
 
 Chart.defaults.global.elements.arc.borderWidth = 0;
-Chart.defaults.global.elements.arc.borderColor = "rgba(0, 0, 0, 0)";
+Chart.defaults.global.elements.arc.borderColor = 'rgba(0, 0, 0, 0)';
 Chart.defaults.global.elements.point.borderWidth = 0;
-Chart.defaults.global.elements.point.backgroundColor = "rgba(0, 0, 0, 0)";
-Chart.defaults.global.tooltips.titleFontFamily = "Monaco"; // fixed space for columns
-Chart.defaults.global.tooltips.bodyFontFamily = "Monaco";
-Chart.defaults.global.tooltips.footerFontFamily = "Monaco";
-Chart.defaults.global.tooltips.footerFontStyle = "normal";
-Chart.defaults.global.defaultFontFamily = "Raleway"; // sans-serif;
+Chart.defaults.global.elements.point.backgroundColor = 'rgba(0, 0, 0, 0)';
+Chart.defaults.global.tooltips.titleFontFamily = 'Monaco'; // fixed space for columns
+Chart.defaults.global.tooltips.bodyFontFamily = 'Monaco';
+Chart.defaults.global.tooltips.footerFontFamily = 'Monaco';
+Chart.defaults.global.tooltips.footerFontStyle = 'normal';
+Chart.defaults.global.defaultFontFamily = 'Raleway'; // sans-serif;
 Chart.defaults.global.defaultFontSize = 12;
 
 function make_bar(destination, summary, label) {
@@ -52,7 +52,7 @@ function make_bar(destination, summary, label) {
   // data.datasets.map((v) => { v.backgroundColor = colors[0]; }); // TODO: colors[0]
   add_average(data.datasets);
 
-  return draw(destination, "bar", data, options);
+  return draw(destination, 'bar', data, options);
 }
 
 function make_line(destination, summary, label) {
@@ -75,21 +75,21 @@ function make_line(destination, summary, label) {
       line: {
         tension: 0.2, // bezier curve
         borderWidth: 0,
-        borderColor: "rgba(0, 0, 0, 0)",
+        borderColor: 'rgba(0, 0, 0, 0)',
       },
     },
   };
   //console.log("make_line()", summary, datasets, labels)
 
-  return draw(destination, "line", make_data_single(summary, label), options);
+  return draw(destination, 'line', make_data_single(summary, label), options);
 }
 
 function draw(canvas, type, data, options) {
   // http://www.chartjs.org/docs/latest/developers/api.html
   // object properties are copied by reference, so only touch tooltips here
   options.tooltips = {
-    mode: "index",
-    intersect: ["bar", "pie"].includes(type),
+    mode: 'index',
+    intersect: ['bar', 'pie'].includes(type),
     callbacks: {
       title: title_callback,
       label: label_callback,
@@ -105,7 +105,7 @@ function draw(canvas, type, data, options) {
     },
   };
 
-  let context = canvas.getContext("2d");
+  let context = canvas.getContext('2d');
   let config = {
     type,
     data,
@@ -117,44 +117,44 @@ function draw(canvas, type, data, options) {
 }
 
 function make_table(table, data) {
-  table.html(""); // fresh copy
+  table.html(''); // fresh copy
 
   let columns = Object.keys(data[0]);
   let sum = 0;
   let avg = 0;
 
-  table.append("<tr><th>" + columns.join("</th><th>") + "</th></tr>");
+  table.append('<tr><th>' + columns.join('</th><th>') + '</th></tr>');
 
   data.forEach(function (row) {
     let cells = columns.map((c) => row[c]); // values for known columns
     sum += row[columns[columns.length - 1]]; // last column is the amount
 
-    table.append("<tr><td>" + cells.join("</td><td>") + "</td></tr>");
+    table.append('<tr><td>' + cells.join('</td><td>') + '</td></tr>');
   });
 
   // empty rows of the same length
-  let sum_row = columns.map(() => "");
-  let avg_row = columns.map(() => "");
+  let sum_row = columns.map(() => '');
+  let avg_row = columns.map(() => '');
 
-  sum_row[0] = "SUM";
+  sum_row[0] = 'SUM';
   sum_row[sum_row.length - 1] = Math.round(sum).toLocaleString();
 
-  avg_row[0] = "AVG";
+  avg_row[0] = 'AVG';
   avg_row[avg_row.length - 1] = Math.round(sum / data.length).toLocaleString();
 
   table.append(
-    "<tr>" + sum_row.map((v) => `<th>${v}</th>`).join() + "</th></tr>",
+    '<tr>' + sum_row.map((v) => `<th>${v}</th>`).join() + '</th></tr>'
   );
   table.append(
-    "<tr>" + avg_row.map((v) => `<th>${v}</th>`).join() + "</th></tr>",
+    '<tr>' + avg_row.map((v) => `<th>${v}</th>`).join() + '</th></tr>'
   );
 }
 
 function add_average(datasets, index = 0) {
   let avg = {
-    label: "Average",
-    backgroundColor: "#000000",
-    type: "line",
+    label: 'Average',
+    backgroundColor: '#000000',
+    type: 'line',
     fill: false,
     data: [],
   };
@@ -178,14 +178,14 @@ function ticks_callback(v) {
 function title_callback(items, data) {
   // show the name of the dataset if available
   if (items.length == 0) {
-    return "";
+    return '';
   } else {
-    return data.labels[items[0].index] || ""; // data.labels[items[0].index];
+    return data.labels[items[0].index] || ''; // data.labels[items[0].index];
   }
 }
 
 function label_callback(item, data) {
-  let category = data.labels[item.index] || "";
+  let category = data.labels[item.index] || '';
   let dataset = data.datasets[item.datasetIndex].label;
   let value = data.datasets[item.datasetIndex].data[item.index];
   //console.log("label_callback()", item, data);
@@ -199,20 +199,20 @@ function label_callback(item, data) {
     parts[0] = dataset;
     sum = data.datasets.reduce(
       (carry, v) => carry + (v.hidden ? 0 : v.data[item.index]),
-      0,
+      0
     ); // visible datasets only
   } else {
     parts[0] = category;
     sum = data.datasets[0].data.reduce((carry, v) => carry + v, 0);
   }
-  parts[0] = parts[0].padEnd(25, " ");
+  parts[0] = parts[0].padEnd(25, ' ');
 
   parts.push(
-    Math.round(value).toLocaleString().padEnd(12, " "),
-    Math.round((100 * value) / sum) + "%",
+    Math.round(value).toLocaleString().padEnd(12, ' '),
+    Math.round((100 * value) / sum) + '%'
   );
 
-  return parts.join("");
+  return parts.join('');
 }
 
 function footer_callback_sum(items, data) {
@@ -233,7 +233,7 @@ function footer_callback_sum(items, data) {
     // add this column across all datasets
     total = items.reduce(
       (carry, v) => carry + data.datasets[v.datasetIndex].data[v.index],
-      0,
+      0
     );
     visible = total; // TODO: this should be different
   }
@@ -246,9 +246,9 @@ function footer_callback_sum(items, data) {
 
   // there is no legend color box, which takes up two spaces
   return (
-    " ".repeat(27) +
+    ' '.repeat(27) +
     `TOTAL       ${total.toLocaleString()}\n` +
-    " ".repeat(27) +
+    ' '.repeat(27) +
     `VISIBLE     ${visible.toLocaleString()}`
   );
 }
@@ -271,13 +271,13 @@ function footer_callback_avg(items, data) {
 
   // there is no legend color box, which takes up two spaces
   return (
-    "AVG ".padStart(27, " ") + Math.round(sum / items.length).toLocaleString()
+    'AVG '.padStart(27, ' ') + Math.round(sum / items.length).toLocaleString()
   );
 }
 
 // TODO: pass colors here
 function make_data(summary, labels) {
-  if (typeof labels == "string") {
+  if (typeof labels == 'string') {
     return make_data_single(summary, labels);
   } else {
     return make_data_multiple(summary, labels);
@@ -288,7 +288,7 @@ function make_data_single(summary, label) {
   let length = Object.values(summary).length;
   let keys = Object.keys(summary);
   let data = Object.values(summary);
-  let backgroundColor = keys.map((key) => colors[key] || colors["default"]);
+  let backgroundColor = keys.map((key) => colors[key] || colors['default']);
 
   return {
     labels: keys,
@@ -312,7 +312,7 @@ function make_data_multiple(summary, labels) {
     datasets.push({
       label: dimension,
       data: labels.map((label) => summary[dimension][label] || 0),
-      backgroundColor: colors[dimension] || colors["default"],
+      backgroundColor: colors[dimension] || colors['default'],
     });
   }
 
@@ -342,14 +342,14 @@ function sort_summary(summary, init = null) {
   return arr.reduce(func, {});
 }
 
-function single_reducer(group, aggregate = "amount") {
+function single_reducer(group, aggregate = 'amount') {
   return (sum, v) => {
     sum[v[group]] = (sum[v[group]] || 0) + v[aggregate];
     return sum;
   };
 }
 
-function double_reducer(group_a, group_b, aggregate = "amount") {
+function double_reducer(group_a, group_b, aggregate = 'amount') {
   return (sum, val) => {
     sum[val[group_a]] = sum[val[group_a]] || {};
     sum[val[group_a]][val[group_b]] =

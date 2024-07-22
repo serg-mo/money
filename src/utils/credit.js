@@ -5,8 +5,8 @@
 
 // TODO: add typescript
 // TODO: write unit tests for all of these
-import { createContext } from "react";
-import { parseCSV } from "./common";
+import { createContext } from 'react';
+import { parseCSV } from './common';
 export const CreditContext = createContext();
 
 // TODO: ideally there would be at least one transaction per category per month
@@ -15,33 +15,32 @@ export const CreditContext = createContext();
 
 // NOTE: order matters here
 export const CATEGORIES = {
-  CAR: "CAR",
-  GROCERY: "GROCERY",
-  HEALTH: "HEALTH", // includes insurance
-  OTHER: "OTHER", // includes gifts
-  PET: "PET",
-  RESTAURANT: "RESTAURANT",
-  SHOPPING: "SHOPPING",
-  TRAVEL: "TRAVEL", // includes taxi, flight, hotel, car, and activities
-  UNCLASSIFIED: "UNCLASSIFIED",
-  UTILITIES: "UTILITIES", // includes subscriptions, gym
+  CAR: 'CAR',
+  GROCERY: 'GROCERY',
+  HEALTH: 'HEALTH', // includes insurance
+  OTHER: 'OTHER', // includes gifts
+  PET: 'PET',
+  RESTAURANT: 'RESTAURANT',
+  SHOPPING: 'SHOPPING',
+  TRAVEL: 'TRAVEL', // includes taxi, flight, hotel, car, and activities
+  UNCLASSIFIED: 'UNCLASSIFIED',
+  UTILITIES: 'UTILITIES', // includes subscriptions, gym
 };
 
-// datasets appear in this order
+// stacked chart datasets appear in this order
 export const COLORS = {
-  [CATEGORIES.GROCERY]: "rgb(7, 42, 200)", // #072ac8
-  [CATEGORIES.UTILITIES]: "rgb(30, 150, 252)", // #1e96fc
-  [CATEGORIES.HEALTH]: "rgb(96, 182, 251)", // #60b6fb
+  [CATEGORIES.GROCERY]: 'rgb(3, 4, 94)', // #03045e
+  [CATEGORIES.UTILITIES]: 'rgb(0, 119, 182)', // #0077b6
+  [CATEGORIES.HEALTH]: 'rgb(0, 180, 216)', // #00b4d8
+  [CATEGORIES.PET]: 'rgb(144, 224, 239)', // #90e0ef
+  [CATEGORIES.CAR]: 'rgb(202, 240, 248)', // #caf0f8
 
-  [CATEGORIES.CAR]: "rgb(111, 70, 166)", // #6f46a6
-  [CATEGORIES.PET]: "rgb(81, 31, 115)", // #511f73
+  [CATEGORIES.RESTAURANT]: 'rgb(255, 204, 0)', // #ffcc00
+  [CATEGORIES.SHOPPING]: 'rgb(255, 102, 0)', // #ff6600
+  [CATEGORIES.TRAVEL]: 'rgb(255, 153, 0)', // #ff9900
 
-  [CATEGORIES.SHOPPING]: "rgb(255, 102, 0)", // #ff6600
-  [CATEGORIES.TRAVEL]: "rgb(255, 153, 0)", // #ff9900
-  [CATEGORIES.RESTAURANT]: "rgb(255, 204, 0)", // #ffcc00
-
-  [CATEGORIES.OTHER]: "rgb(142, 142, 142)", // #8e8e8e
-  [CATEGORIES.UNCLASSIFIED]: "rgb(85, 85, 85)", // #555555
+  [CATEGORIES.OTHER]: 'rgb(142, 142, 142)', // #8e8e8e
+  [CATEGORIES.UNCLASSIFIED]: 'rgb(85, 85, 85)', // #555555
 };
 
 // TODO: make a constants file
@@ -49,7 +48,7 @@ const MIN_NAME_LENGTH = 23;
 const MAX_NAME_LENGTH = 40;
 
 export const HEADER_ROW_INDEX = 0;
-export const REQUIRED_COLS = ["date", "transaction", "name", "memo", "amount"];
+export const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
 
 export function getCategory(name, rules) {
   // NOTE: name has a structure: description, city/phone/domain, state
@@ -57,7 +56,7 @@ export function getCategory(name, rules) {
 
   // given a name, find a rule with a matching pattern, i.e., name includes pattern
   const match = Object.entries(rules).find(([pattern, category]) =>
-    name.includes(pattern),
+    name.includes(pattern)
   );
 
   // rules is a name => category mapping
@@ -86,19 +85,19 @@ export function parseCreditFile(txt) {
   // convert each line from an array of strings into an object, where keys are headers
   return tail.map((values) => {
     const obj = Object.fromEntries(
-      headers.map((header, index) => [header, values[index]]),
+      headers.map((header, index) => [header, values[index]])
     );
 
     const normalizedName = normalizeName(
-      obj["name"].substring(0, MIN_NAME_LENGTH),
+      obj['name'].substring(0, MIN_NAME_LENGTH)
     );
 
     return {
       ...obj,
-      key: obj["memo"],
-      amount: parseFloat(obj["amount"]),
+      key: obj['memo'],
+      amount: parseFloat(obj['amount']),
       category: CATEGORIES.UNCLASSIFIED,
-      location: obj["name"].substring(MIN_NAME_LENGTH).trim(),
+      location: obj['name'].substring(MIN_NAME_LENGTH).trim(),
       normalizedName: normalizedName,
       vector: nameToVector(normalizedName),
       confidences: {},
@@ -121,44 +120,44 @@ export function normalizeName(name) {
     /SQ\ \*?/i,
   ];
   for (const prefix of prefixes) {
-    name = name.replace(prefix, "");
+    name = name.replace(prefix, '');
   }
 
   // TODO: consider stripping anything but letters, e.g., numbers and punctuation
-  name = name.replace(/\*\S+$/, ""); // trailing star + nonspace sequence e.g., AMZN Mktp US*DC1M32GX3
-  name = name.replace(/#\d+.+$/, ""); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
-  name = name.replace(/\s\s\S+$/, ""); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
-  name = name.replace(/\d{3,}$/, ""); // trailing digits, e.g., SHELL OIL 57444585400
-  name = name.replace(/\*RECUR.+$/, ""); // e.g., GEICO *RECURING PMTS
-  name = name.replace(/LYFT\s+\*.+$/, "LYFT"); // e.g., LYFT *2 RIDES 09-20
-  name = name.replace(/AMZN MKTP US\*.+$/, "AMZN MKTP US"); // e.g., AMZN MKTP US*HT4P35MN2
-  name = name.replace(/AMAZON.COM\*.+$/, "AMAZON.COM"); // e.g., AMAZON.COM*H058W0GR0
+  name = name.replace(/\*\S+$/, ''); // trailing star + nonspace sequence e.g., AMZN Mktp US*DC1M32GX3
+  name = name.replace(/#\d+.+$/, ''); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
+  name = name.replace(/\s\s\S+$/, ''); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
+  name = name.replace(/\d{3,}$/, ''); // trailing digits, e.g., SHELL OIL 57444585400
+  name = name.replace(/\*RECUR.+$/, ''); // e.g., GEICO *RECURING PMTS
+  name = name.replace(/LYFT\s+\*.+$/, 'LYFT'); // e.g., LYFT *2 RIDES 09-20
+  name = name.replace(/AMZN MKTP US\*.+$/, 'AMZN MKTP US'); // e.g., AMZN MKTP US*HT4P35MN2
+  name = name.replace(/AMAZON.COM\*.+$/, 'AMAZON.COM'); // e.g., AMAZON.COM*H058W0GR0
 
   // all must be the same length, see parseName()
-  return name.trim().padEnd(MIN_NAME_LENGTH, " ");
+  return name.trim().padEnd(MIN_NAME_LENGTH, ' ');
 }
 //console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
 //console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
 
 export function nameToVector(name) {
   // normalize, then convert each charater into it's ASCII code equivalent
-  return name.split("").map((chr) => chr.charCodeAt(0));
+  return name.split('').map((chr) => chr.charCodeAt(0));
 }
 
-console.assert(nameToVector("A"), [65]);
-console.assert(nameToVector("AB"), [65, 66]);
-console.assert(nameToVector("ABC"), [65, 66, 67]);
+console.assert(nameToVector('A'), [65]);
+console.assert(nameToVector('AB'), [65, 66]);
+console.assert(nameToVector('ABC'), [65, 66, 67]);
 
 // given a list of strings, return the longest common prefix (for rule pruning)
 function getLongestCommonPrefix(names) {
   if (names.length === 0) {
-    return "";
+    return '';
   }
 
   // smallest of the available names
   let minLength = Math.min(...names.map((name) => name.length));
 
-  let prefix = "";
+  let prefix = '';
   for (let i = 0; i < minLength; i++) {
     const char = names[0][i]; // i-th character from the first name
     if (names.every((str) => str[i] === char)) {
@@ -191,7 +190,7 @@ export function formatConfidence(value) {
 }
 
 export function getOpacity(value) {
-  const opacities = ["opacity-25", "opacity-50", "opacity-75", "opacity-100"];
+  const opacities = ['opacity-25', 'opacity-50', 'opacity-75', 'opacity-100'];
 
   // 0..1 => 0..last index
   const scaled = Math.floor(value * (opacities.length - 1));

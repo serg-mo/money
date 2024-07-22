@@ -1,6 +1,6 @@
-import React from "react";
-import moment from "moment";
-import CreditTransactions from "./CreditTransactions";
+import React from 'react';
+import moment from 'moment';
+import CreditTransactions from './CreditTransactions';
 
 function isMonthly(transactions) {
   if (transactions.length <= 2) {
@@ -8,14 +8,14 @@ function isMonthly(transactions) {
   }
 
   const months = transactions.map((row) =>
-    moment(row["date"]).format("YYYY-MM"),
+    moment(row['date']).format('YYYY-MM')
   );
   const [first, last] = [months[0], months[months.length - 1]];
 
   const expected = [];
   for (let i = moment(first); i <= moment(last); ) {
-    expected.push(i.format("YYYY-MM"));
-    i = i.add(1, "months");
+    expected.push(i.format('YYYY-MM'));
+    i = i.add(1, 'months');
   }
 
   // NOTE: comparing distance between first and last to count is not reliable
@@ -28,7 +28,7 @@ function isMonthly(transactions) {
 export default function RecurringCharges({ transactions }) {
   // name => transactions
   const summary = transactions.reduce((obj, transaction) => {
-    const group = transaction["normalizedName"]; // TODO: parse name here
+    const group = transaction['normalizedName']; // TODO: parse name here
     obj[group] = [...(obj[group] || []), transaction];
     return obj;
   }, {});

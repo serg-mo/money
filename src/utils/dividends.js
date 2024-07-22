@@ -1,11 +1,11 @@
-import moment from "moment";
-import { createContext } from "react";
-import regression from "regression";
-import { mean, parseCSV, rowToObjectWithKeys, sum, sumProduct } from "./common";
+import moment from 'moment';
+import { createContext } from 'react';
+import regression from 'regression';
+import { mean, parseCSV, rowToObjectWithKeys, sum, sumProduct } from './common';
 export const DividendContext = createContext();
 
 export const HEADER_ROW_INDEX = 0;
-export const REQUIRED_COLS = ["symbol", "quantity", "average cost basis"];
+export const REQUIRED_COLS = ['symbol', 'quantity', 'average cost basis'];
 
 // NOTE: this only works with a specific shape
 export const CARD_SORTS = {
@@ -26,12 +26,12 @@ export async function parseDividendFile(txt) {
   const values = cells
     .slice(1, 13)
     .map(objectify)
-    .filter((v) => !!v["quantity"] && v["symbol"] !== "FZROX"); // ignore header/footer
+    .filter((v) => !!v['quantity'] && v['symbol'] !== 'FZROX'); // ignore header/footer
   // console.log({ values });
 
-  const names = values.map((v) => v["symbol"]);
-  const current = values.map((v) => parseInt(v["quantity"]));
-  const basis = values.map((v) => parseFloat(v["average cost basis"]));
+  const names = values.map((v) => v['symbol']);
+  const current = values.map((v) => parseInt(v['quantity']));
+  const basis = values.map((v) => parseFloat(v['average cost basis']));
   // console.log({ names, current });
 
   const stats = await Promise.all(names.map(fetchFundStats));
@@ -50,16 +50,20 @@ export async function parseDividendFile(txt) {
     current,
     goalTotal: 45_000, // see dividends model
     goalMonthly: 355, // see dividends model
-    getStats: (c) => evaluateCandidate(c, { expenses, dividends, prices, current, basis }),
+    getStats: (c) =>
+      evaluateCandidate(c, { expenses, dividends, prices, current, basis }),
   };
 }
 
 export function evaluateCandidate(
   candidate,
-  { expenses, dividends, prices, current, basis },
+  { expenses, dividends, prices, current, basis }
 ) {
   const total = sumProduct(candidate, prices); // total value of the portfolio
-  const monthly = sumProduct(candidate, dividends.map((d) => d.next)); // last, avg, next
+  const monthly = sumProduct(
+    candidate,
+    dividends.map((d) => d.next)
+  ); // last, avg, next
   const exp = sumProduct(candidate, prices, expenses) / total;
   const roi = (monthly * 12) / total; // a year worth of dividends over the total invested
   const ratio = roi / exp; // NOTE: this is what we're trying to maximize
@@ -95,7 +99,6 @@ console.log(
 );
 */
 
-
 // assert all values are positive, not originals, and are multiples of N
 // console.log(mutateCandidate([300, 50, 70, 80, 300, 220, 210, 90, 90, 70]));
 export function mutateCandidate(candidate, jitter, multiple = 1) {
@@ -123,7 +126,6 @@ export function multipleOfN(value, n) {
   return Math.round(value / n) * n;
 }
 
-
 export function mutateCandidates(src, size, jitter) {
   let candidates = [];
   for (let i = 0; i < size; i++) {
@@ -142,7 +144,7 @@ export function singleCandidateCombinations(candidate, variants) {
       const newCandidate = candidate.slice(); // copy
       newCandidate[index] += variant;
       return newCandidate;
-    }),
+    })
   );
 }
 
@@ -170,25 +172,24 @@ export function getPercentDistanceOnStat(a, b, stat) {
 function isCloseStats(a, b, totalMargin = 0, monthlyMargin = 0) {
   // either total OR monthly are within unit margin
   return (
-    Math.abs(getUnitDistanceOnStat(a, b, "total")) < totalMargin ||
-    Math.abs(getUnitDistanceOnStat(a, b, "monthly")) < monthlyMargin
+    Math.abs(getUnitDistanceOnStat(a, b, 'total')) < totalMargin ||
+    Math.abs(getUnitDistanceOnStat(a, b, 'monthly')) < monthlyMargin
   );
 }
 
 function isCloserStats(a, b, totalMargin = 0, monthlyMargin = 0) {
   // either total AND monthly are within unit margin
   return (
-    Math.abs(getUnitDistanceOnStat(a, b, "total")) < totalMargin &&
-    Math.abs(getUnitDistanceOnStat(a, b, "monthly")) < monthlyMargin
+    Math.abs(getUnitDistanceOnStat(a, b, 'total')) < totalMargin &&
+    Math.abs(getUnitDistanceOnStat(a, b, 'monthly')) < monthlyMargin
   );
 }
-
 
 export function isBetterStats(a, b) {
   // both less total AND more monthly
   return (
-    getUnitDistanceOnStat(a, b, "total") < 0 &&
-    getUnitDistanceOnStat(a, b, "monthly") > 0
+    getUnitDistanceOnStat(a, b, 'total') < 0 &&
+    getUnitDistanceOnStat(a, b, 'monthly') > 0
   );
 }
 
@@ -199,7 +200,6 @@ export function isCloseToCard(focusCard, totalMargin, monthlyMargin) {
 export function isCloserToCard(focusCard, totalMargin, monthlyMargin) {
   return (card) => isCloserStats(card, focusCard, totalMargin, monthlyMargin);
 }
-
 
 export function isBetterThanCard(focusCard) {
   return (card) => isBetterStats(card, focusCard);
@@ -239,8 +239,8 @@ export async function fetchFundStats(symbol) {
     price,
   } = await response.json();
 
-  const recent = getRecentDividends(dividends)
-  const next = getNext(recent).toFixed(4)
+  const recent = getRecentDividends(dividends);
+  const next = getNext(recent).toFixed(4);
   const values = recent.map(([date, amount]) => amount);
 
   const last = values[0].toFixed(4); // most recent first
@@ -256,7 +256,9 @@ export async function fetchFundStats(symbol) {
 
 export function getNext(values) {
   // exercise date, dividend in dollars
-  const indexed = values.reverse().map(([date, amount], index) => [index + 1, amount]);
+  const indexed = values
+    .reverse()
+    .map(([date, amount], index) => [index + 1, amount]);
 
   // TODO: tune the predictor + chart the guess
   //'linear', 'exponential', 'logarithmic', 'power', 'polynomial',
@@ -275,14 +277,13 @@ export async function fetchFundDividends(symbol) {
   return getRecentDividends(dividends);
 }
 
-export function getRecentDividends(values, n = 1, unit = "years") {
+export function getRecentDividends(values, n = 1, unit = 'years') {
   const oneYearAgo = moment().subtract(n, unit).unix();
   const filterFN = ([date]) => moment(date).unix() >= oneYearAgo;
   // exercise date, dividend in dollars
 
-  return values.filter(filterFN).reverse() // most recent first
+  return values.filter(filterFN).reverse(); // most recent first
 }
-
 
 // should be 261
 /*

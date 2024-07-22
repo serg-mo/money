@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   Chart as ChartJS,
@@ -8,8 +8,8 @@ import {
   LineElement,
   Title,
   Tooltip,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -17,7 +17,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   Title,
-  Tooltip,
+  Tooltip
 );
 
 export default function BalanceChart({ transactions, column }) {
@@ -35,12 +35,12 @@ export default function BalanceChart({ transactions, column }) {
 
   // NOTE: ending balance of one month is the same as the beginning balance of the next one
   const data = {
-    labels: transactions.map((fields) => fields["month"]),
+    labels: transactions.map((fields) => fields['month']),
     datasets: [
       {
         data: transactions.map((fields) => fields[column]),
-        borderColor: "rgb(100, 100, 100)",
-        backgroundColor: "rgba(100, 100, 100, 1)",
+        borderColor: 'rgb(100, 100, 100)',
+        backgroundColor: 'rgba(100, 100, 100, 1)',
       },
     ],
   };

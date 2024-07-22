@@ -1,11 +1,10 @@
-import moment from "moment";
-import React, { useEffect, useState } from "react";
-import CreditClassifier from "../components/credit/CreditClassifier";
-import CreditTransactionsTab from "../components/credit/CreditTransactionsTab";
-import Frame from "../components/Frame";
-import { CreditContext, parseCreditFile } from "../utils/credit";
-import usePersisedState from "../utils/usePersistedState";
-
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import CreditClassifier from '../components/credit/CreditClassifier';
+import CreditTransactionsTab from '../components/credit/CreditTransactionsTab';
+import Frame from '../components/Frame';
+import { CreditContext, parseCreditFile } from '../utils/credit';
+import usePersisedState from '../utils/usePersistedState';
 
 export default function Credit({ txt }) {
   const [context, setContext] = useState({});
@@ -14,7 +13,7 @@ export default function Credit({ txt }) {
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
     {},
-    "manualCategories",
+    'manualCategories'
   );
 
   // TODO: it would be nice to see the chart at month/week level + vendor level for groceries
@@ -22,8 +21,9 @@ export default function Credit({ txt }) {
   // TODO: bring back the arrow key navigation and derive which transactions to show
   useEffect(() => {
     if (txt && !transactions.length) {
-      const cutoff = moment().subtract(12, "months").format("YYYY-MM-DD");
-      const filterFn = (row) => row["transaction"] === "DEBIT" && row["date"] >= cutoff;
+      const cutoff = moment().subtract(12, 'months').format('YYYY-MM-DD');
+      const filterFn = (row) =>
+        row['transaction'] === 'DEBIT' && row['date'] >= cutoff;
 
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }
@@ -45,7 +45,7 @@ export default function Credit({ txt }) {
 
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
-    const key = JSON.stringify(transaction["vector"]); // must be unique, for unserialized vector access
+    const key = JSON.stringify(transaction['vector']); // must be unique, for unserialized vector access
     // console.log({ key, category });
 
     setManualCategories({ ...manualCategories, [key]: category });
@@ -55,7 +55,7 @@ export default function Credit({ txt }) {
     return;
   }
 
-  const render = (slice) => (<CreditTransactionsTab transactions={slice} />)
+  const render = (slice) => <CreditTransactionsTab transactions={slice} />;
 
   return (
     <CreditContext.Provider value={context}>

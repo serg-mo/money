@@ -1,5 +1,5 @@
-import React from "react";
-import CandidateCard from "./CandidateCard";
+import React from 'react';
+import CandidateCard from './CandidateCard';
 
 // TODO: consider charting stats as points on a graph
 // TODO: click a data point on the chart to load the candidate

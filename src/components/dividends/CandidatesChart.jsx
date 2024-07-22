@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 import {
   BarElement,
@@ -7,26 +7,26 @@ import {
   LinearScale,
   Title,
   defaults,
-} from "chart.js";
-import annotationPlugin from "chartjs-plugin-annotation";
-import { Scatter } from "react-chartjs-2";
+} from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
+import { Scatter } from 'react-chartjs-2';
 // import { getColorTransparencies } from "../../utils/common";
 
-defaults.font.family = "Monaco";
+defaults.font.family = 'Monaco';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
-  annotationPlugin,
+  annotationPlugin
 );
 
 export const colors = {
-  candidate: "gray", // default
-  goal: "green",
-  highlight: "blue",
-  split: "red",
+  candidate: 'gray', // default
+  goal: 'green',
+  highlight: 'blue',
+  split: 'red',
 };
 
 // TODO: inside the doughnut, show the total and monthly
@@ -42,17 +42,17 @@ export default function CandidatesChart({
     const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}: ${stats.costAbs}`;
     const getAnnotations = ({ stats }, color) => [
       {
-        type: "line",
-        mode: "vertical",
-        scaleID: "x",
+        type: 'line',
+        mode: 'vertical',
+        scaleID: 'x',
         value: stats[x],
         borderColor: color,
         borderWidth: 1,
       },
       {
-        type: "line",
-        mode: "horizontal",
-        scaleID: "y",
+        type: 'line',
+        mode: 'horizontal',
+        scaleID: 'y',
         value: stats[y],
         borderColor: color,
         borderWidth: 1,
@@ -67,7 +67,7 @@ export default function CandidatesChart({
       responsive: true,
       animation: {
         // https://www.chartjs.org/docs/latest/configuration/animations.html#easing
-        easing: "easeInOutQuad",
+        easing: 'easeInOutQuad',
         duration: 500, // milliseconds
       },
       plugins: {
@@ -119,7 +119,7 @@ export default function CandidatesChart({
     datasets: [
       {
         data: cards.map(({ stats }) => stats),
-        backgroundColor: "rgb(255, 99, 132)",
+        backgroundColor: 'rgb(255, 99, 132)',
         pointBackgroundColor,
         pointRadius,
       },
@@ -129,7 +129,7 @@ export default function CandidatesChart({
   // TODO: color code each point on the scatter chart to show similarity to current
   return (
     <>
-      <Scatter options={getOptions("total", "monthly")} data={data} />
+      <Scatter options={getOptions('total', 'monthly')} data={data} />
       {/* <Scatter options={getOptions("exp", "roi")} data={data} /> */}
     </>
   );

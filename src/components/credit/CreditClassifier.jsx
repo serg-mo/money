@@ -1,13 +1,13 @@
-import * as KNNClassifier from "@tensorflow-models/knn-classifier";
-import { tensor } from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-backend-webgl"; // this is important
-import React, { useContext, useEffect, useState } from "react";
-import { CATEGORIES, CreditContext } from "../../utils/credit";
+import * as KNNClassifier from '@tensorflow-models/knn-classifier';
+import { tensor } from '@tensorflow/tfjs';
+import '@tensorflow/tfjs-backend-webgl'; // this is important
+import React, { useContext, useEffect, useState } from 'react';
+import { CATEGORIES, CreditContext } from '../../utils/credit';
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(
     (acc, val, index) => acc + val * arr2[index],
-    0,
+    0
   );
   const magnitude1 = Math.sqrt(arr1.reduce((acc, val) => acc + val ** 2, 0));
   const magnitude2 = Math.sqrt(arr2.reduce((acc, val) => acc + val ** 2, 0));
@@ -18,7 +18,7 @@ function knnLabelDistribution(data, active, k = 30) {
   // data is vector => label
   const similarities = Object.keys(data).map((key) => {
     const vector = JSON.parse(key);
-    return cosineSimilarity(vector, active["vector"]);
+    return cosineSimilarity(vector, active['vector']);
   });
 
   const sortedNeighbors = similarities
@@ -132,8 +132,8 @@ export default function CreditClassifier() {
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label
     const { label, confidences } = await classifier.predictClass(
-      tensor(transaction["vector"]),
-      neighborhoodSize,
+      tensor(transaction['vector']),
+      neighborhoodSize
     );
 
     // TODO: stick with the regular classifier for now
@@ -149,7 +149,7 @@ export default function CreditClassifier() {
       maxConfidence >= minConfidence ? label : transaction.category;
 
     const manual =
-      manualCategories[JSON.stringify(transaction["vector"])] ?? null;
+      manualCategories[JSON.stringify(transaction['vector'])] ?? null;
 
     return {
       ...transaction,
@@ -176,7 +176,7 @@ export default function CreditClassifier() {
       return;
     }
     console.log(
-      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`,
+      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`
     );
 
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
@@ -195,14 +195,14 @@ export default function CreditClassifier() {
   const { classes, examples } = getClassifierStats();
 
   const buttonClass =
-    "m-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl";
+    'm-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl';
 
   return (
     <>
       <div className="flex flex-row justify-center">
         <button
           className={buttonClass}
-          onClick={() => confirm("Are you sure?") && resetState()}
+          onClick={() => confirm('Are you sure?') && resetState()}
         >
           Reset
         </button>

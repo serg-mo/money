@@ -1,6 +1,6 @@
-import { groupBy, sumBy } from "lodash";
-import React from "react";
-import { COLORS } from "../../utils/credit";
+import { groupBy, sumBy } from 'lodash';
+import React from 'react';
+import { COLORS } from '../../utils/credit';
 
 import {
   CategoryScale,
@@ -13,10 +13,10 @@ import {
   Title,
   Tooltip,
   defaults,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 
-defaults.font.family = "Monaco";
+defaults.font.family = 'Monaco';
 
 ChartJS.register(
   CategoryScale,
@@ -26,10 +26,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Filler,
-  Legend,
+  Legend
 );
 
-const titles = ["Date", "Transaction", "Name", "Memo", "Amount"];
+const titles = ['Date', 'Transaction', 'Name', 'Memo', 'Amount'];
 
 export default function CreditChart({ transactions }) {
   const GOAL_TOTAL = 2000;
@@ -39,7 +39,7 @@ export default function CreditChart({ transactions }) {
     spanGaps: 3,
     interaction: {
       intersect: false,
-      mode: "index",
+      mode: 'index',
     },
     plugins: {
       legend: true,
@@ -48,7 +48,7 @@ export default function CreditChart({ transactions }) {
           footer: (points) => {
             const total = points.reduce(
               (acc, point) => acc + point.parsed.y,
-              0,
+              0
             );
 
             // TODO: add avg here too
@@ -59,13 +59,13 @@ export default function CreditChart({ transactions }) {
       annotation: {
         annotations: [
           {
-            type: "line",
-            mode: "horizontal",
-            scaleID: "y",
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y',
             // TODO: when the tab is set, this should be monthly avg
             // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
             value: GOAL_TOTAL,
-            borderColor: "red",
+            borderColor: 'red',
             borderWidth: 2,
           },
         ],
@@ -90,58 +90,63 @@ export default function CreditChart({ transactions }) {
       },
     },
     legend: {
-      position: "bottom",
+      position: 'bottom',
     },
   };
 
   const allMonths = Object.keys(
-    groupBy(transactions, (row) => row["date"].substring(0, 7)), // year-month
+    groupBy(transactions, (row) => row['date'].substring(0, 7)) // year-month
   );
-  const categories = groupBy(transactions, (row) => row["category"]);
+
+  // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
+  const categories = groupBy(transactions, (row) => row['category']);
 
   const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
-      const total = -1 * sumBy(categoryTransactions, "amount");
+      const total = -1 * sumBy(categoryTransactions, 'amount');
       return {
         category,
         total,
         avg: total / allMonths.length,
         categoryTransactions,
       };
-    },
+    }
   );
   // TODO: sort by most recent's month
   // categoryTotals.sort((a, b) => b.total - a.total); // desc
 
   // show datasets in order of COLORS
   const COLORS_ORDER = Object.keys(COLORS);
-  categoryTotals.sort((a, b) => COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category));
+  categoryTotals.sort(
+    (a, b) =>
+      COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category)
+  );
 
   const datasets = categoryTotals.map(
     ({ category, avg, categoryTransactions }) => {
       // "2022-08-30" -> "2022-08"
       const months = groupBy(categoryTransactions, (row) =>
-        row["date"].substring(0, 7),
+        row['date'].substring(0, 7)
       );
 
       // there needs to be a value for every year-month, even if it's 0
       const data = allMonths.map((month) => ({
         x: month, // year-month
-        y: months[month] ? -1 * sumBy(months[month], "amount") : 0,
+        y: months[month] ? -1 * sumBy(months[month], 'amount') : 0,
       }));
 
       // TODO: what I want is the sum of averages of visible datasets
       return {
         // label: `${category.padEnd(15, ' ')} \$${avg.toFixed(2)}/mo`.padEnd(27, ' '),
-        label: category.padEnd(15, " "),
+        label: category.padEnd(15, ' '),
         data,
-        fill: "start",
-        pointStyle: "rect",
+        fill: 'start',
+        pointStyle: 'rect',
         hidden: false,
         borderColor: COLORS[category],
         backgroundColor: COLORS[category],
       };
-    },
+    }
   );
 
   const data = { datasets };

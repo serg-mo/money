@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 import {
   CATEGORIES,
   COLORS,
   formatConfidence,
   getOpacity,
-} from "../../utils/credit";
+} from '../../utils/credit';
 
 // TODO: scale categories by their respective rule sizes, i.e., many examples - bigger scale
 // TODO: consider setting opacity based on the confidences
@@ -17,14 +17,14 @@ export default function CategoryPicker({ transaction, onClick }) {
   return (
     <div className="flex flex-row flex-wrap justify-between">
       {Object.entries(COLORS).map(([category]) => {
-        const isCurrent = transaction["category"] === category;
-        const confidence = transaction["confidences"][category];
+        const isCurrent = transaction['category'] === category;
+        const confidence = transaction['confidences'][category];
         // confidence ? "bg-gray-400" : "",
 
         const className = [
-          "my-1 rounded-md bg-gray-200 cursor-pointer p-1 hover:opacity-100",
-          isCurrent ? "border-2 border-gray-500" : "",
-        ].join(" ");
+          'my-1 rounded-md bg-gray-200 cursor-pointer p-1 hover:opacity-100',
+          isCurrent ? 'border-2 border-gray-500' : '',
+        ].join(' ');
 
         return (
           <div
