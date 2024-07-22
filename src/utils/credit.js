@@ -6,12 +6,14 @@
 // TODO: add typescript
 // TODO: write unit tests for all of these
 import { createContext } from "react";
-import { parseCSV, rowToObjectWithKeys } from "./common";
+import { parseCSV } from "./common";
 export const CreditContext = createContext();
 
 // TODO: ideally there would be at least one transaction per category per month
 // TODO: otherwise the stacked area chart will look weird
 // TODO: make a map for category, budget, and color
+
+// NOTE: order matters here
 export const CATEGORIES = {
   CAR: "CAR",
   GROCERY: "GROCERY",
@@ -20,23 +22,26 @@ export const CATEGORIES = {
   PET: "PET",
   RESTAURANT: "RESTAURANT",
   SHOPPING: "SHOPPING",
-  TRAVEL: "TRAVEL", // includes ubers, flights, hotel, car, and activities
+  TRAVEL: "TRAVEL", // includes taxi, flight, hotel, car, and activities
   UNCLASSIFIED: "UNCLASSIFIED",
   UTILITIES: "UTILITIES", // includes subscriptions, gym
 };
 
-// category buttons will appear in this order, alphabetically
+// datasets appear in this order
 export const COLORS = {
-  [CATEGORIES.CAR]: "rgba(15, 72, 101, 0.8)",
-  [CATEGORIES.GROCERY]: "rgba(23, 130, 171, 0.9)",
-  [CATEGORIES.HEALTH]: "rgba(230, 154, 43, 0.9)",
-  [CATEGORIES.OTHER]: "rgba(200, 200, 200, 0.8)",
-  [CATEGORIES.PET]: "rgba(13, 45, 67, 0.75)",
-  [CATEGORIES.RESTAURANT]: "rgba(233, 120, 34, 0.85)",
-  [CATEGORIES.SHOPPING]: "rgba(19, 100, 134, 0.85)",
-  [CATEGORIES.TRAVEL]: "rgba(206, 56, 24, 0.85)",
-  [CATEGORIES.UNCLASSIFIED]: "rgba(200, 200, 200, 0.75)",
-  [CATEGORIES.UTILITIES]: "rgba(77, 152, 128, 0.8)",
+  [CATEGORIES.GROCERY]: "rgb(7, 42, 200)", // #072ac8
+  [CATEGORIES.UTILITIES]: "rgb(30, 150, 252)", // #1e96fc
+  [CATEGORIES.HEALTH]: "rgb(96, 182, 251)", // #60b6fb
+
+  [CATEGORIES.CAR]: "rgb(111, 70, 166)", // #6f46a6
+  [CATEGORIES.PET]: "rgb(81, 31, 115)", // #511f73
+
+  [CATEGORIES.SHOPPING]: "rgb(255, 102, 0)", // #ff6600
+  [CATEGORIES.TRAVEL]: "rgb(255, 153, 0)", // #ff9900
+  [CATEGORIES.RESTAURANT]: "rgb(255, 204, 0)", // #ffcc00
+
+  [CATEGORIES.OTHER]: "rgb(142, 142, 142)", // #8e8e8e
+  [CATEGORIES.UNCLASSIFIED]: "rgb(85, 85, 85)", // #555555
 };
 
 // TODO: make a constants file
@@ -107,12 +112,13 @@ export function normalizeName(name) {
 
   // remove processor prefixes, e.q., Square, Toast, WePay
   const prefixes = [
-    /SQ\ \*?/i,
+    /^IC\*/i, // instacart
     /^SP\ /i,
     /^TST\*/i,
+    /^WF\*/i,
     /^WPY\*/i,
     /^ZSK\*/i,
-    /^WF\*/i,
+    /SQ\ \*?/i,
   ];
   for (const prefix of prefixes) {
     name = name.replace(prefix, "");
