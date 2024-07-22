@@ -35,7 +35,7 @@ export default function Transaction({ onClick, ...t }) {
       </td>
       <td className="px-2 py-4 text-center">${formatAmount(t["amount"])}</td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`} title={title}>
-        <div>{t["category"]} ({formatConfidence(confidence)})</div>
+        {t["category"]}
       </td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`}>
         {formatConfidence(confidence)}
