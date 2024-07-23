@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 import {
   BsReception0,
   BsReception1,
   BsReception2,
   BsReception3,
   BsReception4,
-} from "react-icons/bs";
+} from 'react-icons/bs';
 
 export default function ProgressIcon({ value = 0 }) {
   const icons = [

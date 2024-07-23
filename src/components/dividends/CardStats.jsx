@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function CardStats({ cards }) {
   return (
@@ -19,7 +19,7 @@ export default function CardStats({ cards }) {
             <td className="border">{name}</td>
             {Object.values(card.stats).map((value, index) => (
               <td key={index} className="border">
-                {value > 0 ? value : ""}
+                {value > 0 ? value : ''}
               </td>
             ))}
           </tr>

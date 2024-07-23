@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 const persist = (values, itemKey) => {
   if (values && Object.values(values).length) {

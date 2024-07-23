@@ -1,14 +1,14 @@
-import { ArcElement, Chart as ChartJS, Tooltip, defaults } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import React, { useContext } from "react";
-import { Doughnut } from "react-chartjs-2";
-import { arrayProduct } from "../../utils/common";
-import { DividendContext } from "../../utils/dividends";
+import { ArcElement, Chart as ChartJS, Tooltip, defaults } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import React, { useContext } from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import { arrayProduct } from '../../utils/common';
+import { DividendContext } from '../../utils/dividends';
 
 // https://chartjs-plugin-datalabels.netlify.app/samples/charts/doughnut.html
 ChartJS.register(ArcElement, Tooltip /*ChartDataLabels*/);
 
-defaults.font.family = "Monaco";
+defaults.font.family = 'Monaco';
 
 // export function CandidateStats({ monthly, total, roi, exp, ratio }) {
 //   return (
@@ -35,16 +35,16 @@ defaults.font.family = "Monaco";
 // }
 
 const COLORS = [
-  "#2b50b6", // DIV
-  "#5578b5", // DIVO
-  "#829caf", // JEPI
-  "#b3bfa3", // NUSI
-  "#e5e08f", // QYLD
-  "#ffe892", // RYLD
-  "#fed6af", // SDIV
-  "#fdc2c7", // SPHD
-  "#fcaedd", // SRET
-  "#fa97f0", // XYLD
+  '#2b50b6', // DIV
+  '#5578b5', // DIVO
+  '#829caf', // JEPI
+  '#b3bfa3', // NUSI
+  '#e5e08f', // QYLD
+  '#ffe892', // RYLD
+  '#fed6af', // SDIV
+  '#fdc2c7', // SPHD
+  '#fcaedd', // SRET
+  '#fa97f0', // XYLD
 ];
 
 // TODO: compute the similar colors for the split and current
@@ -90,12 +90,12 @@ export default function CandidateChart({ current, split }) {
     labels: names,
     datasets: [
       {
-        label: "current",
+        label: 'current',
         data: arrayProduct(current.candidate, prices),
         backgroundColor: COLORS,
       },
       {
-        label: "split",
+        label: 'split',
         data: arrayProduct(split.candidate, prices),
         backgroundColor: COLORS,
       },

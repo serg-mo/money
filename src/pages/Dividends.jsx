@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import DividendDash from "../components/dividends/DividendDash";
-import { DividendContext, parseDividendFile } from "../utils/dividends";
+import React, { useEffect, useState } from 'react';
+import DividendDash from '../components/dividends/DividendDash';
+import { DividendContext, parseDividendFile } from '../utils/dividends';
 
 export default function Dividends({ txt }) {
   const [context, setContext] = useState(null);

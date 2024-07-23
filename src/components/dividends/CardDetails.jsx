@@ -1,14 +1,8 @@
-import React, { useContext, useState } from "react";
-import {
-  arrayDifference,
-  arrayProduct,
-  sum
-} from "../../utils/common";
-import {
-  DividendContext,
-} from "../../utils/dividends";
+import React, { useContext, useState } from 'react';
+import { arrayDifference, arrayProduct, sum } from '../../utils/common';
+import { DividendContext } from '../../utils/dividends';
 
-import DividendsChart from "./DividendsChart";
+import DividendsChart from './DividendsChart';
 
 export default function CardDetails({ cards }) {
   const { names, dividends, prices, basis } = useContext(DividendContext);
@@ -16,13 +10,17 @@ export default function CardDetails({ cards }) {
 
   const orders = arrayDifference(
     cards.split.candidate,
-    cards.current.candidate,
+    cards.current.candidate
   );
 
   const net = arrayProduct(orders, prices).map((cost) => -1 * cost); // negative order means sell, so I get money
-  const pnl = arrayProduct(orders.map(v => v < 0 ? -v : 0), arrayDifference(prices, basis)); // only count "sell"
+  const pnl = arrayProduct(
+    orders.map((v) => (v < 0 ? -v : 0)),
+    arrayDifference(prices, basis)
+  ); // only count "sell"
 
-  const formatDollars = (value, precision = 0) => `${value < 0 ? '-' : ''}\$${Math.abs(value).toFixed(precision)}`;
+  const formatDollars = (value, precision = 0) =>
+    `${value < 0 ? '-' : ''}\$${Math.abs(value).toFixed(precision)}`;
 
   return (
     <>
@@ -42,11 +40,23 @@ export default function CardDetails({ cards }) {
         <tbody>
           {names.map((name, index) => (
             <tr key={index}>
-              <td className="border border-r border-r-8"><a href="#" onClick={() => setName(name)} className="hover:underline">{name}</a></td>
+              <td className="border border-r border-r-8">
+                <a
+                  href="#"
+                  onClick={() => setName(name)}
+                  className="hover:underline"
+                >
+                  {name}
+                </a>
+              </td>
               <td className="border">{cards.current.candidate[index]}</td>
-              <td className="border border-r border-r-8">{cards.split.candidate[index]}</td>
+              <td className="border border-r border-r-8">
+                {cards.split.candidate[index]}
+              </td>
               <td className="border">{orders[index]}</td>
-              <td className="border border-r border-r-8 text-right">{formatDollars(net[index])}</td>
+              <td className="border border-r border-r-8 text-right">
+                {formatDollars(net[index])}
+              </td>
               <td className="border">${prices[index].toFixed(2)}</td>
               <td className="border">${basis[index].toFixed(2)}</td>
               <td className="border">{formatDollars(pnl[index])}</td>
@@ -66,7 +76,12 @@ export default function CardDetails({ cards }) {
           </tr>
         </tfoot>
       </table>
-      {name && (<DividendsChart name={name} next={dividends[names.indexOf(name)].next} />)}
+      {name && (
+        <DividendsChart
+          name={name}
+          next={dividends[names.indexOf(name)].next}
+        />
+      )}
     </>
   );
 }

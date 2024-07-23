@@ -1,10 +1,10 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
 export const FilesContext = createContext();
 export const FILE_TYPES = {
-  brokerage: "brokerage",
-  credit: "credit",
-  dividend: "dividend",
+  brokerage: 'brokerage',
+  credit: 'credit',
+  dividend: 'dividend',
 };
 
 export function loadFileContent(file) {
@@ -25,12 +25,12 @@ export function parseCSV(
   txt,
   rowRegx = /\r?\n/,
   colRegx = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/, // ignore commas within double quotes
-  replaceRegx = /[\",\$%]/g,
+  replaceRegx = /[\",\$%]/g
 ) {
   return txt
     .split(rowRegx)
     .map((row) =>
-      row.split(colRegx).map((v) => v.replace(replaceRegx, "").trim()),
+      row.split(colRegx).map((v) => v.replace(replaceRegx, '').trim())
     );
 }
 
@@ -44,7 +44,7 @@ export function isMatchingFile(txt, required, headerIndex = 0) {
   const lines = parseCSV(txt);
   const headers = lines[headerIndex].map((v) => v.toLowerCase());
 
-  return required.every((col) => headers.includes(col))
+  return required.every((col) => headers.includes(col));
 }
 
 export function getColorTransparencies(color, length) {
@@ -53,7 +53,7 @@ export function getColorTransparencies(color, length) {
   let palette = [];
   for (let i = 0; i < length; i++) {
     rgba[rgba.length - 1] = Math.round((100 * (length - i)) / length) / 100; // alpha 1 .. 0
-    palette.push(`rgba(${rgba.join(",")})`);
+    palette.push(`rgba(${rgba.join(',')})`);
   }
   return palette;
 }
@@ -74,7 +74,7 @@ export function arrayProduct(...arrays) {
   const size = arrays[0].length;
 
   if (!arrays.every((arr) => arr.length === size)) {
-    throw new Error("All arrays must be of the same length");
+    throw new Error('All arrays must be of the same length');
   }
 
   let result = [];
@@ -86,7 +86,7 @@ export function arrayProduct(...arrays) {
 
 export function arrayDifference(a, b) {
   if (a.length !== b.length) {
-    throw new Error("Arrays must be of the same length");
+    throw new Error('Arrays must be of the same length');
   }
 
   return a.map((value, index) => value - b[index]);
@@ -96,7 +96,7 @@ export function sumProduct(...arrays) {
   const size = arrays[0].length;
 
   if (!arrays.every((arr) => arr.length === size)) {
-    throw new Error("All arrays must be of the same length");
+    throw new Error('All arrays must be of the same length');
   }
 
   let sum = 0;

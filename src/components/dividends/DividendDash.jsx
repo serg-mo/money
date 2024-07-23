@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from 'react';
 import {
   deDupeCardsByStat,
   DividendContext,
   isCloserToCard,
-  mutateCandidates
-} from "../../utils/dividends";
-import CandidatesChart from "./CandidatesChart";
-import CardDetails from "./CardDetails";
+  mutateCandidates,
+} from '../../utils/dividends';
+import CandidatesChart from './CandidatesChart';
+import CardDetails from './CardDetails';
 
 // TODO: I can download dividends CSV from fidelity, instead of my own spreadsheet
 // it contains name, now, and cost, which is all I really need. There is no OK though.
@@ -32,8 +32,10 @@ export default function DividendDash() {
 
   const currentCard = candidateToCard(current);
   const [splitCard, setSplitCard] = useState(currentCard);
-  const [goalCard] = useState({ ...currentCard, stats: { ...currentCard.stats, total: goalTotal, monthly: goalMonthly }, });
-
+  const [goalCard] = useState({
+    ...currentCard,
+    stats: { ...currentCard.stats, total: goalTotal, monthly: goalMonthly },
+  });
 
   // const isBetterThanGoal = isBetterThanCard(goalCard); // goal in the bottom-right
   // const isCloseToSplit = isCloseToCard(splitCard, 1_000, 100); // split to the middle
@@ -54,8 +56,10 @@ export default function DividendDash() {
 
     setTopCards((prev) => {
       const cards = deDupeCardsByStat(
-        mutateCandidates(card.candidate, CLICK_SIZE, jitter).map(candidateToCard),
-        "monthly"
+        mutateCandidates(card.candidate, CLICK_SIZE, jitter).map(
+          candidateToCard
+        ),
+        'monthly'
       );
       return [...prev, ...cards].filter(isCloserToCard(card, 3_000, 100));
     });
@@ -72,7 +76,7 @@ export default function DividendDash() {
   // explore by clicking on a data point, which generates new mutations
   const onClick = (card) => {
     const load = async (text) => await navigator.clipboard.writeText(text);
-    load(card.candidate.join("\n")); // newlines for spreadsheet
+    load(card.candidate.join('\n')); // newlines for spreadsheet
 
     setSplitCard(card);
   };
