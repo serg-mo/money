@@ -39,8 +39,7 @@ export default function CandidatesChart({
   onHover,
 }) {
   const getOptions = (x, y) => {
-    const getLabel = ({ stats }) =>
-      `${stats[y]} vs ${stats[x]}: ${stats.costAbs}`;
+    const getLabel = ({ stats }) => `${stats[y]} vs ${stats[x]}: ${stats.costAbs}`;
     const getAnnotations = ({ stats }, color) => [
       {
         type: 'line',

@@ -8,6 +8,7 @@ import {
   Tooltip,
   defaults,
 } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
@@ -17,7 +18,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 defaults.font.family = 'Monaco';
@@ -41,6 +43,28 @@ export default function CashFlowChart({ transactions, title }) {
       },
       legend: {
         display: true,
+      },
+      annotation: {
+        annotations: [
+          // TODO: only show these when "withdrawals" dataset is visible 
+          // {
+          //   type: 'line',
+          //   mode: 'horizontal',
+          //   scaleID: 'y',
+          //   value: -3_095, // rent on the withdrawals side
+          //   borderColor: "red",
+          //   borderWidth: 1,
+          // },
+          // {
+          //   type: 'line',
+          //   mode: 'horizontal',
+          //   scaleID: 'y',
+          //   value: -5_000, // budget on the withdrawals side
+          //   borderColor: "red",
+          //   borderWidth: 1,
+          // },
+          // TODO: add avg withdrawals here
+        ],
       },
     },
     scales: {
