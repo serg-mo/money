@@ -97,6 +97,8 @@ export default function CreditChart({ transactions }) {
   const allMonths = Object.keys(
     groupBy(transactions, (row) => row['date'].substring(0, 7)) // year-month
   );
+
+  // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
   const categories = groupBy(transactions, (row) => row['category']);
 
   const categoryTotals = Object.entries(categories).map(
