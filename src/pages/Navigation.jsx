@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export const NAV_LINKS = [
-  { path: '/dividends', label: 'Dividends' },
   { path: '/brokerage', label: 'Brokerage' },
   { path: '/credit', label: 'Credit' },
 ];

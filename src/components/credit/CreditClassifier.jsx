@@ -197,22 +197,24 @@ export default function CreditClassifier() {
   const buttonClass =
     'm-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl';
 
-  return (
-    <>
-      <div className="flex flex-row justify-center">
-        <button
-          className={buttonClass}
-          onClick={() => confirm('Are you sure?') && resetState()}
-        >
-          Reset
-        </button>
-      </div>
-      <div className="text-center">
-        <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
-        <div>{`${examples} examples (${MIN_EXAMPLES} min)`}</div>
-        <div>{`${Object.values(manualCategories).length} manual`}</div>
-        <div>{`neighborhood size ${neighborhoodSize}`}</div>
-      </div>
-    </>
-  );
+  return;
+
+  // return (
+  //   <>
+  //     <div className="flex flex-row justify-center">
+  //       <button
+  //         className={buttonClass}
+  //         onClick={() => confirm('Are you sure?') && resetState()}
+  //       >
+  //         Reset
+  //       </button>
+  //     </div>
+  //     <div className="text-center">
+  //       <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
+  //       <div>{`${examples} examples (${MIN_EXAMPLES} min)`}</div>
+  //       <div>{`${Object.values(manualCategories).length} manual`}</div>
+  //       <div>{`neighborhood size ${neighborhoodSize}`}</div>
+  //     </div>
+  //   </>
+  // );
 }

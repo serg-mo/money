@@ -19,11 +19,12 @@ export default function Credit({ txt }) {
   // TODO: it would be nice to see the chart at month/week level + vendor level for groceries
   // TODO: I bet you my weekly spending is more predictable
   // TODO: bring back the arrow key navigation and derive which transactions to show
+  // TODO: deal with refunds
   useEffect(() => {
     if (txt && !transactions.length) {
       const cutoff = moment().subtract(12, 'months').format('YYYY-MM-DD');
       const filterFn = (row) =>
-        row['transaction'] === 'DEBIT' && row['date'] >= cutoff;
+        row['transaction'] === 'DEBIT' && row['date'] >= cutoff; // exlcude payments and refunds
 
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }

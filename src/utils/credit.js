@@ -29,18 +29,18 @@ export const CATEGORIES = {
 
 // stacked chart datasets appear in this order
 export const COLORS = {
-  [CATEGORIES.GROCERY]: 'rgb(3, 4, 94)', // #03045e
-  [CATEGORIES.UTILITIES]: 'rgb(0, 119, 182)', // #0077b6
-  [CATEGORIES.HEALTH]: 'rgb(0, 180, 216)', // #00b4d8
-  [CATEGORIES.PET]: 'rgb(144, 224, 239)', // #90e0ef
-  [CATEGORIES.CAR]: 'rgb(202, 240, 248)', // #caf0f8
+  [CATEGORIES.GROCERY]: 'rgb(3, 4, 94)',
+  [CATEGORIES.UTILITIES]: 'rgb(0, 119, 182)',
+  [CATEGORIES.HEALTH]: 'rgb(0, 180, 216)',
+  [CATEGORIES.PET]: 'rgb(144, 224, 239)',
+  [CATEGORIES.CAR]: 'rgb(202, 240, 248)',
 
-  [CATEGORIES.RESTAURANT]: 'rgb(255, 204, 0)', // #ffcc00
-  [CATEGORIES.SHOPPING]: 'rgb(255, 102, 0)', // #ff6600
-  [CATEGORIES.TRAVEL]: 'rgb(255, 153, 0)', // #ff9900
+  [CATEGORIES.RESTAURANT]: 'rgb(255, 102, 0)',
+  [CATEGORIES.SHOPPING]: 'rgb(255, 128, 51)',
+  [CATEGORIES.TRAVEL]: 'rgb(255, 153, 102)',
 
-  [CATEGORIES.OTHER]: 'rgb(142, 142, 142)', // #8e8e8e
-  [CATEGORIES.UNCLASSIFIED]: 'rgb(85, 85, 85)', // #555555
+  [CATEGORIES.OTHER]: 'rgb(142, 142, 142)',
+  [CATEGORIES.UNCLASSIFIED]: 'rgb(85, 85, 85)',
 };
 
 // TODO: make a constants file

@@ -14,10 +14,6 @@ import {
   HEADER_ROW_INDEX as CREDIT_HEADER_ROW_INDEX,
   REQUIRED_COLS as CREDIT_REQUIRED_COLS,
 } from '../utils/credit';
-import {
-  HEADER_ROW_INDEX as DIVIDEND_HEADER_ROW_INDEX,
-  REQUIRED_COLS as DIVIDEND_REQUIRED_COLS,
-} from '../utils/dividends';
 import Target from './Target';
 
 export default function DragAndDrop({ children }) {
@@ -50,11 +46,6 @@ export default function DragAndDrop({ children }) {
         ) {
           type = FILE_TYPES.credit;
           name = 'Credit';
-        } else if (
-          isMatchingFile(txt, DIVIDEND_REQUIRED_COLS, DIVIDEND_HEADER_ROW_INDEX)
-        ) {
-          type = FILE_TYPES.dividend;
-          name = 'Dividends';
         }
 
         return { txt, type, name };

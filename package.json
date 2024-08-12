@@ -26,10 +26,9 @@
     "regression": "^2.0.1"
   },
   "scripts": {
-    "start": "scripts/fetch_dividends.sh && webpack serve --mode development --open --hot",
+    "start": "webpack serve --mode development --open --hot",
     "lint": "prettier . --write",
-    "build": "webpack --mode production",
-    "fetch": "scripts/fetch_dividends.sh"
+    "build": "webpack --mode production"
   },
   "eslintConfig": {
     "extends": [

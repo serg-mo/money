@@ -1,7 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import Dividends from './pages/Dividends';
+import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Brokerage from './pages/Brokerage';
 import Credit from './pages/Credit';
 import Home from './pages/Home';
@@ -16,7 +15,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="dividends" element={<Dividends />} />
           <Route path="brokerage" element={<Brokerage />} />
           <Route path="credit" element={<Credit />} />
         </Route>

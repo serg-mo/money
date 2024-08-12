@@ -46,7 +46,7 @@ export default function CashFlowChart({ transactions, title }) {
       },
       annotation: {
         annotations: [
-          // TODO: only show these when "withdrawals" dataset is visible 
+          // TODO: only show these when "withdrawals" dataset is visible
           // {
           //   type: 'line',
           //   mode: 'horizontal',
