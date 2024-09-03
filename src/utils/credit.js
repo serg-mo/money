@@ -27,6 +27,21 @@ export const CATEGORIES = {
   UTILITIES: 'UTILITIES', // includes subscriptions, gym
 };
 
+export const BUDGET = {
+  GROCERY: 800,
+  UTILITIES: 500,
+  HEALTH: 600,
+  CAR: 300,
+  PET: 300,
+
+  RESTAURANT: 300,
+  SHOPPING: 200,
+  TRAVEL: 0,
+
+  OTHER: 0,
+  UNCLASSIFIED: 0,
+};
+
 // stacked chart datasets appear in this order
 export const COLORS = {
   [CATEGORIES.GROCERY]: 'rgb(3, 4, 94)',

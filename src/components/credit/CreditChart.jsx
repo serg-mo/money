@@ -1,6 +1,6 @@
 import { groupBy, sumBy } from 'lodash';
 import React from 'react';
-import { COLORS } from '../../utils/credit';
+import { BUDGET, COLORS } from '../../utils/credit';
 
 import {
   CategoryScale,
@@ -29,24 +29,16 @@ ChartJS.register(
   Legend
 );
 
-const titles = ['Date', 'Transaction', 'Name', 'Memo', 'Amount'];
-const BUDGET = {
-  CAR: 300,
-  GROCERY: 800,
-  HEALTH: 500,
-  OTHER: 0,
-  PET: 300,
-  RESTAURANT: 300,
-  SHOPPING: 500,
-  TRAVEL: 0,
-  UNCLASSIFIED: 0,
-  UTILITIES: 500,
-}
-console.log(Object.values(BUDGET).reduce((acc, amount) => acc + amount, 0))
+const BUDGET_TOTAL = Object.values(BUDGET).reduce(
+  (acc, amount) => acc + amount,
+  0
+);
+const BUDGET_BARE =
+  BUDGET_TOTAL - BUDGET['RESTAURANT'] - BUDGET['SHOPPING'] - BUDGET['TRAVEL'];
 
+// TODO: when the tab is set, this should be monthly avg
+// TODO: when multiple datasets, this should be the sum of the averages for the visible ones
 export default function CreditChart({ transactions }) {
-  const GOAL_TOTAL = 2000;
-
   const options = {
     responsive: true,
     spanGaps: 3,
@@ -75,9 +67,25 @@ export default function CreditChart({ transactions }) {
             type: 'line',
             mode: 'horizontal',
             scaleID: 'y',
-            // TODO: when the tab is set, this should be monthly avg
-            // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-            value: GOAL_TOTAL,
+            label: {
+              content: `BUDGET TOTAL ${BUDGET_TOTAL}`,
+              display: true,
+              position: 'start',
+            },
+            value: BUDGET_TOTAL,
+            borderColor: 'red',
+            borderWidth: 2,
+          },
+          {
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y',
+            label: {
+              content: `BARE ${BUDGET_BARE}`,
+              display: true,
+              position: 'start',
+            },
+            value: BUDGET_BARE,
             borderColor: 'red',
             borderWidth: 2,
           },
@@ -150,8 +158,7 @@ export default function CreditChart({ transactions }) {
 
       // TODO: what I want is the sum of averages of visible datasets
       return {
-        // label: `${category.padEnd(15, ' ')} \$${avg.toFixed(2)}/mo`.padEnd(27, ' '),
-        label: category, //.padEnd(15, ' '),
+        label: category, // NOTE: dataset name must match category name
         data,
         fill: 'start',
         pointStyle: 'rect',
@@ -162,17 +169,5 @@ export default function CreditChart({ transactions }) {
     }
   );
 
-
-  const visibleBudgetTotal = datasets.reduce((acc, dataset) => {
-    if (!dataset.hidden) {
-      return acc + BUDGET[dataset.label];
-    }
-    return acc;
-  }, 0);
-  console.log({ visibleBudgetTotal })
-
-
-  const data = { datasets };
-
-  return <Line options={options} data={data} />;
+  return <Line options={options} data={{ datasets }} />;
 }
