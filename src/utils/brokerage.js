@@ -42,3 +42,11 @@ export function parseBrokerageFile(txt) {
 
   return middle.map(makeTransaction);
 }
+
+export function formatMoney(value) {
+  if (Math.abs(value) > 1000) {
+    return Math.round(value / 1000) + 'k';
+  }
+
+  return Math.round(value)
+}

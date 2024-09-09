@@ -13,18 +13,20 @@ export const CreditContext = createContext();
 // TODO: otherwise the stacked area chart will look weird
 // TODO: make a map for category, budget, and color
 
-// NOTE: order matters here
+// NOTE: match the order of COLORS, so tabs match datasets in the chart
 export const CATEGORIES = {
-  CAR: 'CAR',
   GROCERY: 'GROCERY',
+  UTILITIES: 'UTILITIES', // includes subscriptions, gym
   HEALTH: 'HEALTH', // includes insurance
-  OTHER: 'OTHER', // includes gifts
   PET: 'PET',
+  CAR: 'CAR',
+
   RESTAURANT: 'RESTAURANT',
   SHOPPING: 'SHOPPING',
   TRAVEL: 'TRAVEL', // includes taxi, flight, hotel, car, and activities
+
+  OTHER: 'OTHER', // includes gifts
   UNCLASSIFIED: 'UNCLASSIFIED',
-  UTILITIES: 'UTILITIES', // includes subscriptions, gym
 };
 
 export const BUDGET = {
