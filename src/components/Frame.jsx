@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export default function Frame({
   transactions,
-  render,
+  children,
   initialSize,
   minSize = 3,
 }) {
@@ -42,5 +42,5 @@ export default function Frame({
   const slice = transactions.slice(left, left + size);
   //console.log(`[${left},${size}] ${slice.length}/${transactions.length}`);
 
-  return render(slice);
+  return children(slice);
 }

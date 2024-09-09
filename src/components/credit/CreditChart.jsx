@@ -68,7 +68,7 @@ export default function CreditChart({ transactions }) {
             mode: 'horizontal',
             scaleID: 'y',
             label: {
-              content: `BUDGET TOTAL ${BUDGET_TOTAL}`,
+              content: `BUDGET ${BUDGET_TOTAL}`,
               display: true,
               position: 'start',
             },
