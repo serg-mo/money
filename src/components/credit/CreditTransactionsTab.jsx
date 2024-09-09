@@ -24,7 +24,7 @@ export default function CreditTransactionsTab({ transactions }) {
       : transactions;
 
   return (
-    <div className="font-mono text-xs">
+    <div className="w-3/4 font-mono text-xs">
       <CreditChart transactions={filteredTransactions} />
       <CategoryTabs />
       <CreditTransactions
