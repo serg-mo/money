@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
+import React, { useMemo, useState } from 'react';
 import CreditTransaction from './CreditTransaction';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 
 export default function CreditTransactions({
   title,
@@ -52,7 +52,7 @@ export default function CreditTransactions({
   }
 
   return (
-    <table className="w-full mx-auto my-2 border-collapse border border-slate-600">
+    <table className="mx-auto my-2 border-collapse border border-slate-600">
       <thead>
         <tr>
           <th colSpan={5} className="uppercase">

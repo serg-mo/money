@@ -39,6 +39,36 @@ const BUDGET_BARE =
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
 export default function CreditChart({ transactions }) {
+  // TODO: only show annotations when showing multiple categories
+  const annotations = [
+    {
+      type: 'line',
+      mode: 'horizontal',
+      scaleID: 'y',
+      label: {
+        content: `BUDGET ${BUDGET_TOTAL}`,
+        display: true,
+        position: 'start',
+      },
+      value: BUDGET_TOTAL,
+      borderColor: 'red',
+      borderWidth: 2,
+    },
+    {
+      type: 'line',
+      mode: 'horizontal',
+      scaleID: 'y',
+      label: {
+        content: `BARE ${BUDGET_BARE}`,
+        display: true,
+        position: 'start',
+      },
+      value: BUDGET_BARE,
+      borderColor: 'red',
+      borderWidth: 2,
+    },
+  ];
+
   const options = {
     responsive: true,
     spanGaps: 3,
@@ -50,46 +80,28 @@ export default function CreditChart({ transactions }) {
       legend: true,
       tooltip: {
         callbacks: {
+          label: (item) => {
+            const label = item.dataset.label;
+            const value = Math.round(item.parsed.y);
+            return `${label.padEnd(15)} ${value}`;
+          },
           footer: (points) => {
+            if (points.length === 1) {
+              return;
+            }
+
             const total = points.reduce(
               (acc, point) => acc + point.parsed.y,
               0
             );
 
-            // TODO: add avg here too
-            return `TOTAL: ${total.toFixed(2)}`;
+            // padding is offset by the color of the dataset
+            return `${'TOTAL'.padEnd(17)} ${Math.round(total)}`;
           },
         },
       },
       annotation: {
-        annotations: [
-          {
-            type: 'line',
-            mode: 'horizontal',
-            scaleID: 'y',
-            label: {
-              content: `BUDGET ${BUDGET_TOTAL}`,
-              display: true,
-              position: 'start',
-            },
-            value: BUDGET_TOTAL,
-            borderColor: 'red',
-            borderWidth: 2,
-          },
-          {
-            type: 'line',
-            mode: 'horizontal',
-            scaleID: 'y',
-            label: {
-              content: `BARE ${BUDGET_BARE}`,
-              display: true,
-              position: 'start',
-            },
-            value: BUDGET_BARE,
-            borderColor: 'red',
-            borderWidth: 2,
-          },
-        ],
+        annotations,
       },
     },
     elements: {

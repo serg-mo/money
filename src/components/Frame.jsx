@@ -10,7 +10,11 @@ export default function Frame({
   const [size, setSize] = useState(initialSize);
   const [left, setLeft] = useState(transactions.length - initialSize);
 
+  // NOTE: keyboard arrows effectively control both edges of the timeline
+  // NOTE: stateless because it's easy to navigate back to where you just were
   const handleKeyPress = (event) => {
+    event.preventDefault();
+
     // NOTE: all of these must be closures
     if (event.key === 'ArrowLeft') {
       setLeft((prev) => Math.max(prev - 1, 0));
@@ -30,7 +34,6 @@ export default function Frame({
     } else if (event.key === 'ArrowDown') {
       setSize((prev) => Math.max(prev - 1, minSize));
     }
-    event.preventDefault();
   };
 
   useEffect(() => {

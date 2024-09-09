@@ -57,9 +57,9 @@ export default function Credit({ txt }) {
   return (
     <CreditContext.Provider value={context}>
       <CreditClassifier />
-      <Frame transactions={transactions} initialSize={100}>{
-        (slice) => <CreditTransactionsTab transactions={slice} />
-      }</Frame>
+      <Frame transactions={transactions} initialSize={100}>
+        {(slice) => <CreditTransactionsTab transactions={slice} />}
+      </Frame>
     </CreditContext.Provider>
   );
 }

@@ -48,5 +48,5 @@ export function formatMoney(value) {
     return Math.round(value / 1000) + 'k';
   }
 
-  return Math.round(value)
+  return Math.round(value);
 }

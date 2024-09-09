@@ -1,17 +1,16 @@
 import React, { useContext } from 'react';
-import { CATEGORIES } from '../../utils/credit';
-import { CreditContext } from '../../utils/credit';
+import { CATEGORIES, CreditContext } from '../../utils/credit';
 
 export default function CategoryTabs() {
   const { tab, setTab } = useContext(CreditContext);
 
-  const tabClass = 'p-1 font-medium bg-gray-200 hover:bg-gray-400';
+  const tabClass = 'mx-1 p-1 font-medium bg-gray-200 hover:bg-gray-400 rounded';
   const activeTabClass = 'bg-gray-400';
 
   const categories = ['ALL', ...Object.values(CATEGORIES)];
 
   return (
-    <div className="text-sm divide-x-1 divide-blue-400 divide-solid">
+    <div className="flex flex-row justify-center text-sm">
       {categories.map((category) => (
         <button
           key={category}
