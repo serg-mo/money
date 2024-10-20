@@ -38,7 +38,7 @@ const BUDGET_BARE =
 
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-export default function CreditChart({ transactions }) {
+export default function CreditChart({ transactions, x = 'week' }) {
   // TODO: only show annotations when showing multiple categories
   const annotations = [
     {
@@ -101,7 +101,7 @@ export default function CreditChart({ transactions }) {
         },
       },
       annotation: {
-        annotations,
+        // annotations,
       },
     },
     elements: {
@@ -127,7 +127,8 @@ export default function CreditChart({ transactions }) {
     },
   };
 
-  const allMonths = Object.keys(groupBy(transactions, 'month')); // year-month
+  // there needs to be a value for every x, even if it's 0
+  const allXs = Object.keys(groupBy(transactions, x));
 
   // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
   const categories = groupBy(transactions, 'category');
@@ -138,12 +139,12 @@ export default function CreditChart({ transactions }) {
       return {
         category,
         total,
-        avg: total / allMonths.length,
+        avg: total / allXs.length,
         categoryTransactions,
       };
     }
   );
-  // TODO: sort by most recent's month
+  // TODO: sort by most recent x
   // categoryTotals.sort((a, b) => b.total - a.total); // desc
 
   // show datasets in order of COLORS
@@ -155,12 +156,12 @@ export default function CreditChart({ transactions }) {
 
   const datasets = categoryTotals.map(
     ({ category, avg, categoryTransactions }) => {
-      const months = groupBy(categoryTransactions, 'month');
+      const groups = groupBy(categoryTransactions, x);
 
-      // there needs to be a value for every year-month, even if it's 0
-      const data = allMonths.map((month) => ({
-        x: month, // year-month
-        y: months[month] ? -1 * sumBy(months[month], 'amount') : 0,
+      // there needs to be a value for every x, even if it's 0
+      const data = allXs.map((value) => ({
+        x: value,
+        y: groups[value] ? -1 * sumBy(groups[value], 'amount') : 0,
       }));
 
       // TODO: what I want is the sum of averages of visible datasets
