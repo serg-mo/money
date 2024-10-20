@@ -5,6 +5,7 @@
 
 // TODO: add typescript
 // TODO: write unit tests for all of these
+import moment from 'moment';
 import { createContext } from 'react';
 import { parseCSV } from './common';
 export const CreditContext = createContext();
@@ -93,6 +94,10 @@ export function parseName(name) {
   return name.toUpperCase().substring(0, MAX_NAME_LENGTH).trim(); // ignore city/phone + state
 }
 
+function getSunday(date) {
+  return moment(date).day(0).format('YYYY-MM-DD');
+}
+
 export function parseCreditFile(txt) {
   const lines = parseCSV(txt);
   const headers = lines[0].map((v) => v.toLowerCase());
@@ -111,6 +116,8 @@ export function parseCreditFile(txt) {
 
     return {
       ...obj,
+      week: moment(obj['date']).day(0).format('YYYY-MM-DD'), // date of the Sunday of that week
+      month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
       amount: parseFloat(obj['amount']),
       category: CATEGORIES.UNCLASSIFIED,
