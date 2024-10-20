@@ -67,8 +67,7 @@ export default function CreditChart({ transactions }) {
       borderColor: 'red',
       borderWidth: 2,
     },
-  ]
-
+  ];
 
   const options = {
     responsive: true,
@@ -96,13 +95,13 @@ export default function CreditChart({ transactions }) {
               0
             );
 
-            // padding is offset by the color of the dataset 
+            // padding is offset by the color of the dataset
             return `${'TOTAL'.padEnd(17)} ${Math.round(total)}`;
           },
         },
       },
       annotation: {
-        annotations
+        annotations,
       },
     },
     elements: {
