@@ -116,7 +116,8 @@ export function parseCreditFile(txt) {
 
     return {
       ...obj,
-      week: getSunday(obj['date']), // date of the sunday that week
+      week: moment(obj['date']).day(0).format('YYYY-MM-DD'), // date of the Sunday of that week
+      month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
       amount: parseFloat(obj['amount']),
       category: CATEGORIES.UNCLASSIFIED,

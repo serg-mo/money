@@ -127,12 +127,10 @@ export default function CreditChart({ transactions }) {
     },
   };
 
-  const allMonths = Object.keys(
-    groupBy(transactions, (row) => row['date'].substring(0, 7)) // year-month
-  );
+  const allMonths = Object.keys(groupBy(transactions, 'month')); // year-month
 
   // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
-  const categories = groupBy(transactions, (row) => row['category']);
+  const categories = groupBy(transactions, 'category');
 
   const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
@@ -157,10 +155,7 @@ export default function CreditChart({ transactions }) {
 
   const datasets = categoryTotals.map(
     ({ category, avg, categoryTransactions }) => {
-      // "2022-08-30" -> "2022-08"
-      const months = groupBy(categoryTransactions, (row) =>
-        row['date'].substring(0, 7)
-      );
+      const months = groupBy(categoryTransactions, 'month');
 
       // there needs to be a value for every year-month, even if it's 0
       const data = allMonths.map((month) => ({
