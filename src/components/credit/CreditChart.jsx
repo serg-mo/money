@@ -38,8 +38,10 @@ const BUDGET_BARE =
 
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-export default function CreditChart({ transactions, x = 'week' }) {
+export default function CreditChart({ transactions, x }) {
   // TODO: only show annotations when showing multiple categories
+  // TODO: I should have a file for important dates, like when I moved in and out of SF
+  // NOTE: credit card csv only has one year worth of data, which is all I need, really
   const annotations = [
     {
       type: 'line',

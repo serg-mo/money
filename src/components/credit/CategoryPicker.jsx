@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  CATEGORIES,
   COLORS,
-  formatConfidence,
-  getOpacity,
+  formatConfidence
 } from '../../utils/credit';
 
 // TODO: scale categories by their respective rule sizes, i.e., many examples - bigger scale
@@ -22,8 +20,8 @@ export default function CategoryPicker({ transaction, onClick }) {
         // confidence ? "bg-gray-400" : "",
 
         const className = [
-          'my-1 rounded-md bg-gray-200 cursor-pointer p-1 hover:opacity-100',
-          isCurrent ? 'border-2 border-gray-500' : '',
+          'my-1 rounded-md bg-gray-300 cursor-pointer p-1 hover:opacity-100',
+          isCurrent ? 'opacity-100' : 'opacity-20',
         ].join(' ');
 
         return (

@@ -44,7 +44,6 @@ export default function Frame({
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  // TODO: consider having a timeout that plays one second per month and just loops through the whole thing
   const slice = transactions.slice(left, left + size);
   //console.log(`[${left},${size}] ${slice.length}/${transactions.length}`);
 
