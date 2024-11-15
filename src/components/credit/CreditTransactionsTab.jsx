@@ -27,7 +27,7 @@ export default function CreditTransactionsTab({ transactions }) {
       : transactions;
 
   return (
-    <div className="w-3/4 font-mono text-xs">
+    <div className="w-full font-mono text-xs">
       <div className="flex flex-row justify-center space-x-4">
         <div className="flex bg-gray-200 rounded-full p-1">
           {options.map((option) => (
