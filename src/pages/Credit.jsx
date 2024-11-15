@@ -54,10 +54,11 @@ export default function Credit({ txt }) {
     return;
   }
 
+  // NOTE: start at full length and shrink from there
   return (
     <CreditContext.Provider value={context}>
       <CreditClassifier />
-      <Frame transactions={transactions} initialSize={100}>
+      <Frame transactions={transactions} initialSize={transactions.length}>
         {(slice) => <CreditTransactionsTab transactions={slice} />}
       </Frame>
     </CreditContext.Provider>
