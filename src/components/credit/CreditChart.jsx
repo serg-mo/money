@@ -36,6 +36,7 @@ const BUDGET_TOTAL = Object.values(BUDGET).reduce(
 const BUDGET_BARE =
   BUDGET_TOTAL - BUDGET['RESTAURANT'] - BUDGET['SHOPPING'] - BUDGET['TRAVEL'];
 
+// TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
 export default function CreditChart({ transactions, x }) {
