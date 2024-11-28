@@ -30,7 +30,10 @@ export default function Transaction({ onClick, ...t }) {
           {onClick && <CategoryPicker transaction={t} onClick={onClick} />}
         </div>
       </td>
-      <td className="px-2 py-4 text-center">
+      <td
+        className="px-2 py-4 text-center"
+        title={moment(t['date']).format('MMM D')}
+      >
         {moment(t['date']).format('YYYY-MM-DD')}
       </td>
       <td className="px-2 py-4 text-center">${formatAmount(t['amount'])}</td>
