@@ -47,6 +47,8 @@ export default function CreditTransactions({
       <ChevronDownIcon className="inline w-4 h-4 ml-1" />
     );
 
+  const total = transactions.reduce((sum, { amount }) => sum - amount, 0); // amounts are negative
+
   if (!transactions.length) {
     return;
   }
@@ -55,8 +57,15 @@ export default function CreditTransactions({
     <table className="mx-auto my-2 border-collapse border border-slate-600">
       <thead>
         <tr>
-          <th colSpan={5} className="uppercase">
-            {title ?? 'All'} ({transactions.length})
+          <th colSpan={Object.keys(columnsWidths).length} className="uppercase">
+            <div className="flex flex-row justify-center space-x-4">
+              <div>{title ?? 'All'}</div>
+              <div>Count {transactions.length}</div>
+              <div>Total ${Math.round(total).toLocaleString()}</div>
+              <div>
+                Avg ${Math.round(total / transactions.length).toLocaleString()}
+              </div>
+            </div>
           </th>
         </tr>
         <tr>

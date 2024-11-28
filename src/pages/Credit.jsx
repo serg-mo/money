@@ -1,4 +1,3 @@
-import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import CreditClassifier from '../components/credit/CreditClassifier';
 import CreditTransactionsTab from '../components/credit/CreditTransactionsTab';
@@ -20,9 +19,8 @@ export default function Credit({ txt }) {
   // TODO: see if my weekly spending is more predictable
   useEffect(() => {
     if (txt && !transactions.length) {
-      const cutoff = moment().subtract(12, 'months').format('YYYY-MM-DD');
-      const filterFn = (row) =>
-        row['transaction'] === 'DEBIT' && row['date'] >= cutoff; // exlcude payments and refunds
+      // TODO: I don't want to classify the refunds, find a way to remove those charges
+      const filterFn = (row) => row['transaction'] === 'DEBIT'; // charges only
 
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }
