@@ -40,12 +40,15 @@ const BUDGET_BARE =
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
 export default function CreditChart({ transactions, x }) {
-  // there needs to be a value for every x, even if it's 0
+  // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, x));
+  console.log(x)
+
 
   // TODO: pass annotations into this component
   // TODO: only show annotations when showing multiple categories
   // TODO: I should have a file for important dates, like when I moved in and out of SF
+  // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
   // NOTE: credit card csv only has one year worth of data, which is all I need, really
   const annotations = [
     {
@@ -107,9 +110,7 @@ export default function CreditChart({ transactions, x }) {
           },
         },
       },
-      annotation: {
-        annotations,
-      },
+      annotation: x === 'month' ? { annotations } : {},
     },
     scales: {
       x: { stacked: false }, // must be false
