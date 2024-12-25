@@ -30,12 +30,13 @@ export const CATEGORIES = {
   UNCLASSIFIED: 'UNCLASSIFIED',
 };
 
-export const BUDGET = {
-  GROCERY: 800,
-  UTILITIES: 500,
-  HEALTH: 600,
-  CAR: 300,
-  PET: 300,
+// TODO: rename to monthly budget
+export const BUDGET_MONTHLY = {
+  GROCERY: 900,
+  UTILITIES: 200,
+  PET: 600,
+  CAR: 150,
+  HEALTH: 100,
 
   RESTAURANT: 300,
   SHOPPING: 200,
@@ -44,6 +45,13 @@ export const BUDGET = {
   OTHER: 0,
   UNCLASSIFIED: 0,
 };
+
+export const BUDGET_TOTAL = Object.values(BUDGET_MONTHLY)
+  .reduce((acc, amount) => acc + amount, 0);
+
+export const BUDGET_BARE =
+  BUDGET_TOTAL - BUDGET_MONTHLY['RESTAURANT'] - BUDGET_MONTHLY['SHOPPING'] - BUDGET_MONTHLY['TRAVEL'];
+
 
 // stacked chart datasets appear in this order
 export const COLORS = {

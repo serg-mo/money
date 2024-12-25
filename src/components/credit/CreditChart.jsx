@@ -1,6 +1,6 @@
 import { groupBy, sumBy } from 'lodash';
 import React from 'react';
-import { BUDGET, COLORS } from '../../utils/credit';
+import { COLORS } from '../../utils/credit';
 
 import {
   CategoryScale,
@@ -29,55 +29,17 @@ ChartJS.register(
   Legend
 );
 
-const BUDGET_TOTAL = Object.values(BUDGET).reduce(
-  (acc, amount) => acc + amount,
-  0
-);
-const BUDGET_BARE =
-  BUDGET_TOTAL - BUDGET['RESTAURANT'] - BUDGET['SHOPPING'] - BUDGET['TRAVEL'];
-
 // TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-export default function CreditChart({ transactions, x }) {
+export default function CreditChart({ transactions, x, annotations }) {
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, x));
-  console.log(x)
+  // console.log(x)
 
-
-  // TODO: pass annotations into this component
-  // TODO: only show annotations when showing multiple categories
   // TODO: I should have a file for important dates, like when I moved in and out of SF
   // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
   // NOTE: credit card csv only has one year worth of data, which is all I need, really
-  const annotations = [
-    {
-      type: 'line',
-      mode: 'horizontal',
-      scaleID: 'y',
-      label: {
-        content: `BUDGET ${BUDGET_TOTAL}`,
-        display: true,
-        position: 'start',
-      },
-      value: BUDGET_TOTAL,
-      borderColor: 'red',
-      borderWidth: 2,
-    },
-    {
-      type: 'line',
-      mode: 'horizontal',
-      scaleID: 'y',
-      label: {
-        content: `BARE ${BUDGET_BARE}`,
-        display: true,
-        position: 'start',
-      },
-      value: BUDGET_BARE,
-      borderColor: 'red',
-      borderWidth: 2,
-    },
-  ];
 
   const options = {
     responsive: true,
@@ -110,7 +72,7 @@ export default function CreditChart({ transactions, x }) {
           },
         },
       },
-      annotation: x === 'month' ? { annotations } : {},
+      annotation: { annotations },
     },
     scales: {
       x: { stacked: false }, // must be false

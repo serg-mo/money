@@ -1,15 +1,33 @@
 import { groupBy, sumBy } from 'lodash';
 import React, { useContext, useState } from 'react';
-import { CreditContext } from '../../utils/credit';
+import { BUDGET_BARE, BUDGET_MONTHLY, BUDGET_TOTAL, CreditContext } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
 import CreditChart from './CreditChart';
 import CreditTransactions from './CreditTransactions';
 
 const options = ['week', 'month']; // must be a prop of transaction
 
+const makeAnnotation = (name, value) => ({
+  type: 'line',
+  mode: 'horizontal',
+  scaleID: 'y',
+  label: {
+    content: `${name}: ${value}`,
+    display: true,
+    position: 'start',
+  },
+  value: value,
+  borderColor: 'red', // COLORS[tab] || 'blue',
+  borderWidth: 2,
+});
+
+// budgets are monthly by default, convert to weekly
+const convertBudget = (value, type) =>
+  type === 'month' ? value : Math.round((value * 12) / 52);
+
 // TODO: two pies, total and average spending per category
 export default function CreditTransactionsTab({ transactions }) {
-  const [x, setX] = useState('month');
+  const [x, setX] = useState('month'); // TODO: week | month
   const { onCategorize, tab } = useContext(CreditContext);
 
   const categories = groupBy(transactions, (row) => row['category']);
@@ -25,6 +43,14 @@ export default function CreditTransactionsTab({ transactions }) {
     tab && tab !== 'ALL'
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
+
+  const annotations =
+    tab && tab !== 'ALL'
+      ? [makeAnnotation('BUDGET', convertBudget(BUDGET_MONTHLY[tab], x))]
+      : [
+        makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
+        makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
+      ];
 
   return (
     <div className="w-full font-mono text-xs">
@@ -42,7 +68,11 @@ export default function CreditTransactionsTab({ transactions }) {
           ))}
         </div>
       </div>
-      <CreditChart transactions={filteredTransactions} x={x} />
+      <CreditChart
+        transactions={filteredTransactions}
+        x={x}
+        annotations={annotations}
+      />
       <CategoryTabs />
       <CreditTransactions
         title={tab}
