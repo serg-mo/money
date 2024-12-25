@@ -30,6 +30,7 @@ export const CATEGORIES = {
   UNCLASSIFIED: 'UNCLASSIFIED',
 };
 
+// TODO: rename to monthly budget
 export const BUDGET = {
   GROCERY: 800,
   UTILITIES: 500,
