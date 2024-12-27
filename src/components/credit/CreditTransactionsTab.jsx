@@ -1,19 +1,11 @@
 import { groupBy, sumBy } from 'lodash';
 import React, { useContext, useState } from 'react';
-import { BUDGET, CreditContext } from '../../utils/credit';
+import { BUDGET_BARE, BUDGET_MONTHLY, BUDGET_TOTAL, CreditContext } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
 import CreditChart from './CreditChart';
 import CreditTransactions from './CreditTransactions';
 
 const options = ['week', 'month']; // must be a prop of transaction
-
-const BUDGET_TOTAL = Object.values(BUDGET).reduce(
-  (acc, amount) => acc + amount,
-  0
-);
-
-const BUDGET_BARE =
-  BUDGET_TOTAL - BUDGET['RESTAURANT'] - BUDGET['SHOPPING'] - BUDGET['TRAVEL'];
 
 const makeAnnotation = (name, value) => ({
   type: 'line',
@@ -54,11 +46,11 @@ export default function CreditTransactionsTab({ transactions }) {
 
   const annotations =
     tab && tab !== 'ALL'
-      ? [makeAnnotation('BUDGET', convertBudget(BUDGET[tab], x))]
+      ? [makeAnnotation('BUDGET', convertBudget(BUDGET_MONTHLY[tab], x))]
       : [
-          makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
-          makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
-        ];
+        makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
+        makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
+      ];
 
   return (
     <div className="w-full font-mono text-xs">
