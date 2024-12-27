@@ -33,7 +33,6 @@ const makeAnnotation = (name, value) => ({
 const convertBudget = (value, type) =>
   type === 'month' ? value : Math.round((value * 12) / 52);
 
-
 // TODO: two pies, total and average spending per category
 export default function CreditTransactionsTab({ transactions }) {
   const [x, setX] = useState('month'); // TODO: week | month
@@ -53,14 +52,13 @@ export default function CreditTransactionsTab({ transactions }) {
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
 
-
   const annotations =
     tab && tab !== 'ALL'
       ? [makeAnnotation('BUDGET', convertBudget(BUDGET[tab], x))]
       : [
-        makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
-        makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
-      ];
+          makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
+          makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
+        ];
 
   return (
     <div className="w-full font-mono text-xs">
