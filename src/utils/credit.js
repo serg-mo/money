@@ -15,6 +15,7 @@ export const CreditContext = createContext();
 // TODO: make a map for category, budget, and color
 
 // NOTE: match the order of COLORS, so tabs match datasets in the chart
+// TODO: come up with an easy way to set this up at the beginning
 export const CATEGORIES = {
   GROCERY: 'GROCERY',
   UTILITIES: 'UTILITIES', // includes subscriptions, gym
@@ -29,29 +30,6 @@ export const CATEGORIES = {
   OTHER: 'OTHER', // includes gifts
   UNCLASSIFIED: 'UNCLASSIFIED',
 };
-
-// TODO: rename to monthly budget
-export const BUDGET_MONTHLY = {
-  GROCERY: 900,
-  UTILITIES: 200,
-  PET: 600,
-  CAR: 150,
-  HEALTH: 100,
-
-  RESTAURANT: 300,
-  SHOPPING: 200,
-  TRAVEL: 0,
-
-  OTHER: 0,
-  UNCLASSIFIED: 0,
-};
-
-export const BUDGET_TOTAL = Object.values(BUDGET_MONTHLY)
-  .reduce((acc, amount) => acc + amount, 0);
-
-export const BUDGET_BARE =
-  BUDGET_TOTAL - BUDGET_MONTHLY['RESTAURANT'] - BUDGET_MONTHLY['SHOPPING'] - BUDGET_MONTHLY['TRAVEL'];
-
 
 // stacked chart datasets appear in this order
 export const COLORS = {
@@ -86,11 +64,7 @@ export function getCategory(name, rules) {
   );
 
   // rules is a name => category mapping
-  if (match) {
-    return match[1]; // category
-  }
-
-  return CATEGORIES.UNCLASSIFIED;
+  return match ? match[1] : CATEGORIES.UNCLASSIFIED;
 }
 
 export function formatAmount(amount) {

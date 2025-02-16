@@ -128,6 +128,7 @@ export default function CreditClassifier() {
     return { classes, examples };
   };
 
+  // TODO: consider getting rid of classifier completely, it is nice at the beginning though
   // NOTE: the curse of dimentionality, more dimensions => very tighly distributed distances among vectors
   const predictOne = async (transaction) => {
     // NOTE: must be a tensor + string label

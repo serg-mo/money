@@ -49,7 +49,6 @@ export default function CreditChart({ transactions, x, annotations }) {
       mode: 'index',
     },
     plugins: {
-      legend: true,
       tooltip: {
         callbacks: {
           label: (item) => {

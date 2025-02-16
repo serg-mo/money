@@ -1,6 +1,6 @@
-import { groupBy, sumBy } from 'lodash';
+import { groupBy } from 'lodash';
 import React, { useContext, useState } from 'react';
-import { BUDGET_BARE, BUDGET_MONTHLY, BUDGET_TOTAL, CreditContext } from '../../utils/credit';
+import { CreditContext } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
 import CreditChart from './CreditChart';
 import CreditTransactions from './CreditTransactions';
@@ -21,36 +21,25 @@ const makeAnnotation = (name, value) => ({
   borderWidth: 2,
 });
 
-// budgets are monthly by default, convert to weekly
-const convertBudget = (value, type) =>
-  type === 'month' ? value : Math.round((value * 12) / 52);
-
 // TODO: two pies, total and average spending per category
 export default function CreditTransactionsTab({ transactions }) {
   const [x, setX] = useState('month'); // TODO: week | month
   const { onCategorize, tab } = useContext(CreditContext);
-
-  const categories = groupBy(transactions, (row) => row['category']);
-  const categoryTotals = Object.entries(categories).map(
-    ([category, categoryTransactions]) => {
-      const total = -1 * sumBy(categoryTransactions, 'amount');
-      return { category, total, categoryTransactions };
-    }
-  );
-  categoryTotals.sort((a, b) => b.total - a.total); // desc
 
   const filteredTransactions =
     tab && tab !== 'ALL'
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
 
-  const annotations =
-    tab && tab !== 'ALL'
-      ? [makeAnnotation('BUDGET', convertBudget(BUDGET_MONTHLY[tab], x))]
-      : [
-        makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
-        makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
-      ];
+  // TODO: ideally the annotation updates with visible datasets
+  const allXs = Object.keys(groupBy(filteredTransactions, x));
+  const total = filteredTransactions.reduce(
+    (prev, { amount }) => prev - amount,
+    0
+  ); // amounts are negative
+  const avg = Math.round(total / allXs.length);
+
+  const annotations = [makeAnnotation(tab ?? 'BUDGET', avg)];
 
   return (
     <div className="w-full font-mono text-xs">
@@ -81,10 +70,6 @@ export default function CreditTransactionsTab({ transactions }) {
       />
     </div>
   );
-
-  // console.log(
-  //   categoryTotals.map(({ category, total }) => ({ category, total })),
-  // );
 
   // TODO: it would be nice to sync dataset visibility with tab content
 }
