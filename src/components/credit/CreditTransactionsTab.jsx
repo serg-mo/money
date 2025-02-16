@@ -34,19 +34,12 @@ export default function CreditTransactionsTab({ transactions }) {
   // TODO: ideally the annotation updates with visible datasets
   const allXs = Object.keys(groupBy(filteredTransactions, x));
   const total = filteredTransactions.reduce(
-    (prev, curr) => prev - curr.amount,
+    (prev, { amount }) => prev - amount,
     0
   ); // amounts are negative
   const avg = Math.round(total / allXs.length);
 
   const annotations = [makeAnnotation(tab ?? 'BUDGET', avg)];
-  // const annotations =
-  //   tab && tab !== 'ALL'
-  //     ? [makeAnnotation('BUDGET', convertBudget(BUDGET_MONTHLY[tab], x))]
-  //     : [
-  //       makeAnnotation('TOTAL', convertBudget(BUDGET_TOTAL, x)),
-  //       makeAnnotation('BARE', convertBudget(BUDGET_BARE, x)),
-  //     ];
 
   return (
     <div className="w-full font-mono text-xs">
