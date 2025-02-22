@@ -34,7 +34,7 @@ const makeAnnotation = (name, value) => ({
   mode: 'horizontal',
   scaleID: 'y',
   label: {
-    content: `${name}: ${value}`,
+    content: `${name}: ${Math.round(value)}`,
     display: true,
     position: 'start',
   },
@@ -51,11 +51,10 @@ const makeAnnotation = (name, value) => ({
 export default function CreditChart({ transactions, x }) {
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, x));
-  // console.log(x)
 
-  // amounts are negative
-  const total = transactions.reduce((prev, { amount }) => prev - amount, 0);
-  const avg = Math.round(total / allXs.length);
+  const total = transactions.reduce((prev, { amount }) => prev - amount, 0); // amounts are negative
+  const avg = total / allXs.length;
+  // console.log({ x, allXs, total, avg })
 
   const [annotations, setAnnotations] = useState([makeAnnotation('AVG', avg)]);
 
