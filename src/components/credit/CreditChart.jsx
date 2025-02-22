@@ -1,5 +1,5 @@
 import { groupBy, sumBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { COLORS } from '../../utils/credit';
 
 import {
@@ -51,12 +51,17 @@ const makeAnnotation = (name, value) => ({
 export default function CreditChart({ transactions, x }) {
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, x));
+  const [annotations, setAnnotations] = useState([]);
 
-  const total = transactions.reduce((prev, { amount }) => prev - amount, 0); // amounts are negative
-  const avg = total / allXs.length;
-  // console.log({ x, allXs, total, avg })
+  useEffect(() => {
+    // TODO: this counts all datasets, including the hidden ones
+    const total = transactions.reduce((prev, { amount }) => prev - amount, 0); // amounts are negative
+    const avg = total / allXs.length;
+    // console.log({ x, allXs, total, avg })
 
-  const [annotations, setAnnotations] = useState([makeAnnotation('AVG', avg)]);
+    setAnnotations([makeAnnotation('AVG', avg)])
+  }, [transactions, x])
+
 
   // TODO: I should have a file for important dates, like when I moved in and out of SF
   // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
