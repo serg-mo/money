@@ -1,5 +1,5 @@
 import { groupBy, sumBy } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { COLORS } from '../../utils/credit';
 
 import {
@@ -29,10 +29,28 @@ ChartJS.register(
   Legend
 );
 
+const makeAnnotation = (name, value) => ({
+  type: 'line',
+  mode: 'horizontal',
+  scaleID: 'y',
+  label: {
+    content: `${name}: ${value}`,
+    display: true,
+    position: 'start',
+  },
+  value: value,
+  borderColor: 'red', // COLORS[tab] || 'blue',
+  borderWidth: 2,
+});
+
+
+
 // TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-export default function CreditChart({ transactions, x, annotations }) {
+export default function CreditChart({ transactions, x }) {
+  const [annotations, setAnnotations] = useState([]);
+
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, x));
   // console.log(x)
@@ -40,6 +58,52 @@ export default function CreditChart({ transactions, x, annotations }) {
   // TODO: I should have a file for important dates, like when I moved in and out of SF
   // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
   // NOTE: credit card csv only has one year worth of data, which is all I need, really
+  // show datasets in order of COLORS
+  // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
+  const categories = groupBy(transactions, 'category');
+
+  const categoryTotals = Object.entries(categories).map(
+    ([category, categoryTransactions]) => {
+      const total = -1 * sumBy(categoryTransactions, 'amount');
+      return {
+        category,
+        total,
+        avg: total / allXs.length,
+        categoryTransactions,
+      };
+    }
+  );
+  // TODO: sort by most recent x
+  // categoryTotals.sort((a, b) => b.total - a.total); // desc
+
+  const COLORS_ORDER = Object.keys(COLORS);
+
+  categoryTotals.sort((a, b) => COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category));
+
+  // must go above options
+  const datasets = categoryTotals.map(
+    ({ category, avg, categoryTransactions }) => {
+      const groups = groupBy(categoryTransactions, x);
+
+      // there needs to be a value for every x, even if it's 0
+      const data = allXs.map((value) => ({
+        x: value,
+        y: groups[value] ? -1 * sumBy(groups[value], 'amount') : 0,
+      }));
+
+      // TODO: what I want is the sum of averages of visible datasets
+      return {
+        label: category, // NOTE: each category is a separate dataset
+        data,
+        fill: 'start',
+        pointStyle: 'rect',
+        hidden: false,
+        borderColor: COLORS[category],
+        backgroundColor: COLORS[category],
+      };
+    }
+  );
+
 
   const options = {
     responsive: true,
@@ -72,6 +136,23 @@ export default function CreditChart({ transactions, x, annotations }) {
         },
       },
       annotation: { annotations },
+      legend: {
+        onClick: (_, { datasetIndex }, { chart }) => {
+          chart.getDatasetMeta(datasetIndex).hidden = !chart.getDatasetMeta(datasetIndex).hidden
+
+          const visibleData = chart.data.datasets
+            .filter((_, i) => !chart.getDatasetMeta(i).hidden)
+            .map(dataset => dataset.data)
+            .flat()
+
+          const total = Math.round(visibleData.reduce((sum, { y }) => sum + y, 0));
+          const avg = Math.round(total / allXs.length);
+          // console.log({ total, avg });
+
+          setAnnotations([makeAnnotation('AVG', avg)]);
+          chart.update();
+        },
+      },
     },
     scales: {
       x: { stacked: false }, // must be false
@@ -98,52 +179,7 @@ export default function CreditChart({ transactions, x, annotations }) {
     },
   };
 
-  // TODO: if there is only a single catagory, then group by NAME, i.e., vendor
-  const categories = groupBy(transactions, 'category');
 
-  const categoryTotals = Object.entries(categories).map(
-    ([category, categoryTransactions]) => {
-      const total = -1 * sumBy(categoryTransactions, 'amount');
-      return {
-        category,
-        total,
-        avg: total / allXs.length,
-        categoryTransactions,
-      };
-    }
-  );
-  // TODO: sort by most recent x
-  // categoryTotals.sort((a, b) => b.total - a.total); // desc
-
-  // show datasets in order of COLORS
-  const COLORS_ORDER = Object.keys(COLORS);
-  categoryTotals.sort(
-    (a, b) =>
-      COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category)
-  );
-
-  const datasets = categoryTotals.map(
-    ({ category, avg, categoryTransactions }) => {
-      const groups = groupBy(categoryTransactions, x);
-
-      // there needs to be a value for every x, even if it's 0
-      const data = allXs.map((value) => ({
-        x: value,
-        y: groups[value] ? -1 * sumBy(groups[value], 'amount') : 0,
-      }));
-
-      // TODO: what I want is the sum of averages of visible datasets
-      return {
-        label: category, // NOTE: dataset name must match category name
-        data,
-        fill: 'start',
-        pointStyle: 'rect',
-        hidden: false,
-        borderColor: COLORS[category],
-        backgroundColor: COLORS[category],
-      };
-    }
-  );
 
   return <Line options={options} data={{ datasets }} />;
 }

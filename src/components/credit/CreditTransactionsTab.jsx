@@ -1,4 +1,3 @@
-import { groupBy } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { CreditContext } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
@@ -6,20 +5,6 @@ import CreditChart from './CreditChart';
 import CreditTransactions from './CreditTransactions';
 
 const options = ['week', 'month']; // must be a prop of transaction
-
-const makeAnnotation = (name, value) => ({
-  type: 'line',
-  mode: 'horizontal',
-  scaleID: 'y',
-  label: {
-    content: `${name}: ${value}`,
-    display: true,
-    position: 'start',
-  },
-  value: value,
-  borderColor: 'red', // COLORS[tab] || 'blue',
-  borderWidth: 2,
-});
 
 // TODO: two pies, total and average spending per category
 export default function CreditTransactionsTab({ transactions }) {
@@ -30,16 +15,6 @@ export default function CreditTransactionsTab({ transactions }) {
     tab && tab !== 'ALL'
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
-
-  // TODO: ideally the annotation updates with visible datasets
-  const allXs = Object.keys(groupBy(filteredTransactions, x));
-  const total = filteredTransactions.reduce(
-    (prev, { amount }) => prev - amount,
-    0
-  ); // amounts are negative
-  const avg = Math.round(total / allXs.length);
-
-  const annotations = [makeAnnotation(tab ?? 'BUDGET', avg)];
 
   return (
     <div className="w-full font-mono text-xs">
@@ -57,11 +32,7 @@ export default function CreditTransactionsTab({ transactions }) {
           ))}
         </div>
       </div>
-      <CreditChart
-        transactions={filteredTransactions}
-        x={x}
-        annotations={annotations}
-      />
+      <CreditChart transactions={filteredTransactions} x={x} />
       <CategoryTabs />
       <CreditTransactions
         title={tab}
