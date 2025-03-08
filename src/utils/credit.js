@@ -16,35 +16,22 @@ export const CreditContext = createContext();
 
 // NOTE: match the order of COLORS, so tabs match datasets in the chart
 // TODO: come up with an easy way to set this up at the beginning
-export const CATEGORIES = {
-  GROCERY: 'GROCERY',
-  UTILITIES: 'UTILITIES', // includes subscriptions, gym
-  HEALTH: 'HEALTH', // includes insurance
-  PET: 'PET',
-  CAR: 'CAR',
-
-  RESTAURANT: 'RESTAURANT',
-  SHOPPING: 'SHOPPING',
-  TRAVEL: 'TRAVEL', // includes taxi, flight, hotel, car, and activities
-
-  OTHER: 'OTHER', // includes gifts
-  UNCLASSIFIED: 'UNCLASSIFIED',
-};
+// TODO: show health > insurance vs pharmacy or utilities: subscriptions vs gym, or travel: flight, hotel, car, activities
 
 // stacked chart datasets appear in this order
 export const COLORS = {
-  [CATEGORIES.GROCERY]: 'rgb(3, 4, 94)',
-  [CATEGORIES.UTILITIES]: 'rgb(0, 119, 182)',
-  [CATEGORIES.HEALTH]: 'rgb(0, 180, 216)',
-  [CATEGORIES.PET]: 'rgb(144, 224, 239)',
-  [CATEGORIES.CAR]: 'rgb(202, 240, 248)',
+  ['GROCERY']: 'rgb(3, 4, 94)',
+  ['UTILITIES']: 'rgb(0, 119, 182)',
+  ['HEALTH']: 'rgb(0, 180, 216)',
+  ['PET']: 'rgb(144, 224, 239)',
+  ['CAR']: 'rgb(202, 240, 248)',
 
-  [CATEGORIES.RESTAURANT]: 'rgb(255, 102, 0)',
-  [CATEGORIES.SHOPPING]: 'rgb(255, 128, 51)',
-  [CATEGORIES.TRAVEL]: 'rgb(255, 153, 102)',
+  ['RESTAURANT']: 'rgb(255, 102, 0)',
+  ['SHOPPING']: 'rgb(255, 128, 51)',
+  ['TRAVEL']: 'rgb(255, 153, 102)',
 
-  [CATEGORIES.OTHER]: 'rgb(142, 142, 142)',
-  [CATEGORIES.UNCLASSIFIED]: 'rgb(85, 85, 85)',
+  ['OTHER']: 'rgb(142, 142, 142)',
+  ['UNCLASSIFIED']: 'rgb(85, 85, 85)',
 };
 
 // TODO: make a constants file
@@ -64,7 +51,7 @@ export function getCategory(name, rules) {
   );
 
   // rules is a name => category mapping
-  return match ? match[1] : CATEGORIES.UNCLASSIFIED;
+  return match ? match[1] : "UNCLASSIFIED";
 }
 
 export function formatAmount(amount) {
@@ -102,7 +89,7 @@ export function parseCreditFile(txt) {
       month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
       amount: parseFloat(obj['amount']),
-      category: CATEGORIES.UNCLASSIFIED,
+      category: "UNCLASSIFIED",
       location: obj['name'].substring(MIN_NAME_LENGTH).trim(),
       normalizedName: normalizedName,
       vector: nameToVector(normalizedName),

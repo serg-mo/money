@@ -2,7 +2,7 @@ import * as KNNClassifier from '@tensorflow-models/knn-classifier';
 import { tensor } from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl'; // this is important
 import React, { useContext, useEffect, useState } from 'react';
-import { CATEGORIES, CreditContext } from '../../utils/credit';
+import { COLORS, CreditContext } from '../../utils/credit';
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(
@@ -69,7 +69,7 @@ export default function CreditClassifier() {
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: use context to access transactions and classifier
-  const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
+  const MIN_EXAMPLES = Object.keys(COLORS).length; // at least one per category
 
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);
 
@@ -183,10 +183,6 @@ export default function CreditClassifier() {
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
 
-  const resetState = () => {
-    classifier.clearAllClasses();
-    setManualCategories({});
-  };
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -195,27 +191,18 @@ export default function CreditClassifier() {
   // TODO: it would be nice to see a progress icon for this
   const { classes, examples } = getClassifierStats();
 
-  const buttonClass =
-    'm-2 py-1 px-2 text-l text-slate bg-blue-300 hover:bg-blue-600 rounded-xl';
+  const resetState = () => {
+    classifier.clearAllClasses();
+    setManualCategories({});
+  };
 
-  return;
-
-  // return (
-  //   <>
-  //     <div className="flex flex-row justify-center">
-  //       <button
-  //         className={buttonClass}
-  //         onClick={() => confirm('Are you sure?') && resetState()}
-  //       >
-  //         Reset
-  //       </button>
-  //     </div>
-  //     <div className="text-center">
-  //       <div>{`${classes}/${Object.values(CATEGORIES).length} classes`}</div>
-  //       <div>{`${examples} examples (${MIN_EXAMPLES} min)`}</div>
-  //       <div>{`${Object.values(manualCategories).length} manual`}</div>
-  //       <div>{`neighborhood size ${neighborhoodSize}`}</div>
-  //     </div>
-  //   </>
-  // );
+  return (
+    <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
+      <div className='px-2'>{classes}/{Object.keys(COLORS).length} categories</div>
+      <div className='px-2'>{examples} examples [{MIN_EXAMPLES} min]</div>
+      <div className='px-2'>{Object.values(manualCategories).length} manual</div>
+      <div className='px-2'>{neighborhoodSize} neighborhood</div>
+      <div className='px-2'><a className="cursor-pointer" onClick={() => confirm('Are you sure?') && resetState()}>Reset</a></div>
+    </div>
+  );
 }

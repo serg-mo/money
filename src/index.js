@@ -1,25 +1,18 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Route, HashRouter as Router, Routes } from 'react-router-dom';
-import Brokerage from './pages/Brokerage';
-import Credit from './pages/Credit';
-import Home from './pages/Home';
-import Layout from './pages/Layout';
+import DragAndDrop from './components/DragAndDrop';
+import FilesMenu from './components/FilesMenu';
 
 import '../styles/tailwind.css';
 
 // NOTE: Github pages do not support BrowserRouter, hence HashRouter
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="brokerage" element={<Brokerage />} />
-          <Route path="credit" element={<Credit />} />
-        </Route>
-      </Routes>
-    </Router>
+    <div className="flex flex-col justify-center items-center">
+      <DragAndDrop>
+        <FilesMenu />
+      </DragAndDrop>
+    </div>
   );
 }
 

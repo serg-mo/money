@@ -8,7 +8,7 @@ import usePersisedState from '../utils/usePersistedState';
 export default function Credit({ txt }) {
   const [context, setContext] = useState({});
 
-  const [tab, setTab] = useState(undefined); // TODO: type CATEGORIES,
+  const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
     {},
@@ -43,8 +43,6 @@ export default function Credit({ txt }) {
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
     const key = JSON.stringify(transaction['vector']); // must be unique, for unserialized vector access
-    // console.log({ key, category });
-
     setManualCategories({ ...manualCategories, [key]: category });
   };
 
