@@ -43,8 +43,6 @@ const makeAnnotation = (name, value) => ({
   borderWidth: 2,
 });
 
-
-
 // TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
@@ -59,9 +57,8 @@ export default function CreditChart({ transactions, x }) {
     const avg = total / allXs.length;
     // console.log({ x, allXs, total, avg })
 
-    setAnnotations([makeAnnotation('AVG', avg)])
-  }, [transactions, x])
-
+    setAnnotations([makeAnnotation('AVG', avg)]);
+  }, [transactions, x]);
 
   // TODO: I should have a file for important dates, like when I moved in and out of SF
   // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
@@ -86,7 +83,10 @@ export default function CreditChart({ transactions, x }) {
 
   const COLORS_ORDER = Object.keys(COLORS);
 
-  categoryTotals.sort((a, b) => COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category));
+  categoryTotals.sort(
+    (a, b) =>
+      COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category)
+  );
 
   // must go above options
   const datasets = categoryTotals.map(
@@ -111,7 +111,6 @@ export default function CreditChart({ transactions, x }) {
       };
     }
   );
-
 
   const options = {
     responsive: true,
@@ -146,14 +145,17 @@ export default function CreditChart({ transactions, x }) {
       annotation: { annotations },
       legend: {
         onClick: (_, { datasetIndex }, { chart }) => {
-          chart.getDatasetMeta(datasetIndex).hidden = !chart.getDatasetMeta(datasetIndex).hidden
+          chart.getDatasetMeta(datasetIndex).hidden =
+            !chart.getDatasetMeta(datasetIndex).hidden;
 
           const visibleData = chart.data.datasets
             .filter((_, i) => !chart.getDatasetMeta(i).hidden)
-            .map(dataset => dataset.data)
-            .flat()
+            .map((dataset) => dataset.data)
+            .flat();
 
-          const total = Math.round(visibleData.reduce((sum, { y }) => sum + y, 0));
+          const total = Math.round(
+            visibleData.reduce((sum, { y }) => sum + y, 0)
+          );
           const avg = Math.round(total / allXs.length);
           // console.log({ total, avg });
 
@@ -186,8 +188,6 @@ export default function CreditChart({ transactions, x }) {
       }
     },
   };
-
-
 
   return <Line options={options} data={{ datasets }} />;
 }

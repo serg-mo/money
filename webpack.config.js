@@ -2,12 +2,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 // TODO: I want to "npm run serve -f path/to/csv" so I don't have to upload the file on local
-module.exports = {
+module.exports = (env, argv) => ({
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'docs'),
-    publicPath: 'auto',
-    // publicPath: "https://serg-mo.github.io/money-charts/",
+    publicPath: argv.mode === 'production'
+      ? 'https://serg-mo.github.io/money/'
+      : 'auto',
     filename: 'bundle.js',
     clean: true,
   },
@@ -43,4 +44,4 @@ module.exports = {
     hot: true,
     // historyApiFallback: true,
   },
-};
+});
