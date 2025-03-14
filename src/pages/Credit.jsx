@@ -43,8 +43,6 @@ export default function Credit({ txt }) {
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
     const key = JSON.stringify(transaction['vector']); // must be unique, for unserialized vector access
-    // console.log({ key, category });
-
     setManualCategories({ ...manualCategories, [key]: category });
   };
 
