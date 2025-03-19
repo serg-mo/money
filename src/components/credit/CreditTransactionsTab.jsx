@@ -17,6 +17,8 @@ export default function CreditTransactionsTab({ transactions }) {
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
 
+  const groupByKey = tab && tab !== 'ALL' ? "name" : "category";
+
   return (
     <div className="w-full font-mono text-xs">
       <div className="flex flex-row justify-center space-x-4">
@@ -33,7 +35,7 @@ export default function CreditTransactionsTab({ transactions }) {
           ))}
         </div>
       </div>
-      <CreditChart transactions={filtered} x={x} />
+      <CreditChart transactions={filtered} x={x} groupByKey={groupByKey} />
       <CategoryTabs />
       <CreditTransactions
         title={tab}
