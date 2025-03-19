@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { CATEGORIES, CreditContext } from '../../utils/credit';
+import { COLORS, CreditContext } from '../../utils/credit';
 
 export default function CategoryTabs() {
   const { tab, setTab } = useContext(CreditContext);
@@ -7,7 +7,7 @@ export default function CategoryTabs() {
   const tabClass = 'mx-1 p-1 font-medium bg-gray-200 hover:bg-gray-400 rounded';
   const activeTabClass = 'bg-gray-400';
 
-  const categories = ['ALL', ...Object.values(CATEGORIES)];
+  const categories = ['ALL', ...Object.keys(COLORS)];
 
   return (
     <div className="flex flex-row justify-center text-sm">

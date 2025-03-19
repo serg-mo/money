@@ -8,7 +8,7 @@ import usePersisedState from '../utils/usePersistedState';
 export default function Credit({ txt }) {
   const [context, setContext] = useState({});
 
-  const [tab, setTab] = useState(undefined); // TODO: type CATEGORIES,
+  const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
     {},

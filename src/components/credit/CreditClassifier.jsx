@@ -2,7 +2,7 @@ import * as KNNClassifier from '@tensorflow-models/knn-classifier';
 import { tensor } from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl'; // this is important
 import React, { useContext, useEffect, useState } from 'react';
-import { CATEGORIES, CreditContext } from '../../utils/credit';
+import { COLORS, CreditContext } from '../../utils/credit';
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(
@@ -69,7 +69,7 @@ export default function CreditClassifier() {
   // TODO: optimize neighborhood size by evaluating accuracy of predictions given manual classifications
   // TODO: sort by max confidence
   // TODO: use context to access transactions and classifier
-  const MIN_EXAMPLES = Object.values(CATEGORIES).length; // at least one per category
+  const MIN_EXAMPLES = Object.keys(COLORS).length; // at least one per category
 
   const [neighborhoodSize, setNeighborhoodSize] = useState(2);
 
@@ -198,7 +198,7 @@ export default function CreditClassifier() {
 
   return (
     <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
-      <div className='px-2'>{classes}/{Object.values(CATEGORIES).length} categories</div>
+      <div className='px-2'>{classes}/{Object.keys(COLORS).length} categories</div>
       <div className='px-2'>{examples} examples [{MIN_EXAMPLES} min]</div>
       <div className='px-2'>{Object.values(manualCategories).length} manual</div>
       <div className='px-2'>{neighborhoodSize} neighborhood</div>

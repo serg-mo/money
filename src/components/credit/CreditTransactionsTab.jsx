@@ -7,7 +7,7 @@ import CreditTransactions from './CreditTransactions';
 const options = ['week', 'month']; // must be a prop of transaction
 
 // TODO: two pies, total and average spending per category
-// TODO: when tab && tab !== 'ALL' show a bar chart instead of a stack
+// TODO: when tab && tab !== 'ALL' show a stack by vendor (e.g., Safeway vs Costco)
 export default function CreditTransactionsTab({ transactions }) {
   const [x, setX] = useState('month'); // TODO: week | month
   const { onCategorize, tab } = useContext(CreditContext);
