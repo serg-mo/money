@@ -125,7 +125,7 @@ export default function CreditChart({ transactions, timeResolution, groupByKey }
           label: (item) => {
             const label = item.dataset.label;
             const value = Math.round(item.parsed.y);
-            return `${label.padEnd(15)} ${value}`;
+            return (value) ? `${label.padEnd(15)} ${value}` : ""
           },
           footer: (points) => {
             if (points.length === 1) {

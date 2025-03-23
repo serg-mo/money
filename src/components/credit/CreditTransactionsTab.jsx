@@ -17,7 +17,7 @@ export default function CreditTransactionsTab({ transactions }) {
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
 
-  const groupByKey = tab && tab !== 'ALL' ? "name" : "category";
+  const groupByKey = tab && tab !== 'ALL' ? "normalizedName" : "category";
 
   return (
     <div className="w-full font-mono text-xs">
