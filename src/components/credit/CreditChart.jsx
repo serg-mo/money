@@ -39,16 +39,16 @@ const makeAnnotation = (name, value) => ({
     position: 'start',
   },
   value: value,
-  borderColor: 'red', // COLORS[tab] || 'blue',
-  borderWidth: 2,
+  borderColor: 'blue', // COLORS[tab] || 'blue',
+  borderWidth: 1,
 });
 
 // TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
-export default function CreditChart({ transactions, x, groupByKey }) {
+export default function CreditChart({ transactions, timeResolution, groupByKey }) {
   // there needs to be a value for every x (date column), even if it's 0
-  const allXs = Object.keys(groupBy(transactions, x));
+  const allXs = Object.keys(groupBy(transactions, timeResolution));
   const [annotations, setAnnotations] = useState([]);
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function CreditChart({ transactions, x, groupByKey }) {
     const avg = total / allXs.length;
     // console.log({ x, allXs, total, avg })
 
-    setAnnotations([makeAnnotation('AVG', avg)]);
-  }, [transactions, x]);
+    setAnnotations(() => [makeAnnotation('AVG', avg)]);
+  }, [transactions, timeResolution]);
 
   // TODO: I should have a file for important dates, like when I moved in and out of SF
   // TODO: derive these based on the datasets, i.e., avg monthly restaurants vs budget
@@ -91,7 +91,7 @@ export default function CreditChart({ transactions, x, groupByKey }) {
   // must go above options
   const datasets = categoryTotals.map(
     ({ category, avg, categoryTransactions }) => {
-      const groups = groupBy(categoryTransactions, x);
+      const groups = groupBy(categoryTransactions, timeResolution);
 
       // there needs to be a value for every x, even if it's 0
       const data = allXs.map((value) => ({

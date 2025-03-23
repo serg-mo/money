@@ -9,7 +9,7 @@ const options = ['week', 'month']; // must be a prop of transaction
 // TODO: two pies, total and average spending per category
 // TODO: when tab && tab !== 'ALL' show a stack by vendor (e.g., Safeway vs Costco)
 export default function CreditTransactionsTab({ transactions }) {
-  const [x, setX] = useState('month'); // TODO: week | month
+  const [timeResolution, setTimeResolution] = useState('month'); // TODO: week | month
   const { onCategorize, tab } = useContext(CreditContext);
 
   const filtered =
@@ -26,16 +26,16 @@ export default function CreditTransactionsTab({ transactions }) {
           {options.map((option) => (
             <button
               key={option}
-              onClick={() => setX(option)}
+              onClick={() => setTimeResolution(option)}
               className={`px-4 py-1 rounded-full text-sm font-medium transition-colors duration-300 
-              ${x === option ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-700'}`}
+              ${timeResolution === option ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-700'}`}
             >
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
           ))}
         </div>
       </div>
-      <CreditChart transactions={filtered} x={x} groupByKey={groupByKey} />
+      <CreditChart transactions={filtered} timeResolution={timeResolution} groupByKey={groupByKey} />
       <CategoryTabs />
       <CreditTransactions
         title={tab}
