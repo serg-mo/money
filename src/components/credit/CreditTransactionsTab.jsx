@@ -7,7 +7,7 @@ import CreditTransactions from './CreditTransactions';
 const options = ['week', 'month']; // must be a prop of transaction
 
 // TODO: two pies, total and average spending per category
-// TODO: when tab && tab !== 'ALL' show a stack by vendor (e.g., Safeway vs Costco)
+// TODO: avg is off because there are 13 unique months between two of the same dates this year and last year
 export default function CreditTransactionsTab({ transactions }) {
   const [timeResolution, setTimeResolution] = useState('month'); // TODO: week | month
   const { onCategorize, tab } = useContext(CreditContext);

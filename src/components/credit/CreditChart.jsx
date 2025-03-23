@@ -29,24 +29,36 @@ ChartJS.register(
   Legend
 );
 
-const makeAnnotation = (name, value) => ({
-  type: 'line',
-  mode: 'horizontal',
-  scaleID: 'y',
-  label: {
-    content: `${name}: ${Math.round(value)}`,
-    display: true,
-    position: 'start',
-  },
-  value: value,
-  borderColor: 'blue', // COLORS[tab] || 'blue',
-  borderWidth: 1,
-});
+function formatNumber(n) {
+  return (n > 1_000) ? (Math.round(n / 100) / 10) + 'k' : Math.round(n)
+}
+
+function makeAnnotation(total, avg, timeResolution, borderColor = 'blue') {
+  const parts = [
+    `TOTAL ${formatNumber(total)}`,
+    `AVG ${formatNumber(avg)}/${timeResolution}`
+  ]
+
+  return {
+    type: 'line',
+    mode: 'horizontal',
+    scaleID: 'y',
+    label: {
+      content: parts.join(', '),
+      display: true,
+      position: 'start',
+    },
+    value: avg,
+    borderColor, // COLORS[tab] || 'blue',
+    borderWidth: 1,
+  }
+};
 
 // TODO: when I click on a date, scroll to the first transaction with that date
 // TODO: when the tab is set, this should be monthly avg
 // TODO: when multiple datasets, this should be the sum of the averages for the visible ones
 export default function CreditChart({ transactions, timeResolution, groupByKey }) {
+  // TODO: derive these based on date math, not groupBy, e.g., 13 unique months in 12 month span
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, timeResolution));
   const [annotations, setAnnotations] = useState([]);
@@ -57,7 +69,7 @@ export default function CreditChart({ transactions, timeResolution, groupByKey }
     const avg = total / allXs.length;
     // console.log({ x, allXs, total, avg })
 
-    setAnnotations(() => [makeAnnotation('AVG', avg)]);
+    setAnnotations(() => [makeAnnotation(total, avg, timeResolution)]);
   }, [transactions, timeResolution]);
 
   // TODO: I should have a file for important dates, like when I moved in and out of SF
@@ -159,7 +171,7 @@ export default function CreditChart({ transactions, timeResolution, groupByKey }
           const avg = Math.round(total / allXs.length);
           // console.log({ total, avg });
 
-          setAnnotations([makeAnnotation('AVG', avg)]);
+          setAnnotations([makeAnnotation(total, avg, timeResolution)]);
           chart.update();
         },
       },
