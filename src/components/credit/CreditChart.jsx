@@ -133,9 +133,10 @@ export default function CreditChart({ transactions, timeResolution, groupByKey }
     },
     plugins: {
       tooltip: {
+        itemSort: (a, b) => a.parsed.y - b.parsed.y, // asc total
         callbacks: {
           label: (item) => {
-            const label = item.dataset.label;
+            const label = item.dataset.label.substring(0, 14);
             const value = Math.round(item.parsed.y);
             return (value) ? `${label.padEnd(15)} ${value}` : ""
           },
