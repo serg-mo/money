@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CreditClassifier from '../components/credit/CreditClassifier';
 import CreditTransactionsTab from '../components/credit/CreditTransactionsTab';
-import Frame from '../components/Frame';
+import Frame from '../components/FrameIndex';
 import { CreditContext, parseCreditFile } from '../utils/credit';
 import usePersisedState from '../utils/usePersistedState';
 

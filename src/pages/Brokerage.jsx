@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import BalanceChart from '../components/brokerage/BalanceChart';
 import CashFlowChart from '../components/brokerage/CashFlowChart';
-import Frame from '../components/Frame';
+import Frame from '../components/FrameIndex';
 import { formatMoney, parseBrokerageFile } from '../utils/brokerage';
 import { sum } from '../utils/common';
 
