@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CreditClassifier from '../components/credit/CreditClassifier';
 import CreditTransactionsTab from '../components/credit/CreditTransactionsTab';
-import Frame from '../components/FrameIndex';
+import Frame from '../components/FrameDate';
 import { CreditContext, parseCreditFile } from '../utils/credit';
 import usePersisedState from '../utils/usePersistedState';
 
@@ -54,7 +54,7 @@ export default function Credit({ txt }) {
   return (
     <CreditContext.Provider value={context}>
       <CreditClassifier />
-      <Frame transactions={transactions} initialSize={transactions.length}>
+      <Frame transactions={transactions}>
         {(slice) => <CreditTransactionsTab transactions={slice} />}
       </Frame>
     </CreditContext.Provider>

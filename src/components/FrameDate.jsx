@@ -43,7 +43,7 @@ function useFrameIndex(totalSize, initialSize, minSize = 3) {
   return [left, size]
 }
 
-export default function FrameIndex({
+export default function FrameDate({
   transactions,
   children,
   initialSize,
