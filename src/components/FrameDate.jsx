@@ -1,36 +1,52 @@
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 
-function useFrameIndex(totalSize, initialSize, minSize = 3) {
-  // don't sort, just start at the end
-  const [size, setSize] = useState(initialSize);
-  const [left, setLeft] = useState(totalSize - initialSize);
+export default function FrameDate({ transactions, children, dateProp = 'month' }) {
+  const format = "YYYY-MM-DD"
+  const unit = "months" // TODO: determine moment unit 
+  // TODO: const width = dateProp === 'week' ? 52 : 12;
+  const [window, setWindow] = useState({ after: null, before: null, width: 0 });
 
-  // NOTE: keyboard arrows effectively control both edges of the timeline
-  // NOTE: stateless because it's easy to navigate back to where you just were
+  useEffect(() => {
+    if (transactions.length > 0) {
+      const dates = transactions.map(t => moment(t.date));
+      const before = moment.max(dates).format(format);
+      const width = dateProp === 'week' ? 52 : 12;
+      const after = moment(before).subtract(width, unit).format(format);
+      // console.log({ after, before, width });
+
+      setWindow({ after, before, width });
+    }
+  }, [transactions, dateProp]);
+
+  const shiftWindow = (delta) => {
+    setWindow(prev => {
+      // const today = moment()
+      const width = dateProp === 'week' ? 52 : 12;
+
+      const newAfter = moment(prev.after).add(delta, unit).format(format)
+      // const tentativeBefore = moment(newAfter).add(width, unit).format(format);
+      // const newBefore = moment.min(tentativeBefore, today).format(format); // before stops moving right at today
+      const newBefore = moment(newAfter).add(width, unit).format(format);
+
+      return {
+        ...prev,
+        after: newAfter,
+        before: newBefore,
+      }
+    });
+  };
+
   const handleKeyPress = (event) => {
-    // NOTE: I really like this kind of navigation
-    // NOTE: all of these must be closures
     if (event.key === 'ArrowLeft') {
-      setLeft((prev) => Math.max(prev - 1, 0));
+      shiftWindow(-1);
       event.preventDefault();
     } else if (event.key === 'ArrowRight') {
-      const maxLeft = totalSize - Math.min(size, 2)
-      setLeft((prev) => Math.min(prev + 1, maxLeft)); // 2..size
-      event.preventDefault();
-    } else if (event.key === 'ArrowUp') {
-      setSize((prev) => {
-        const newSize = Math.min(prev + 1, totalSize);
-        // move left edge if we're expanding all the way on the right
-        if (left + newSize > totalSize) {
-          setLeft(totalSize - newSize);
-        }
-        return newSize;
-      });
-      event.preventDefault();
-    } else if (event.key === 'ArrowDown') {
-      setSize((prev) => Math.max(prev - 1, minSize));
+      shiftWindow(1);
       event.preventDefault();
     }
+    // TODO: up/down increase/decrease the width
+    // TODO: make this a context that the cart can read
   };
 
   useEffect(() => {
@@ -38,17 +54,8 @@ function useFrameIndex(totalSize, initialSize, minSize = 3) {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  //console.log({left, size, totalSize, initialSize, minSize});
+  const filtered = transactions.filter(t => window.after && window.before && moment(t.date).isBetween(window.after, window.before));
+  // console.log(window)
 
-  return [left, size]
-}
-
-export default function FrameDate({
-  transactions,
-  children,
-  initialSize,
-}) {
-  const [left, size] = useFrameIndex(transactions.length, initialSize ?? transactions.length)
-  const slice = transactions.slice(left, left + size);
-  return children(slice);
+  return children(filtered);
 }
