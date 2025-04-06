@@ -3,46 +3,38 @@ import { useEffect, useState } from 'react';
 
 export default function FrameDate({ transactions, children, dateProp = 'month' }) {
   const format = "YYYY-MM-DD"
-  const unit = "months" // TODO: determine moment unit 
-  // TODO: const width = dateProp === 'week' ? 52 : 12;
-  const [window, setWindow] = useState({ after: null, before: null, width: 0 });
+  const unit = dateProp === "month" ? "months" : "weeks" // TODO: determine moment unit 
+  const width = dateProp === 'month' ? 12 : 52;
+
+  const [window, setWindow] = useState({ after: null, before: null });
 
   useEffect(() => {
     if (transactions.length > 0) {
       const dates = transactions.map(t => moment(t.date));
-      const before = moment.max(dates).format(format);
-      const width = dateProp === 'week' ? 52 : 12;
+      const before = moment.max(dates).format(format); // before is the anchor, compute after based from there
       const after = moment(before).subtract(width, unit).format(format);
-      // console.log({ after, before, width });
+      // console.log({ after, before });
 
-      setWindow({ after, before, width });
+      setWindow({ after, before });
     }
   }, [transactions, dateProp]);
 
-  const shiftWindow = (delta) => {
-    setWindow(prev => {
-      // const today = moment()
-      const width = dateProp === 'week' ? 52 : 12;
+  const shiftAfter = (delta) => {
+    setWindow(prev => ({ ...prev, after: moment(prev.after).add(delta, unit).format(format) }));
+  };
 
-      const newAfter = moment(prev.after).add(delta, unit).format(format)
-      // const tentativeBefore = moment(newAfter).add(width, unit).format(format);
-      // const newBefore = moment.min(tentativeBefore, today).format(format); // before stops moving right at today
-      const newBefore = moment(newAfter).add(width, unit).format(format);
-
-      return {
-        ...prev,
-        after: newAfter,
-        before: newBefore,
-      }
-    });
+  const shiftBefore = (delta) => {
+    setWindow(prev => ({ ...prev, before: moment(prev.before).add(delta, unit).format(format) }));
   };
 
   const handleKeyPress = (event) => {
     if (event.key === 'ArrowLeft') {
-      shiftWindow(-1);
+      shiftAfter(-1);
+      shiftBefore(-1);
       event.preventDefault();
     } else if (event.key === 'ArrowRight') {
-      shiftWindow(1);
+      shiftAfter(1);
+      shiftBefore(1);
       event.preventDefault();
     }
     // TODO: up/down increase/decrease the width
