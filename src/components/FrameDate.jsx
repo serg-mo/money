@@ -11,8 +11,8 @@ export default function FrameDate({ transactions, children, dateProp = 'month' }
   useEffect(() => {
     if (transactions.length > 0) {
       const dates = transactions.map(t => moment(t.date));
-      const before = moment.max(dates).format(format); // before is the anchor, compute after based from there
-      const after = moment(before).subtract(width, unit).format(format);
+      const before = moment.max(dates).endOf(dateProp).format(format); // absolute
+      const after = moment(before).subtract(width, unit).startOf(dateProp).format(format); // relative
       // console.log({ after, before });
 
       setWindow({ after, before });
