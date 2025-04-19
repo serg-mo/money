@@ -26,31 +26,22 @@ export default function FrameDate({
     }
   }, [transactions, dateProp]);
 
-  const shiftAfter = (delta) => {
+  const shiftWindow = (delta) => {
     setWindow((prev) => ({
-      ...prev,
       after: moment(prev.after).add(delta, unit).format(format),
-    }));
-  };
-
-  const shiftBefore = (delta) => {
-    setWindow((prev) => ({
-      ...prev,
       before: moment(prev.before).add(delta, unit).format(format),
     }));
   };
 
   const handleKeyPress = (event) => {
     if (event.key === 'ArrowLeft') {
-      shiftAfter(-1);
-      shiftBefore(-1);
+      shiftWindow(-1);
       event.preventDefault();
     } else if (event.key === 'ArrowRight') {
-      shiftAfter(1);
-      shiftBefore(1);
+      shiftWindow(1);
       event.preventDefault();
     }
-    // TODO: up/down increase/decrease the width
+    // TODO: left/right move the left edge, up/down right edge
     // TODO: make this a context that the cart can read
   };
 
