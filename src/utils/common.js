@@ -7,11 +7,6 @@ export function loadFileContent(file) {
   });
 }
 
-// copy-pasted spreadsheets are tab separated
-async function parseClipboard() {
-  await navigator.clipboard.readText();
-}
-
 export function parseCSV(
   txt,
   rowRegx = /\r?\n/,
