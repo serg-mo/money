@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import CreditClassifier from '../components/credit/CreditClassifier';
-import CreditTransactionsTab from '../components/credit/CreditTransactionsTab';
-import Frame from '../components/FrameDate';
 import { CreditContext, parseCreditFile } from '../utils/credit';
 import usePersisedState from '../utils/usePersistedState';
+import CreditClassifier from './credit/CreditClassifier';
+import CreditTransactionsTab from './credit/CreditTransactionsTab';
+import Frame from './FrameDate';
 
-export default function Credit({ txt }) {
+export default function App({ txt }) {
   const [context, setContext] = useState({});
 
   const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
