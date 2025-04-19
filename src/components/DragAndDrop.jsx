@@ -5,7 +5,6 @@ import {
   getFileName,
 } from '../utils/brokerage';
 import {
-  FILE_TYPES,
   FilesContext,
   isMatchingFile,
   loadFileContent,
@@ -39,12 +38,12 @@ export default function DragAndDrop({ children }) {
             BROKERAGE_HEADER_ROW_INDEX
           )
         ) {
-          type = FILE_TYPES.brokerage;
+          type = 'brokerage';
           name = getFileName(txt);
         } else if (
           isMatchingFile(txt, CREDIT_REQUIRED_COLS, CREDIT_HEADER_ROW_INDEX)
         ) {
-          type = FILE_TYPES.credit;
+          type = 'credit';
           name = 'Credit';
         }
 
