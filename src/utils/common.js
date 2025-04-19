@@ -1,7 +1,3 @@
-import { createContext } from 'react';
-
-export const FilesContext = createContext();
-
 export function loadFileContent(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();

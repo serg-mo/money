@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  FilesContext,
-  isMatchingFile,
-  loadFileContent,
-} from '../utils/common';
-import {
-  HEADER_ROW_INDEX as CREDIT_HEADER_ROW_INDEX,
-  REQUIRED_COLS as CREDIT_REQUIRED_COLS,
-} from '../utils/credit';
+import { loadFileContent } from '../utils/common';
 import Target from './Target';
 
 export default function DragAndDrop({ children }) {
-  const [context, setContext] = useState([]);
+  const [context, setContext] = useState([]); // txt of each file
 
   async function handleChange(event) {
     const list = Array.from(event.target.files); // FileList to Array
@@ -20,30 +12,11 @@ export default function DragAndDrop({ children }) {
       return;
     }
 
-    // TODO: dedicated function in utils/common.js
-    const promises = list.map((file) =>
-      loadFileContent(file).then((txt) => {
-        let type = null;
-        let name = null;
-
-        if (
-          isMatchingFile(txt, CREDIT_REQUIRED_COLS, CREDIT_HEADER_ROW_INDEX)
-        ) {
-          type = 'credit';
-          name = 'Credit';
-        }
-
-        return { txt, type, name };
-      })
-    );
-
-    Promise.all(promises).then(setContext);
+    Promise.all(list.map(loadFileContent)).then(setContext);
   }
 
   if (Object.keys(context).length) {
-    return (
-      <FilesContext.Provider value={context}>{children}</FilesContext.Provider>
-    );
+    return children(context);
   }
 
   return (

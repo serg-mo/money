@@ -1,17 +1,13 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import DragAndDrop from './components/DragAndDrop';
-import FilesMenu from './components/FilesMenu';
-
 import '../styles/tailwind.css';
+import DragAndDrop from './components/DragAndDrop';
+import Credit from './pages/Credit';
 
-// NOTE: Github pages do not support BrowserRouter, hence HashRouter
 export default function App() {
   return (
-    <div className="flex flex-col justify-center items-center">
-      <DragAndDrop>
-        <FilesMenu />
-      </DragAndDrop>
+    <div className="flex justify-center items-center">
+      <DragAndDrop>{(txts) => <Credit txt={txts[0]} />}</DragAndDrop>
     </div>
   );
 }
