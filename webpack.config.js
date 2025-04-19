@@ -6,9 +6,8 @@ module.exports = (env, argv) => ({
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'docs'),
-    publicPath: argv.mode === 'production'
-      ? 'https://serg-mo.github.io/money/'
-      : 'auto',
+    publicPath:
+      argv.mode === 'production' ? 'https://serg-mo.github.io/money/' : 'auto',
     filename: 'bundle.js',
     clean: true,
   },

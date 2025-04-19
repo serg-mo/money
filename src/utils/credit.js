@@ -51,7 +51,7 @@ export function getCategory(name, rules) {
   );
 
   // rules is a name => category mapping
-  return match ? match[1] : "UNCLASSIFIED";
+  return match ? match[1] : 'UNCLASSIFIED';
 }
 
 export function formatAmount(amount) {
@@ -89,7 +89,7 @@ export function parseCreditFile(txt) {
       month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
       amount: parseFloat(obj['amount']),
-      category: "UNCLASSIFIED",
+      category: 'UNCLASSIFIED',
       location: obj['name'].substring(MIN_NAME_LENGTH).trim(),
       normalizedName: normalizedName,
       vector: nameToVector(normalizedName),

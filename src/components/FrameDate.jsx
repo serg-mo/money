@@ -1,18 +1,25 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 
-export default function FrameDate({ transactions, children, dateProp = 'month' }) {
-  const format = "YYYY-MM-DD"
-  const unit = dateProp === "month" ? "months" : "weeks" // TODO: determine moment unit 
+export default function FrameDate({
+  transactions,
+  children,
+  dateProp = 'month',
+}) {
+  const format = 'YYYY-MM-DD';
+  const unit = dateProp === 'month' ? 'months' : 'weeks'; // TODO: determine moment unit
   const width = dateProp === 'month' ? 12 : 52;
 
   const [window, setWindow] = useState({ after: null, before: null });
 
   useEffect(() => {
     if (transactions.length > 0) {
-      const dates = transactions.map(t => moment(t.date));
+      const dates = transactions.map((t) => moment(t.date));
       const before = moment.max(dates).endOf(dateProp).format(format); // absolute
-      const after = moment(before).subtract(width, unit).startOf(dateProp).format(format); // relative
+      const after = moment(before)
+        .subtract(width, unit)
+        .startOf(dateProp)
+        .format(format); // relative
       // console.log({ after, before });
 
       setWindow({ after, before });
@@ -20,11 +27,17 @@ export default function FrameDate({ transactions, children, dateProp = 'month' }
   }, [transactions, dateProp]);
 
   const shiftAfter = (delta) => {
-    setWindow(prev => ({ ...prev, after: moment(prev.after).add(delta, unit).format(format) }));
+    setWindow((prev) => ({
+      ...prev,
+      after: moment(prev.after).add(delta, unit).format(format),
+    }));
   };
 
   const shiftBefore = (delta) => {
-    setWindow(prev => ({ ...prev, before: moment(prev.before).add(delta, unit).format(format) }));
+    setWindow((prev) => ({
+      ...prev,
+      before: moment(prev.before).add(delta, unit).format(format),
+    }));
   };
 
   const handleKeyPress = (event) => {
@@ -46,7 +59,12 @@ export default function FrameDate({ transactions, children, dateProp = 'month' }
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  const filtered = transactions.filter(t => window.after && window.before && moment(t.date).isBetween(window.after, window.before));
+  const filtered = transactions.filter(
+    (t) =>
+      window.after &&
+      window.before &&
+      moment(t.date).isBetween(window.after, window.before)
+  );
   // console.log(window)
 
   return children(filtered);

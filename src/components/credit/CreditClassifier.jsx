@@ -183,7 +183,6 @@ export default function CreditClassifier() {
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
 
-
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
@@ -198,11 +197,24 @@ export default function CreditClassifier() {
 
   return (
     <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
-      <div className='px-2'>{classes}/{Object.keys(COLORS).length} categories</div>
-      <div className='px-2'>{examples} examples [{MIN_EXAMPLES} min]</div>
-      <div className='px-2'>{Object.values(manualCategories).length} manual</div>
-      <div className='px-2'>{neighborhoodSize} neighborhood</div>
-      <div className='px-2'><a className="cursor-pointer" onClick={() => confirm('Are you sure?') && resetState()}>Reset</a></div>
+      <div className="px-2">
+        {classes}/{Object.keys(COLORS).length} categories
+      </div>
+      <div className="px-2">
+        {examples} examples [{MIN_EXAMPLES} min]
+      </div>
+      <div className="px-2">
+        {Object.values(manualCategories).length} manual
+      </div>
+      <div className="px-2">{neighborhoodSize} neighborhood</div>
+      <div className="px-2">
+        <a
+          className="cursor-pointer"
+          onClick={() => confirm('Are you sure?') && resetState()}
+        >
+          Reset
+        </a>
+      </div>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default function CreditTransactionsTab({ transactions }) {
       ? transactions.filter((t) => t['category'] === tab)
       : transactions;
 
-  const groupByKey = tab && tab !== 'ALL' ? "normalizedName" : "category";
+  const groupByKey = tab && tab !== 'ALL' ? 'normalizedName' : 'category';
 
   return (
     <div className="w-full font-mono text-xs">
@@ -35,7 +35,11 @@ export default function CreditTransactionsTab({ transactions }) {
           ))}
         </div>
       </div>
-      <CreditChart transactions={filtered} timeResolution={timeResolution} groupByKey={groupByKey} />
+      <CreditChart
+        transactions={filtered}
+        timeResolution={timeResolution}
+        groupByKey={groupByKey}
+      />
       <CategoryTabs />
       <CreditTransactions
         title={tab}

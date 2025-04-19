@@ -14,7 +14,7 @@ function useFrameIndex(totalSize, initialSize, minSize = 3) {
       setLeft((prev) => Math.max(prev - 1, 0));
       event.preventDefault();
     } else if (event.key === 'ArrowRight') {
-      const maxLeft = totalSize - Math.min(size, 2)
+      const maxLeft = totalSize - Math.min(size, 2);
       setLeft((prev) => Math.min(prev + 1, maxLeft)); // 2..size
       event.preventDefault();
     } else if (event.key === 'ArrowUp') {
@@ -40,15 +40,14 @@ function useFrameIndex(totalSize, initialSize, minSize = 3) {
 
   //console.log({left, size, totalSize, initialSize, minSize});
 
-  return [left, size]
+  return [left, size];
 }
 
-export default function FrameIndex({
-  transactions,
-  children,
-  initialSize,
-}) {
-  const [left, size] = useFrameIndex(transactions.length, initialSize ?? transactions.length)
+export default function FrameIndex({ transactions, children, initialSize }) {
+  const [left, size] = useFrameIndex(
+    transactions.length,
+    initialSize ?? transactions.length
+  );
   const slice = transactions.slice(left, left + size);
   return children(slice);
 }

@@ -30,14 +30,14 @@ ChartJS.register(
 );
 
 function formatNumber(n) {
-  return (n > 1_000) ? (Math.round(n / 100) / 10) + 'k' : Math.round(n)
+  return n > 1_000 ? Math.round(n / 100) / 10 + 'k' : Math.round(n);
 }
 
 function makeAnnotation(total, avg, timeResolution, borderColor = 'blue') {
   const parts = [
     `TOTAL ${formatNumber(total)}`,
-    `AVG ${formatNumber(avg)}/${timeResolution}`
-  ]
+    `AVG ${formatNumber(avg)}/${timeResolution}`,
+  ];
 
   return {
     type: 'line',
@@ -51,11 +51,15 @@ function makeAnnotation(total, avg, timeResolution, borderColor = 'blue') {
     value: avg,
     borderColor, // COLORS[tab] || 'blue',
     borderWidth: 1,
-  }
-};
+  };
+}
 
 // TODO: when I click on a date, scroll to the first transaction with that date
-export default function CreditChart({ transactions, timeResolution, groupByKey }) {
+export default function CreditChart({
+  transactions,
+  timeResolution,
+  groupByKey,
+}) {
   // TODO: derive these based on date math, not groupBy, e.g., 13 unique months in 12 month span
   // there needs to be a value for every x (date column), even if it's 0
   const allXs = Object.keys(groupBy(transactions, timeResolution));
@@ -132,7 +136,7 @@ export default function CreditChart({ transactions, timeResolution, groupByKey }
           label: (item) => {
             const label = item.dataset.label.substring(0, 14);
             const value = Math.round(item.parsed.y);
-            return (value) ? `${label.padEnd(15)} ${value}` : ""
+            return value ? `${label.padEnd(15)} ${value}` : '';
           },
           footer: (points) => {
             if (points.length === 1) {
