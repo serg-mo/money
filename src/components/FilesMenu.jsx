@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import Brokerage from '../pages/Brokerage';
 import Credit from '../pages/Credit';
 import { FilesContext } from '../utils/common';
 
@@ -15,8 +14,6 @@ export default function FilesMenu() {
     // brokerage and checking are the same type, key is important
     if (type === 'credit') {
       return () => <Credit txt={txt} key={index} />;
-    } else if (type === 'brokerage') {
-      return () => <Brokerage txt={txt} key={index} />;
     }
   });
 

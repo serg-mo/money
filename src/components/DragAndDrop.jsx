@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
 import {
-  HEADER_ROW_INDEX as BROKERAGE_HEADER_ROW_INDEX,
-  REQUIRED_COLS as BROKERAGE_REQUIRED_COLS,
-  getFileName,
-} from '../utils/brokerage';
-import {
   FilesContext,
   isMatchingFile,
   loadFileContent,
@@ -32,15 +27,6 @@ export default function DragAndDrop({ children }) {
         let name = null;
 
         if (
-          isMatchingFile(
-            txt,
-            BROKERAGE_REQUIRED_COLS,
-            BROKERAGE_HEADER_ROW_INDEX
-          )
-        ) {
-          type = 'brokerage';
-          name = getFileName(txt);
-        } else if (
           isMatchingFile(txt, CREDIT_REQUIRED_COLS, CREDIT_HEADER_ROW_INDEX)
         ) {
           type = 'credit';

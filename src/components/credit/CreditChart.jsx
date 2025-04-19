@@ -1,3 +1,4 @@
+import annotationPlugin from 'chartjs-plugin-annotation';
 import { groupBy, sumBy } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { COLORS } from '../../utils/credit';
@@ -26,7 +27,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Filler,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 function formatNumber(n) {
