@@ -26,10 +26,16 @@ export default function FrameDate({ children }) {
   }, [transactions, timeResolution]);
 
   const shiftWindow = (delta) => {
-    setWindow((prev) => ({
-      after: moment(prev.after).add(delta, unit).format(format),
-      before: moment(prev.before).add(delta, unit).format(format),
-    }));
+    setWindow((prev) => {
+      // TODO: do not advance before to a date after today, the chart looks weird then
+      const newAfer = moment(prev.after).add(delta, unit)
+      const newBefore = moment(prev.before).add(delta, unit)
+
+      return {
+        after: newAfer.format(format),
+        before: newBefore.format(format),
+      }
+    });
   };
 
   const handleKeyPress = (event) => {
