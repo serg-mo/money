@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { CreditContext } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
 import CreditChart from './CreditChart';
@@ -9,8 +9,7 @@ const options = ['week', 'month']; // must be a prop of transaction
 // TODO: two pies, total and average spending per category
 // TODO: avg is off because there are 13 unique months between two of the same dates this year and last year
 export default function CreditTransactionsTab({ transactions }) {
-  const [timeResolution, setTimeResolution] = useState('month'); // TODO: week | month
-  const { onCategorize, tab } = useContext(CreditContext);
+  const { onCategorize, tab, timeResolution, setTimeResolution } = useContext(CreditContext);
 
   const filtered =
     tab && tab !== 'ALL'

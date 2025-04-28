@@ -3,11 +3,12 @@ import { CreditContext, parseCreditFile } from '../utils/credit';
 import usePersisedState from '../utils/usePersistedState';
 import CreditClassifier from './credit/CreditClassifier';
 import CreditTransactionsTab from './credit/CreditTransactionsTab';
-import Frame from './FrameDate';
+import FrameDate from './FrameDate';
 
 export default function App({ txt }) {
   const [context, setContext] = useState({});
 
+  const [timeResolution, setTimeResolution] = useState('month'); // TODO: week | month
   const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
   const [transactions, setTransactions] = useState([]);
   const [manualCategories, setManualCategories] = usePersisedState(
@@ -21,7 +22,6 @@ export default function App({ txt }) {
     if (txt && !transactions.length) {
       // TODO: I don't want to classify the refunds, find a way to remove those charges
       const filterFn = (row) => row['transaction'] === 'DEBIT'; // charges only
-
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }
   }, [transactions, txt]);
@@ -36,9 +36,11 @@ export default function App({ txt }) {
         onCategorize,
         tab,
         setTab,
+        timeResolution,
+        setTimeResolution
       });
     }
-  }, [transactions, manualCategories, tab]);
+  }, [transactions, manualCategories, tab, timeResolution]);
 
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
@@ -54,9 +56,9 @@ export default function App({ txt }) {
   return (
     <CreditContext.Provider value={context}>
       <CreditClassifier />
-      <Frame transactions={transactions}>
+      <FrameDate>
         {(slice) => <CreditTransactionsTab transactions={slice} />}
-      </Frame>
+      </FrameDate>
     </CreditContext.Provider>
   );
 }

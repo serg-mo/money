@@ -1,30 +1,29 @@
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { CreditContext } from '../utils/credit';
 
-export default function FrameDate({
-  transactions,
-  children,
-  dateProp = 'month',
-}) {
+export default function FrameDate({ children }) {
+  const { transactions, timeResolution } = useContext(CreditContext);
+
   const format = 'YYYY-MM-DD';
-  const unit = dateProp === 'month' ? 'months' : 'weeks'; // TODO: determine moment unit
-  const width = dateProp === 'month' ? 12 : 52;
+  const unit = timeResolution === 'month' ? 'months' : 'weeks'; // moment unit
+  const width = timeResolution === 'month' ? 12 : 52;
 
   const [window, setWindow] = useState({ after: null, before: null });
 
   useEffect(() => {
     if (transactions.length > 0) {
       const dates = transactions.map((t) => moment(t.date));
-      const before = moment.max(dates).endOf(dateProp).format(format); // absolute
+      const before = moment.max(dates).endOf(timeResolution).format(format); // absolute
       const after = moment(before)
         .subtract(width, unit)
-        .startOf(dateProp)
+        .startOf(timeResolution)
         .format(format); // relative
       // console.log({ after, before });
 
       setWindow({ after, before });
     }
-  }, [transactions, dateProp]);
+  }, [transactions, timeResolution]);
 
   const shiftWindow = (delta) => {
     setWindow((prev) => ({
@@ -48,7 +47,7 @@ export default function FrameDate({
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [timeResolution]);
 
   const filtered = transactions.filter(
     (t) =>
