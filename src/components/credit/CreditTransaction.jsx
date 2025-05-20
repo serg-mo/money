@@ -19,6 +19,7 @@ export default function Transaction({ onClick, ...t }) {
     .join('\n');
 
   // TODO: set the transparancy of the category to the confidence
+  // TODO: clicking on the merchant name should show only their dataset in the chart
   return (
     <tr className="group border border-slate-600">
       <td className="px-2 py-4 align-middle" title={t['name']}>

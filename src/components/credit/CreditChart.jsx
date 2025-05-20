@@ -36,6 +36,7 @@ function formatNumber(n) {
 }
 
 function makeAnnotation(total, avg, timeResolution, borderColor = 'blue') {
+  // TODO: this would be a good place to figure out a static max for the y axis
   const parts = [
     `TOTAL ${formatNumber(total)}`,
     `AVG ${formatNumber(avg)}/${timeResolution}`,
