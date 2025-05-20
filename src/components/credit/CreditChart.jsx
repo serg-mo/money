@@ -180,7 +180,10 @@ export default function CreditChart({
     },
     scales: {
       x: { stacked: false }, // must be false
-      y: { stacked: true },
+      y: {
+        stacked: true,
+        beginAtZero: true, // must be true
+      },
     },
     animation: {
       duration: 0, // milliseconds
