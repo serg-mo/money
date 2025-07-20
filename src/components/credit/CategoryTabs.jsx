@@ -7,6 +7,7 @@ export default function CategoryTabs() {
   const tabClass = 'mx-1 p-1 font-medium bg-gray-200 hover:bg-gray-400 rounded';
   const activeTabClass = 'bg-gray-400';
 
+  // TODO: this should depend on existing classifications
   const categories = ['ALL', ...Object.keys(COLORS)];
 
   return (

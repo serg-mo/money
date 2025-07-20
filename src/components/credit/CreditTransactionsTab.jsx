@@ -8,6 +8,7 @@ const options = ['week', 'month']; // must be a prop of transaction
 
 // TODO: two pies, total and average spending per category
 // TODO: avg is off because there are 13 unique months between two of the same dates this year and last year
+// TODO: it would be nice to sync dataset visibility with tab content
 export default function CreditTransactionsTab({ transactions }) {
   const { onCategorize, tab, timeResolution, setTimeResolution } = useContext(CreditContext);
 
@@ -47,6 +48,4 @@ export default function CreditTransactionsTab({ transactions }) {
       />
     </div>
   );
-
-  // TODO: it would be nice to sync dataset visibility with tab content
 }

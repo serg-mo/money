@@ -30,7 +30,6 @@ export const COLORS = {
   ['SHOPPING']: 'rgb(255, 128, 51)',
   ['TRAVEL']: 'rgb(255, 153, 102)',
 
-  ['OTHER']: 'rgb(142, 142, 142)',
   ['UNCLASSIFIED']: 'rgb(85, 85, 85)',
 };
 
@@ -61,10 +60,6 @@ export function formatAmount(amount) {
 export function parseName(name) {
   // NOTE: splitting on spaces is not reliable
   return name.toUpperCase().substring(0, MAX_NAME_LENGTH).trim(); // ignore city/phone + state
-}
-
-function getSunday(date) {
-  return moment(date).day(0).format('YYYY-MM-DD');
 }
 
 export function parseCreditFile(txt) {
