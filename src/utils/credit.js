@@ -33,12 +33,10 @@ export const COLORS = {
   ['UNCLASSIFIED']: 'rgb(85, 85, 85)',
 };
 
-// TODO: make a constants file
-const MIN_NAME_LENGTH = 23;
-const MAX_NAME_LENGTH = 40;
+export const MIN_NAME_LENGTH = 23;
+export const MAX_NAME_LENGTH = 40;
 
-export const HEADER_ROW_INDEX = 0;
-export const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
+// const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
 
 export function getCategory(name, rules) {
   // NOTE: name has a structure: description, city/phone/domain, state

@@ -1,7 +1,7 @@
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { groupBy, sumBy } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { COLORS } from '../../utils/credit';
+import { COLORS, MIN_NAME_LENGTH } from '../../utils/credit';
 
 import {
   CategoryScale,
@@ -137,9 +137,9 @@ export default function CreditChart({
         itemSort: (a, b) => a.parsed.y - b.parsed.y, // asc total
         callbacks: {
           label: (item) => {
-            const label = item.dataset.label.substring(0, 14);
+            const label = item.dataset.label.substring(0, MIN_NAME_LENGTH);
             const value = Math.round(item.parsed.y);
-            return value ? `${label.padEnd(15)} ${value}` : '';
+            return value ? `${label.padEnd(MIN_NAME_LENGTH + 1)} ${value}` : '';
           },
           footer: (points) => {
             if (points.length === 1) {
@@ -151,8 +151,8 @@ export default function CreditChart({
               0
             );
 
-            // padding is offset by the color of the dataset
-            return `${'TOTAL'.padEnd(17)} ${Math.round(total)}`;
+            // padding is offset by the color of the dataset (2 chars wide)
+            return `${'TOTAL'.padEnd(MIN_NAME_LENGTH + 3)} ${Math.round(total)}`;
           },
         },
       },
