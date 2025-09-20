@@ -30,9 +30,7 @@ module.exports = (env, argv) => ({
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html',
-    }),
+    new HtmlWebpackPlugin({ template: './public/index.html' }),
   ],
   resolve: {
     extensions: ['.js', '.jsx'],
@@ -41,6 +39,5 @@ module.exports = (env, argv) => ({
     static: './public',
     open: true,
     hot: true,
-    // historyApiFallback: true,
   },
 });
