@@ -1,12 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import '../styles/tailwind.css';
 import App from './components/App';
 import DragAndDrop from './components/DragAndDrop';
+import './index.css';
 
 function AppWrapper() {
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex flex-col justify-center items-center">
       <DragAndDrop>{(txts) => <App txt={txts[0]} />}</DragAndDrop>
     </div>
   );
