@@ -84,20 +84,15 @@ export default function CreditClassifier() {
   // TODO: consider saving the classifier state manually
   // load existing classifier from local storage, which persists across sessions
   useEffect(() => {
-    if (!classifier) {
-      return;
-    }
-
-    if (!Object.values(manualCategories).length) {
+    if (!classifier || !Object.values(manualCategories).length) {
       return;
     }
 
     classifier.clearAllClasses();
 
-    // TODO: loop through manualCategories, reconstruct the dataset, pick a neighborhood size
     Object.entries(manualCategories).map(([serialized, category]) => {
-      const parsed = JSON.parse(serialized);
-      classifier.addExample(tensor(parsed), category); // must be a tensor + string label
+      const example = tensor(JSON.parse(serialized));
+      classifier.addExample(example, category); // must be a tensor + string label
     });
 
     predictAll();
@@ -146,11 +141,8 @@ export default function CreditClassifier() {
 
     // category is predicted label to replace the existing one, if over minConfidence
     const maxConfidence = confidences[label];
-    const category =
-      maxConfidence >= minConfidence ? label : transaction.category;
-
-    const manual =
-      manualCategories[JSON.stringify(transaction['vector'])] ?? null;
+    const category = maxConfidence >= minConfidence ? label : transaction.category;
+    const manual = manualCategories[JSON.stringify(transaction['vector'])] ?? null;
 
     return {
       ...transaction,
@@ -166,19 +158,19 @@ export default function CreditClassifier() {
       console.log(`No categorize, because no transactions`);
       return;
     }
+
     if (!classifier.getNumClasses()) {
       console.log(`No categorize because no classes`);
       return;
     }
+
     // TODO: it would be nice to see a progress icon for this
     const { classes, examples } = getClassifierStats();
     if (examples < MIN_EXAMPLES) {
       console.log(`Not enough examples, ${examples} < ${MIN_EXAMPLES}`);
       return;
     }
-    console.log(
-      `Categorize ${classes} classes of ${examples} examples at ${neighborhoodSize} neighborhoood size`
-    );
+    console.log(JSON.stringify({ classes, examples, neighborhoodSize }));
 
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
@@ -195,28 +187,26 @@ export default function CreditClassifier() {
     setManualCategories({});
   };
 
-  return null;
+  // return <ProgressBar value={examples / MIN_EXAMPLES} />
+  // return null;
 
-  // return (
-  //   <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
-  //     <div className="px-2">
-  //       {classes}/{Object.keys(COLORS).length} categories
-  //     </div>
-  //     <div className="px-2">
-  //       {examples} examples [{MIN_EXAMPLES} min]
-  //     </div>
-  //     <div className="px-2">
-  //       {Object.values(manualCategories).length} manual
-  //     </div>
-  //     <div className="px-2">{neighborhoodSize} neighborhood</div>
-  //     <div className="px-2">
-  //       <a
-  //         className="cursor-pointer"
-  //         onClick={() => confirm('Are you sure?') && resetState()}
-  //       >
-  //         Reset
-  //       </a>
-  //     </div>
-  //   </div>
-  // );
+  return (
+    <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
+      <div className="px-2">
+        {classes}/{Object.keys(COLORS).length} categories
+      </div>
+      <div className="px-2">
+        {examples} examples [{MIN_EXAMPLES} min]
+      </div>
+      <div className="px-2">
+        {Object.values(manualCategories).length} manual
+      </div>
+      <div className="px-2">{neighborhoodSize} neighborhood</div>
+      <div className="px-2">
+        <a className="cursor-pointer" onClick={() => confirm('Are you sure?') && resetState()}>
+          Reset
+        </a>
+      </div>
+    </div>
+  );
 }

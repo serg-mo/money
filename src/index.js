@@ -6,7 +6,7 @@ import './index.css';
 
 function AppWrapper() {
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex flex-col justify-center items-center">
       <DragAndDrop>{(txts) => <App txt={txts[0]} />}</DragAndDrop>
     </div>
   );
