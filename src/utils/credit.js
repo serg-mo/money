@@ -57,11 +57,13 @@ export function parseCreditFile(txt) {
       headers.map((header, index) => [header, values[index]])
     );
 
-
     let normalizedName, location, category;
     if (obj['transaction'] === 'CREDIT') {
       // difference between "INTERNET PAYMENT THANK YOU" and a refund
-      normalizedName = obj['name'] === 'INTERNET PAYMENT THANK YOU' ? obj['name'] : normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
+      normalizedName =
+        obj['name'] === 'INTERNET PAYMENT THANK YOU'
+          ? obj['name']
+          : normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
       location = obj['name'].substring(MIN_NAME_LENGTH).trim();
       category = 'CREDIT'; // NOTE: credits will not show up because there is no filter for this yet
     } else {

@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './components/App';
 import './index.css';
 
-import txt from '../Credit Card.csv';
+import txt from '../data/transactions.csv';
 
 // import DragAndDrop from './components/DragAndDrop';
 // // NOTE: only the first of the uploaded files
@@ -16,7 +16,7 @@ import txt from '../Credit Card.csv';
 // }
 
 function AppWrapper() {
-  return (<App txt={txt} />);
+  return <App txt={txt} />;
 }
 
 // https://react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis

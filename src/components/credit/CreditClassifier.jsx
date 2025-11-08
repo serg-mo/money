@@ -142,8 +142,10 @@ export default function CreditClassifier() {
 
     // category is predicted label to replace the existing one, if over minConfidence
     const maxConfidence = confidences[label];
-    const category = maxConfidence >= minConfidence ? label : transaction.category;
-    const manual = manualCategories[JSON.stringify(transaction['vector'])] ?? null;
+    const category =
+      maxConfidence >= minConfidence ? label : transaction.category;
+    const manual =
+      manualCategories[JSON.stringify(transaction['vector'])] ?? null;
 
     return {
       ...transaction,
@@ -168,7 +170,9 @@ export default function CreditClassifier() {
     // TODO: it would be nice to see a progress icon for this
     const { classes, examples } = getClassifierStats();
     if (examples < MIN_EXAMPLES) {
-      console.log(`No predictAll because not enough examples, ${examples} < ${MIN_EXAMPLES}`);
+      console.log(
+        `No predictAll because not enough examples, ${examples} < ${MIN_EXAMPLES}`
+      );
       return;
     }
     // console.log(JSON.stringify({ classes, examples, neighborhoodSize }));
@@ -204,7 +208,10 @@ export default function CreditClassifier() {
       </div>
       <div className="px-2">{neighborhoodSize} neighborhood</div>
       <div className="px-2">
-        <a className="cursor-pointer" onClick={() => confirm('Are you sure?') && resetState()}>
+        <a
+          className="cursor-pointer"
+          onClick={() => confirm('Are you sure?') && resetState()}
+        >
           Reset
         </a>
       </div>

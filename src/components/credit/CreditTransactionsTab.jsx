@@ -10,7 +10,8 @@ const options = ['week', 'month']; // must be a prop of transaction
 // TODO: avg is off because there are 13 unique months between two of the same dates this year and last year
 // TODO: it would be nice to sync dataset visibility with tab content
 export default function CreditTransactionsTab({ transactions }) {
-  const { onCategorize, tab, timeResolution, setTimeResolution } = useContext(CreditContext);
+  const { onCategorize, tab, timeResolution, setTimeResolution } =
+    useContext(CreditContext);
 
   const filtered =
     tab && tab !== 'ALL'

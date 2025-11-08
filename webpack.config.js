@@ -34,9 +34,7 @@ module.exports = (env, argv) => ({
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({ template: './public/index.html' }),
-  ],
+  plugins: [new HtmlWebpackPlugin({ template: './public/index.html' })],
   resolve: {
     extensions: ['.js', '.jsx'],
   },

@@ -37,7 +37,7 @@ export default function App({ txt }) {
         tab,
         setTab,
         timeResolution,
-        setTimeResolution
+        setTimeResolution,
       });
     }
   }, [transactions, manualCategories, tab, timeResolution]);

@@ -28,13 +28,13 @@ export default function FrameDate({ children }) {
   const shiftWindow = (delta) => {
     setWindow((prev) => {
       // TODO: do not advance before to a date after today, the chart looks weird then
-      const newAfer = moment(prev.after).add(delta, unit)
-      const newBefore = moment(prev.before).add(delta, unit)
+      const newAfer = moment(prev.after).add(delta, unit);
+      const newBefore = moment(prev.before).add(delta, unit);
 
       return {
         after: newAfer.format(format),
         before: newBefore.format(format),
-      }
+      };
     });
   };
 
