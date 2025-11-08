@@ -78,6 +78,7 @@ export default function CreditClassifier() {
     if (classifier) {
       return;
     }
+    // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
     setClassifier(KNNClassifier.create());
   }, [classifier]);
 
@@ -175,6 +176,10 @@ export default function CreditClassifier() {
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
 
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
   // TODO: it would be nice to see a progress icon for this
   const { classes, examples } = getClassifierStats();
 
@@ -185,10 +190,6 @@ export default function CreditClassifier() {
 
   // return <ProgressBar value={examples / MIN_EXAMPLES} />
   // return null;
-
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">
