@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { loadFileContent } from '../utils/common';
 import Target from './Target';
+
+async function loadFileContent(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = (e) => reject(e);
+    reader.readAsText(file);
+  });
+}
 
 export default function DragAndDrop({ children }) {
   const [context, setContext] = useState([]); // txt of each file

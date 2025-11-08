@@ -16,12 +16,10 @@ export const CreditContext = createContext();
 
 // NOTE: match the order of COLORS, so tabs match datasets in the chart
 // TODO: come up with an easy way to set this up at the beginning
-// TODO: show health > insurance vs pharmacy or utilities: subscriptions vs gym, or travel: flight, hotel, car, activities
 
 // stacked chart datasets appear in this order
 export const COLORS = {
   ['GROCERY']: 'rgb(3, 4, 94)',
-  ['UTILITIES']: 'rgb(0, 119, 182)',
   ['HEALTH']: 'rgb(0, 180, 216)',
   ['PET']: 'rgb(144, 224, 239)',
   ['CAR']: 'rgb(202, 240, 248)',
@@ -37,19 +35,6 @@ export const MIN_NAME_LENGTH = 23;
 export const MAX_NAME_LENGTH = 40;
 
 // const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
-
-export function getCategory(name, rules) {
-  // NOTE: name has a structure: description, city/phone/domain, state
-  name = name.toUpperCase();
-
-  // given a name, find a rule with a matching pattern, i.e., name includes pattern
-  const match = Object.entries(rules).find(([pattern, category]) =>
-    name.includes(pattern)
-  );
-
-  // rules is a name => category mapping
-  return match ? match[1] : 'UNCLASSIFIED';
-}
 
 export function formatAmount(amount) {
   return (Math.round(Math.abs(amount) * 100) / 100).toFixed(2);
@@ -72,9 +57,18 @@ export function parseCreditFile(txt) {
       headers.map((header, index) => [header, values[index]])
     );
 
-    const normalizedName = normalizeName(
-      obj['name'].substring(0, MIN_NAME_LENGTH)
-    );
+
+    let normalizedName, location, category;
+    if (obj['transaction'] === 'CREDIT') {
+      // difference between "INTERNET PAYMENT THANK YOU" and a refund
+      normalizedName = obj['name'] === 'INTERNET PAYMENT THANK YOU' ? obj['name'] : normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
+      location = obj['name'].substring(MIN_NAME_LENGTH).trim();
+      category = 'CREDIT'; // NOTE: credits will not show up because there is no filter for this yet
+    } else {
+      normalizedName = normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
+      location = '';
+      category = 'UNCLASSIFIED'; // debits are unclassified by default
+    }
 
     return {
       ...obj,
@@ -82,9 +76,9 @@ export function parseCreditFile(txt) {
       month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
       amount: parseFloat(obj['amount']),
-      category: 'UNCLASSIFIED',
-      location: obj['name'].substring(MIN_NAME_LENGTH).trim(),
-      normalizedName: normalizedName,
+      category,
+      location,
+      normalizedName,
       vector: nameToVector(normalizedName),
       confidences: {},
     };
@@ -115,6 +109,7 @@ export function normalizeName(name) {
   name = name.replace(/\s\s\S+$/, ''); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
   name = name.replace(/\d{3,}$/, ''); // trailing digits, e.g., SHELL OIL 57444585400
   name = name.replace(/\*RECUR.+$/, ''); // e.g., GEICO *RECURING PMTS
+  name = name.replace(/\'/, ''); // e.g., DOMINO'S
   name = name.replace(/LYFT\s+\*.+$/, 'LYFT'); // e.g., LYFT *2 RIDES 09-20
   name = name.replace(/AMZN MKTP US\*.+$/, 'AMZN MKTP US'); // e.g., AMZN MKTP US*HT4P35MN2
   name = name.replace(/AMAZON.COM\*.+$/, 'AMAZON.COM'); // e.g., AMAZON.COM*H058W0GR0

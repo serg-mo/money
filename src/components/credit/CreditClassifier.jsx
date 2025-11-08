@@ -1,3 +1,4 @@
+// https://www.npmjs.com/package/@tensorflow-models/knn-classifier
 import * as KNNClassifier from '@tensorflow-models/knn-classifier';
 import { tensor } from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl'; // this is important
@@ -57,7 +58,7 @@ export default function CreditClassifier() {
     manualCategories,
     setManualCategories,
   } = useContext(CreditContext);
-  const [classifier, setClassifier] = useState(null);
+  const [classifier, setClassifier] = useState(null); // KNNClassifier.create()
   const [isLoaded, setIsLoaded] = useState(false);
   const [minConfidence, setMinConfidence] = useState(0.6);
 
@@ -77,7 +78,6 @@ export default function CreditClassifier() {
     if (classifier) {
       return;
     }
-    // https://www.npmjs.com/package/@tensorflow-models/knn-classifier
     setClassifier(KNNClassifier.create());
   }, [classifier]);
 
@@ -155,29 +155,25 @@ export default function CreditClassifier() {
   const predictAll = async () => {
     // re-categorize when classifier and transactions are loaded, but not categorized
     if (!transactions.length) {
-      console.log(`No categorize, because no transactions`);
+      console.log(`No predictAll because no transactions`);
       return;
     }
 
     if (!classifier.getNumClasses()) {
-      console.log(`No categorize because no classes`);
+      console.log(`No predictAll because no classes`);
       return;
     }
 
     // TODO: it would be nice to see a progress icon for this
     const { classes, examples } = getClassifierStats();
     if (examples < MIN_EXAMPLES) {
-      console.log(`Not enough examples, ${examples} < ${MIN_EXAMPLES}`);
+      console.log(`No predictAll because not enough examples, ${examples} < ${MIN_EXAMPLES}`);
       return;
     }
-    console.log(JSON.stringify({ classes, examples, neighborhoodSize }));
+    // console.log(JSON.stringify({ classes, examples, neighborhoodSize }));
 
     await Promise.all(transactions.map(predictOne)).then(setTransactions);
   };
-
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
 
   // TODO: it would be nice to see a progress icon for this
   const { classes, examples } = getClassifierStats();
@@ -189,6 +185,10 @@ export default function CreditClassifier() {
 
   // return <ProgressBar value={examples / MIN_EXAMPLES} />
   // return null;
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-row items-center justify-center text-center divide-x divide-slate-500">

@@ -20,7 +20,7 @@ export default function App({ txt }) {
   // TODO: see if my weekly spending is more predictable
   useEffect(() => {
     if (txt && !transactions.length) {
-      // TODO: I don't want to classify the refunds, find a way to remove those charges
+      // TODO: I don't want to classify payments, find a way to remove those charges
       const filterFn = (row) => row['transaction'] === 'DEBIT'; // charges only
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }
@@ -44,7 +44,7 @@ export default function App({ txt }) {
 
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
-    const key = JSON.stringify(transaction['vector']); // must be unique, for unserialized vector access
+    const key = JSON.stringify(transaction['vector']); // must be unique
     setManualCategories({ ...manualCategories, [key]: category });
   };
 

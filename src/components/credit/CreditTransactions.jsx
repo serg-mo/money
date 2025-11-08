@@ -9,7 +9,7 @@ export default function CreditTransactions({
 }) {
   const columnsWidths = {
     name: '',
-    location: 'w-96',
+    location: 'w-64',
     date: 'w-24',
     amount: 'w-12',
     category: 'w-36',
