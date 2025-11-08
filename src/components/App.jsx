@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CreditContext, parseCreditFile } from '../utils/credit';
-import usePersisedState from '../utils/usePersistedState';
+import useRules from '../utils/useRules';
 import CreditClassifier from './credit/CreditClassifier';
 import CreditTransactionsTab from './credit/CreditTransactionsTab';
 import FrameDate from './FrameDate';
@@ -10,11 +10,8 @@ export default function App({ txt }) {
 
   const [timeResolution, setTimeResolution] = useState('month'); // TODO: week | month
   const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
-  const [transactions, setTransactions] = useState([]);
-  const [manualCategories, setManualCategories] = usePersisedState(
-    {},
-    'manualCategories'
-  );
+  const [transactions, setTransactions] = useState([]); // TODO: do the same as useRules for transactions
+  const [manualCategories, setManualCategories] = useRules();
 
   // TODO: chart month/week level + vendor level for groceries
   // TODO: see if my weekly spending is more predictable
