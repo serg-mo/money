@@ -27,6 +27,11 @@ module.exports = (env, argv) => ({
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
+      {
+        // allows importing CSV files as text strings
+        test: /\.csv$/,
+        type: 'asset/source',
+      },
     ],
   },
   plugins: [

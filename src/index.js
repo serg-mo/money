@@ -1,15 +1,22 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './components/App';
-import DragAndDrop from './components/DragAndDrop';
 import './index.css';
 
+import txt from '../Credit Card.csv';
+
+// import DragAndDrop from './components/DragAndDrop';
+// // NOTE: only the first of the uploaded files
+// function AppWrapper() {
+//   return (
+//     <div className="flex flex-col justify-center items-center">
+//       <DragAndDrop>{(txts) => <App txt={txts[0]} />}</DragAndDrop>
+//     </div>
+//   );
+// }
+
 function AppWrapper() {
-  return (
-    <div className="flex flex-col justify-center items-center">
-      <DragAndDrop>{(txts) => <App txt={txts[0]} />}</DragAndDrop>
-    </div>
-  );
+  return (<App txt={txt} />);
 }
 
 // https://react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis
