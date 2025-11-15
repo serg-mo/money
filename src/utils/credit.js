@@ -37,7 +37,7 @@ export const MAX_NAME_LENGTH = 40;
 // const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
 
 export function formatAmount(amount) {
-  return (Math.round(Math.abs(amount) * 100) / 100).toFixed(2);
+  return (Math.round(amount * 100) / 100).toFixed(2);
 }
 
 export function parseName(name) {
@@ -58,17 +58,12 @@ export function parseCreditFile(txt) {
     );
 
     let normalizedName, location, category;
+    normalizedName = normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
     if (obj['transaction'] === 'CREDIT') {
-      // difference between "INTERNET PAYMENT THANK YOU" and a refund
-      normalizedName =
-        obj['name'] === 'INTERNET PAYMENT THANK YOU'
-          ? obj['name']
-          : normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
-      location = obj['name'].substring(MIN_NAME_LENGTH).trim();
-      category = 'CREDIT'; // NOTE: credits will not show up because there is no filter for this yet
-    } else {
-      normalizedName = normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
       location = '';
+      category = 'UNCLASSIFIED'; // NOTE: credits will not show up because there is no filter for this yet
+    } else {
+      location = obj['name'].substring(MIN_NAME_LENGTH).trim();
       category = 'UNCLASSIFIED'; // debits are unclassified by default
     }
 
@@ -77,7 +72,7 @@ export function parseCreditFile(txt) {
       week: moment(obj['date']).day(0).format('YYYY-MM-DD'), // date of the Sunday of that week
       month: moment(obj['date']).format('YYYY-MM'),
       key: obj['memo'],
-      amount: parseFloat(obj['amount']),
+      amount: -1 * parseFloat(obj['amount']), // negative debits, positive credits
       category,
       location,
       normalizedName,

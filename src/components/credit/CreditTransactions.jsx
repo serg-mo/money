@@ -47,7 +47,7 @@ export default function CreditTransactions({
       <ChevronDownIcon className="inline w-4 h-4 ml-1" />
     );
 
-  const total = transactions.reduce((sum, { amount }) => sum - amount, 0); // amounts are negative
+  const total = transactions.reduce((sum, { amount }) => sum + amount, 0);
 
   if (!transactions.length) {
     return;

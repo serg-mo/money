@@ -18,7 +18,9 @@ export default function App({ txt }) {
   useEffect(() => {
     if (txt && !transactions.length) {
       // TODO: I don't want to classify payments, find a way to remove those charges
-      const filterFn = (row) => row['transaction'] === 'DEBIT'; // charges only
+      // const filterFn = (row) => row['transaction'] === 'DEBIT'; // charges only
+      const filterFn = (row) => !row['name'].includes('PAYMENT'); // exclude payments, include refunds
+
       setTransactions(parseCreditFile(txt).filter(filterFn));
     }
   }, [transactions, txt]);

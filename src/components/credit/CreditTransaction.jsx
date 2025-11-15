@@ -37,7 +37,7 @@ export default function Transaction({ onClick, ...t }) {
       >
         {moment(t['date']).format('YYYY-MM-DD')}
       </td>
-      <td className="px-2 py-4 text-center">${formatAmount(t['amount'])}</td>
+      <td className="px-2 py-4 text-center">{formatAmount(t['amount'])}</td>
       <td className={`p-2 text-center ${getOpacity(confidence)}`} title={title}>
         {t['category']}
       </td>

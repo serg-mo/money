@@ -70,7 +70,7 @@ export default function CreditChart({
 
   useEffect(() => {
     // TODO: this counts all datasets, including the hidden ones
-    const total = transactions.reduce((prev, { amount }) => prev - amount, 0); // amounts are negative
+    const total = transactions.reduce((prev, { amount }) => prev + amount, 0);
     const avg = total / allXs.length;
     // console.log({ x, allXs, total, avg })
 
@@ -82,7 +82,7 @@ export default function CreditChart({
 
   const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
-      const total = -1 * sumBy(categoryTransactions, 'amount');
+      const total = sumBy(categoryTransactions, 'amount');
       return {
         category,
         total,
@@ -109,7 +109,7 @@ export default function CreditChart({
       // there needs to be a value for every x, even if it's 0
       const data = allXs.map((value) => ({
         x: value,
-        y: groups[value] ? -1 * sumBy(groups[value], 'amount') : 0,
+        y: groups[value] ? sumBy(groups[value], 'amount') : 0,
       }));
 
       // TODO: what I want is the sum of averages of visible datasets
