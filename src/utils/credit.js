@@ -60,7 +60,7 @@ export function parseCreditFile(txt) {
     let normalizedName, location, category;
     normalizedName = normalizeName(obj['name'].substring(0, MIN_NAME_LENGTH));
     if (obj['transaction'] === 'CREDIT') {
-      location = '';
+      location = 'REFUND';
       category = 'UNCLASSIFIED'; // NOTE: credits will not show up because there is no filter for this yet
     } else {
       location = obj['name'].substring(MIN_NAME_LENGTH).trim();
