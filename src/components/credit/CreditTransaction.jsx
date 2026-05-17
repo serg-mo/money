@@ -11,8 +11,8 @@ import CategoryPicker from './CategoryPicker';
 // TODO: maybe show categories vertically + animate their appearance disappearance
 export default function Transaction({ onClick, ...t }) {
   const { manualCategories } = useContext(CreditContext);
-  const isActual = JSON.stringify(t['vector']) in manualCategories;
-  const confidence = isActual ? 1 : t['confidences'][t['category']] ?? 0; // actual overwrites predicted
+  const isManual = t['normalizedName'] in manualCategories; // see /src/components/App.jsx::onCategorize
+  const confidence = isManual ? 1 : t['confidences'][t['category']] ?? 0; // manual over predicted
 
   const title = Object.entries(t['confidences'])
     .map(([key, value]) => `${key}: ${formatConfidence(value)}`)

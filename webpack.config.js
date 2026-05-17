@@ -67,7 +67,6 @@ module.exports = (env, argv) => ({
         }
       });
 
-      // POST /api/rules - Write rules.json
       devServer.app.use('/api/rules', express.json());
       devServer.app.post('/api/rules', async (req, res) => {
         try {
@@ -83,8 +82,8 @@ module.exports = (env, argv) => ({
           );
           res.json({ success: true });
         } catch (error) {
-          console.error('Error writing rules:', error);
-          res.status(500).json({ error: 'Failed to write rules' });
+          console.error('Failed to write file', error);
+          res.status(500).json({ error: 'Failed to write file' });
         }
       });
 

@@ -4,9 +4,8 @@ import { fetchRules, saveRules } from './rulesApi';
 export default function useRules() {
   const [rules, setRules] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Load rules from server on mount
+  // fetch rules from server on mount
   useEffect(() => {
     let isMounted = true;
 
@@ -26,25 +25,21 @@ export default function useRules() {
     };
   }, []);
 
-  // Save rules to server whenever they change
+  // save rules when they change
   useEffect(() => {
-    if (isLoading) {
-      return; // Don't save on initial load
+    if (!Object.values(rules).length) {
+      return; // don't save when there are no rules
     }
 
-    let timeoutId;
-    setIsSaving(true);
-
-    // Debounce saves to avoid too many API calls
-    timeoutId = setTimeout(async () => {
+    // debounce avoids too many API calls
+    let timeoutId = setTimeout(async () => {
       await saveRules(rules);
-      setIsSaving(false);
     }, 500);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [rules, isLoading]);
+  }, [rules]);
 
   return [rules, setRules];
 }

@@ -3,7 +3,7 @@ import * as KNNClassifier from '@tensorflow-models/knn-classifier';
 import { tensor } from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl'; // this is important
 import React, { useContext, useEffect, useState } from 'react';
-import { COLORS, CreditContext } from '../../utils/credit';
+import { COLORS, CreditContext, nameToVector } from '../../utils/credit';
 
 function cosineSimilarity(arr1, arr2) {
   const dotProduct = arr1.reduce(
@@ -91,8 +91,9 @@ export default function CreditClassifier() {
 
     classifier.clearAllClasses();
 
-    Object.entries(manualCategories).map(([serialized, category]) => {
-      const example = tensor(JSON.parse(serialized));
+    // see /src/components/App.jsx::onCategorize
+    Object.entries(manualCategories).map(([normalizedName, category]) => {
+      const example = tensor(nameToVector(normalizedName));
       classifier.addExample(example, category); // must be a tensor + string label
     });
 
@@ -143,13 +144,12 @@ export default function CreditClassifier() {
     // category is predicted label to replace the existing one, if over minConfidence
     const maxConfidence = confidences[label];
     const category =
-      maxConfidence >= minConfidence ? label : transaction.category;
-    const manual =
-      manualCategories[JSON.stringify(transaction['vector'])] ?? null;
+      manualCategories[transaction['normalizedName']] ??
+      (maxConfidence >= minConfidence ? label : transaction.category);
 
     return {
       ...transaction,
-      category: manual ?? category,
+      category,
       confidences,
       maxConfidence,
     };

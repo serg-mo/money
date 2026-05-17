@@ -1,8 +1,6 @@
-const API_BASE = '/api';
-
 export async function fetchRules() {
   try {
-    const response = await fetch(`${API_BASE}/rules`);
+    const response = await fetch(`/api/rules`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -16,7 +14,7 @@ export async function fetchRules() {
 
 export async function saveRules(rules) {
   try {
-    const response = await fetch(`${API_BASE}/rules`, {
+    const response = await fetch(`/api/rules`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

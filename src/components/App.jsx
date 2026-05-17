@@ -43,8 +43,10 @@ export default function App({ txt }) {
 
   // TODO: remember which transactions are classified manually and assert model guesses the same
   const onCategorize = (transaction, category) => {
-    const key = JSON.stringify(transaction['vector']); // must be unique
-    setManualCategories({ ...manualCategories, [key]: category });
+    setManualCategories({
+      ...manualCategories,
+      [transaction['normalizedName']]: category,
+    });
   };
 
   if (!Object.values(context).length) {
