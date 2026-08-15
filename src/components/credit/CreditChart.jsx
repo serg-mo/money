@@ -77,9 +77,8 @@ export default function CreditChart({
     setAnnotations(() => [makeAnnotation(total, avg, timeResolution)]);
   }, [transactions, timeResolution]);
 
-  // NOTE: credit card csv only has one year worth of data, which is all I need, really
+  // NOTE: transactions.csv should only have one year worth of data
   const categories = groupBy(transactions, groupByKey);
-
   const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
       const total = sumBy(categoryTransactions, 'amount');

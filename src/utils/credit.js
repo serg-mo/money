@@ -24,9 +24,9 @@ export const COLORS = {
   ['PET']: 'rgb(144, 224, 239)',
   ['CAR']: 'rgb(202, 240, 248)',
 
-  ['RESTAURANT']: 'rgb(255, 102, 0)',
+  ['RESTAURANT']: 'rgb(242, 152, 6)',
   ['SHOPPING']: 'rgb(255, 128, 51)',
-  ['TRAVEL']: 'rgb(255, 153, 102)',
+  ['TRAVEL']: 'rgb(180, 37, 37)',
 
   ['UNCLASSIFIED']: 'rgb(85, 85, 85)',
 };
@@ -88,10 +88,14 @@ export function normalizeName(name) {
 
   // remove processor prefixes, e.q., Square, Toast, WePay
   const prefixes = [
+    /^FH\*/i,
+    /^FSP\*/i,
     /^IC\*/i, // instacart
     /^SP\ /i,
+    /^SPO\*/i,
     /^TST\*/i,
     /^WF\*/i,
+    /^WP\*/i,
     /^WPY\*/i,
     /^ZSK\*/i,
     /SQ\ \*?/i,
@@ -100,22 +104,22 @@ export function normalizeName(name) {
     name = name.replace(prefix, '');
   }
 
+  // TODO: handle AIRBNB HMC8KZ8Y3F separately
   // TODO: consider stripping anything but letters, e.g., numbers and punctuation
+  name = name.replace(/UBER\s*\*EATS.*/i, 'UBER EATS'); // skip UBER *EATS for the following change
   name = name.replace(/\*\S+$/, ''); // trailing star + nonspace sequence e.g., AMZN Mktp US*DC1M32GX3
-  name = name.replace(/#\d+.+$/, ''); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
-  name = name.replace(/\s\s\S+$/, ''); // trailing double space + nonspace sequence, e.g., AIRBNB HMC8KZ8Y3F
+  name = name.replace(/# ?\d+.+$/, ''); // trailing hashtag + digits, e.g., ARCO#82184SUPER POWER
   name = name.replace(/\d{3,}$/, ''); // trailing digits, e.g., SHELL OIL 57444585400
   name = name.replace(/\*RECUR.+$/, ''); // e.g., GEICO *RECURING PMTS
   name = name.replace(/\'/, ''); // e.g., DOMINO'S
   name = name.replace(/LYFT\s+\*.+$/, 'LYFT'); // e.g., LYFT *2 RIDES 09-20
   name = name.replace(/AMZN MKTP US\*.+$/, 'AMZN MKTP US'); // e.g., AMZN MKTP US*HT4P35MN2
   name = name.replace(/AMAZON.COM\*.+$/, 'AMAZON.COM'); // e.g., AMAZON.COM*H058W0GR0
+  name = name.replace(/\s+/, ' '); // collapse spaces
 
   // all must be the same length, see parseName()
   return name.trim().padEnd(MIN_NAME_LENGTH, ' ');
 }
-//console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
-//console.assert(normalizeName("AMZN MKTP US*HT4P35MN2"), "AMZN MKTP US");
 
 export function nameToVector(name) {
   // normalize, then convert each charater into it's ASCII code equivalent
