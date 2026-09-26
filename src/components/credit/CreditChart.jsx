@@ -77,32 +77,29 @@ export default function CreditChart({
     setAnnotations(() => [makeAnnotation(total, avg, timeResolution)]);
   }, [transactions, timeResolution]);
 
+  // must go above options
   // NOTE: transactions.csv should only have one year worth of data
   const categories = groupBy(transactions, groupByKey);
   const categoryTotals = Object.entries(categories).map(
     ([category, categoryTransactions]) => {
-      const total = sumBy(categoryTransactions, 'amount');
       return {
         category,
-        total,
-        avg: total / allXs.length,
+        total: sumBy(categoryTransactions, 'amount'),
         categoryTransactions,
       };
     }
   );
-  // TODO: sort by most recent x
-  // categoryTotals.sort((a, b) => b.total - a.total); // desc
 
+  // NOTE: manual order of stacked layers, not total like tabs
   const COLORS_ORDER = Object.keys(COLORS);
-
   categoryTotals.sort(
     (a, b) =>
       COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category)
   );
 
-  // must go above options
+
   const datasets = categoryTotals.map(
-    ({ category, avg, categoryTransactions }) => {
+    ({ category, categoryTransactions }) => {
       const groups = groupBy(categoryTransactions, timeResolution);
 
       // there needs to be a value for every x, even if it's 0

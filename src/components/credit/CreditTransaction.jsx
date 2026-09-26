@@ -2,11 +2,14 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import {
   CreditContext,
-  formatAmount,
   formatConfidence,
   getOpacity,
 } from '../../utils/credit';
 import CategoryPicker from './CategoryPicker';
+
+function formatAmount(amount) {
+  return (Math.round(amount * 100) / 100).toFixed(2);
+}
 
 // TODO: maybe show categories vertically + animate their appearance disappearance
 export default function Transaction({ onClick, ...t }) {

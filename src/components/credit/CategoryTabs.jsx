@@ -1,15 +1,13 @@
 import React, { useContext } from 'react';
-import { COLORS, CreditContext } from '../../utils/credit';
+import { CreditContext } from '../../utils/credit';
 
-export default function CategoryTabs() {
+export default function CategoryTabs({ categories, categoryTotals }) {
   const { tab, setTab } = useContext(CreditContext);
 
   const tabClass = 'mx-1 p-1 font-medium bg-gray-200 hover:bg-gray-400 rounded';
   const activeTabClass = 'bg-gray-400';
 
-  // TODO: this should depend on existing classifications
-  const categories = ['ALL', ...Object.keys(COLORS)];
-
+  // NOTE: categories are sorted, which is why they have to be separate from totals
   return (
     <div className="flex flex-row justify-center text-sm">
       {categories.map((category) => (
@@ -18,7 +16,10 @@ export default function CategoryTabs() {
           className={`${tabClass} ${category === tab ? activeTabClass : ''}`}
           onClick={() => setTab(category === 'ALL' ? undefined : category)}
         >
-          {category}
+          {[
+            category,
+            categoryTotals[category] ? Math.round(categoryTotals[category] / 1000) + 'k' : null
+          ].filter(Boolean).join(' ')}
         </button>
       ))}
     </div>

@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
-import { CreditContext } from '../../utils/credit';
+import { CreditContext, COLORS } from '../../utils/credit';
 import CategoryTabs from './CategoryTabs';
 import CreditChart from './CreditChart';
 import CreditTransactions from './CreditTransactions';
+import { groupBy, sumBy } from 'lodash';
 
 const options = ['week', 'month']; // must be a prop of transaction
 
@@ -19,6 +20,19 @@ export default function CreditTransactionsTab({ transactions }) {
       : transactions;
 
   const groupByKey = tab && tab !== 'ALL' ? 'normalizedName' : 'category';
+
+  // NOTE: categoryTotals is based on transactions not filtered
+  const categories = ['ALL', ...Object.keys(COLORS)]; // TODO: these should come from dataset
+  const categoryTotals = Object.fromEntries([
+    ...Object.entries(groupBy(transactions, 'category')).map(
+      ([category, subset]) => [category, sumBy(subset, 'amount')]
+    ),
+    ['ALL', transactions.reduce((prev, { amount }) => prev + amount, 0)],
+  ]);
+
+  // NOTE: tabs are sorted by total, not manual like chart
+  categories.sort((a, b) => categoryTotals[b] - categoryTotals[a]); // desc
+  // console.log({ categories, categoryTotals })
 
   return (
     <div className="w-full font-mono text-xs">
@@ -41,7 +55,7 @@ export default function CreditTransactionsTab({ transactions }) {
         timeResolution={timeResolution}
         groupByKey={groupByKey}
       />
-      <CategoryTabs />
+      <CategoryTabs categories={categories} categoryTotals={categoryTotals} />
       <CreditTransactions
         title={tab}
         transactions={filtered}

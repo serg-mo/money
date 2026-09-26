@@ -36,10 +36,6 @@ export const MAX_NAME_LENGTH = 40;
 
 // const REQUIRED_COLS = ['date', 'transaction', 'name', 'memo', 'amount'];
 
-export function formatAmount(amount) {
-  return (Math.round(amount * 100) / 100).toFixed(2);
-}
-
 export function parseName(name) {
   // NOTE: splitting on spaces is not reliable
   return name.toUpperCase().substring(0, MAX_NAME_LENGTH).trim(); // ignore city/phone + state
