@@ -1,6 +1,11 @@
 import React, { useContext } from 'react';
 import { CreditContext } from '../../utils/credit';
 
+function formatAmount(amount) {
+  const rounded = Math.round(amount / 1000);
+  return rounded > 0 ? rounded + 'k' : ''
+}
+
 export default function CategoryTabs({ categories, categoryTotals }) {
   const { tab, setTab } = useContext(CreditContext);
 
@@ -16,10 +21,7 @@ export default function CategoryTabs({ categories, categoryTotals }) {
           className={`${tabClass} ${category === tab ? activeTabClass : ''}`}
           onClick={() => setTab(category === 'ALL' ? undefined : category)}
         >
-          {[
-            category,
-            categoryTotals[category] ? Math.round(categoryTotals[category] / 1000) + 'k' : null
-          ].filter(Boolean).join(' ')}
+          {`${category} ${formatAmount(categoryTotals[category])}`}
         </button>
       ))}
     </div>
