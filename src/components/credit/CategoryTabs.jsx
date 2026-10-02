@@ -1,10 +1,5 @@
 import React, { useContext } from 'react';
-import { CreditContext } from '../../utils/credit';
-
-function formatAmount(amount) {
-  const rounded = Math.round(amount / 1000);
-  return rounded > 0 ? rounded + 'k' : ''
-}
+import { CreditContext, formatAmount } from '../../utils/credit';
 
 export default function CategoryTabs({ categories, categoryTotals }) {
   const { tab, setTab } = useContext(CreditContext);

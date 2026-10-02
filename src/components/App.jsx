@@ -12,6 +12,8 @@ export default function App({ txt }) {
   const [tab, setTab] = useState(undefined); // TODO: typeof keyof COLORS
   const [transactions, setTransactions] = useState([]); // TODO: do the same as useRules for transactions
   const [manualCategories, setManualCategories] = useRules();
+  // TODO: rules should be category => [names] (5k chars in a QR code)
+  // TODO: trim the category and pad it back when converting to vector
 
   // TODO: chart month/week level + vendor level for groceries
   // TODO: see if my weekly spending is more predictable

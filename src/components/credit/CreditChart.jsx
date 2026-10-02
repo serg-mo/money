@@ -1,7 +1,7 @@
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { groupBy, sumBy } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { COLORS, MIN_NAME_LENGTH } from '../../utils/credit';
+import { COLORS, MIN_NAME_LENGTH, formatAmount } from '../../utils/credit';
 
 import {
   CategoryScale,
@@ -31,15 +31,11 @@ ChartJS.register(
   annotationPlugin
 );
 
-function formatNumber(n) {
-  return n > 1_000 ? Math.round(n / 100) / 10 + 'k' : Math.round(n);
-}
-
 function makeAnnotation(total, avg, timeResolution, borderColor = 'blue') {
   // TODO: this would be a good place to figure out a static max for the y axis
   const parts = [
-    `TOTAL ${formatNumber(total)}`,
-    `AVG ${formatNumber(avg)}/${timeResolution}`,
+    `TOTAL ${formatAmount(total)}`,
+    `AVG ${formatAmount(avg, 1)}/${timeResolution}`,
   ];
 
   return {
@@ -97,29 +93,27 @@ export default function CreditChart({
       COLORS_ORDER.indexOf(a.category) - COLORS_ORDER.indexOf(b.category)
   );
 
+  const datasets = categoryTotals.map(({ category, categoryTransactions }) => {
+    const total = sumBy(categoryTransactions, 'amount');
+    const groups = groupBy(categoryTransactions, timeResolution);
 
-  const datasets = categoryTotals.map(
-    ({ category, categoryTransactions }) => {
-      const groups = groupBy(categoryTransactions, timeResolution);
+    // NOTE: there needs to be a value for every x, even if it's 0
+    const data = allXs.map((value) => ({
+      x: value, // month or week
+      y: groups[value] ? sumBy(groups[value], 'amount') : 0,
+    }));
 
-      // there needs to be a value for every x, even if it's 0
-      const data = allXs.map((value) => ({
-        x: value,
-        y: groups[value] ? sumBy(groups[value], 'amount') : 0,
-      }));
-
-      // TODO: what I want is the sum of averages of visible datasets
-      return {
-        label: category, // NOTE: each category is a separate dataset
-        data,
-        fill: 'start',
-        pointStyle: 'rect',
-        hidden: false,
-        borderColor: COLORS[category],
-        backgroundColor: COLORS[category],
-      };
-    }
-  );
+    // TODO: what I want is the sum of averages of visible datasets
+    return {
+      label: `${category} ${formatAmount(total)}`, // NOTE: each category is a separate dataset
+      data,
+      fill: 'start',
+      pointStyle: 'rect',
+      hidden: false,
+      borderColor: COLORS[category],
+      backgroundColor: COLORS[category],
+    };
+  });
 
   const options = {
     responsive: true,

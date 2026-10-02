@@ -176,3 +176,17 @@ export function getOpacity(value) {
 
   return opacities[index];
 }
+
+export function formatAmount(amount, decimals = 0) {
+  if (!amount) {
+    return '';
+  }
+
+  return amount > 1_000
+    ? `${(amount / 1_000).toFixed(decimals)}k`
+    : Math.round(amount);
+}
+
+console.assert(formatAmount(0) === '');
+console.assert(formatAmount(1234) === '1k');
+console.assert(formatAmount(12345, 1) === '12.3k');
